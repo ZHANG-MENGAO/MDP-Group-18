@@ -13,9 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 public class MainFrame extends JFrame implements ActionListener{
-	
-	
-	
+
 	ArenaFrame arena;
 	ControlFrame control;
 	
@@ -55,7 +53,7 @@ public class MainFrame extends JFrame implements ActionListener{
 			arena.addObstacles = !arena.addObstacles;
 		}
 		
-		// Add Obstacles
+		// Clear Obstacles
 		if (e.getSource() == control.clearButton) {
 			arena.addObstacles = false;
 			arena.clearObstacles = !arena.clearObstacles;

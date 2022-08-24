@@ -41,7 +41,7 @@ public class ControlFrame extends JPanel{
 		obstacleButton.setLocation(0,200);
 		this.add(obstacleButton);
 		
-		// Add obstacle
+		// Clear obstacle
 		clearButton = new JButton();
 		clearButton.setText("Clear Obstacle");
 		clearButton.setSize(100,50);
