@@ -12,7 +12,7 @@ public class Robot {
 	public int x_coor = 0;
 	public int y_coor = 0;
 	public double dir = PI/2;
-	public char orientation = 'N';
+	public Direction orientation = Direction.NORTH;
 	
 	//ArenaFrame arena;
 	
