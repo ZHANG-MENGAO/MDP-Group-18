@@ -50,11 +50,12 @@ public class MainFrame extends JFrame implements ActionListener{
 		if (e.getSource() == control.obstacleButton) {
 			arena.clearObstacles = false;
 			arena.running = false;
+			arena.setImage = true;
 			arena.addObstacles = !arena.addObstacles;
 			SwingUtilities.updateComponentTreeUI(this);
 		}
 		
-		// Add Obstacles
+		// Clear Obstacles
 		if (e.getSource() == control.clearButton) {
 			arena.addObstacles = false;
 			arena.running = false;
