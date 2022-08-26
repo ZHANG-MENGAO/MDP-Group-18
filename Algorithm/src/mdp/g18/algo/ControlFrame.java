@@ -15,6 +15,7 @@ public class ControlFrame extends JPanel{
 	JButton resetButton;
 	JButton obstacleButton;
 	JButton clearButton;
+	JButton startButton;
 	JLabel controlLabel;
 	static JLabel xLabel;
 	static JLabel yLabel;
@@ -41,12 +42,19 @@ public class ControlFrame extends JPanel{
 		obstacleButton.setLocation(0,200);
 		this.add(obstacleButton);
 		
-		// Clear obstacle
+		// Add obstacle
 		clearButton = new JButton();
 		clearButton.setText("Clear Obstacle");
 		clearButton.setSize(100,50);
 		clearButton.setLocation(0,200);
 		this.add(clearButton);
+		
+		// Add obstacle
+		startButton = new JButton();
+		startButton.setText("Start");
+		startButton.setSize(100,50);
+		startButton.setLocation(0,200);
+		this.add(startButton);
 		
 		// Label x
 		xLabel = new JLabel();

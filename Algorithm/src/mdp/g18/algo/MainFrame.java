@@ -17,14 +17,13 @@ public class MainFrame extends JFrame implements ActionListener{
 	ArenaFrame arena;
 	ControlFrame control;
 	
-	MainFrame(){
-		this.setSize(700,300);
-		
+	MainFrame(){		
 		arena = new ArenaFrame();
 		control = new ControlFrame();
 		control.resetButton.addActionListener(this);
 		control.obstacleButton.addActionListener(this);
 		control.clearButton.addActionListener(this);
+		control.startButton.addActionListener(this);
 		
 		this.add(arena, BorderLayout.WEST);
 		this.add(control, BorderLayout.EAST);
@@ -50,15 +49,25 @@ public class MainFrame extends JFrame implements ActionListener{
 		// Add Obstacles
 		if (e.getSource() == control.obstacleButton) {
 			arena.clearObstacles = false;
+			arena.running = false;
 			arena.addObstacles = !arena.addObstacles;
+			SwingUtilities.updateComponentTreeUI(this);
 		}
 		
-		// Clear Obstacles
+		// Add Obstacles
 		if (e.getSource() == control.clearButton) {
 			arena.addObstacles = false;
+			arena.running = false;
 			arena.clearObstacles = !arena.clearObstacles;
 		}
 		
+		// start simulation
+		if (e.getSource() == control.startButton) {
+			arena.addObstacles = false;
+			arena.clearObstacles = false;
+			arena.running = !arena.running;
+			SwingUtilities.updateComponentTreeUI(this);
+		}
 	}
 
 }

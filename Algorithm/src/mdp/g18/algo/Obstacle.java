@@ -19,14 +19,17 @@ public class Obstacle {
 	
 	Random random;
 	
-	Obstacle(int xCoordinate,int yCoordinate, Direction direction){
-		random = new Random();
-		this.obstacleID = random.nextInt((int)(Arena.ARENA_WIDTH/Arena.UNIT_SIZE)) * Arena.UNIT_SIZE;
+	Obstacle(int id,int xCoordinate,int yCoordinate, Direction direction){
+		this.obstacleID = id;
 		this.xCoordinate = xCoordinate;
 		this.yCoordinate = yCoordinate;
 		this.direction = direction;
 		this.virtualx = xCoordinate + 15;
 		this.virtualy = yCoordinate - 15;
+	}
+	
+	public void setObstacleID(int id) {
+		this.obstacleID = id;
 	}
 	
 	public int getObstacleID() {
@@ -38,8 +41,8 @@ public class Obstacle {
 	public void paintObstacle(Graphics g) {
 		
 		// Obstacle body
-		for (int i = -LENGTH; i < 0; i++) {
-			for (int j = 0; j < LENGTH; j++) {
+		for (int i = -LENGTH; i <= 0; i++) {
+			for (int j = -LENGTH; j <= 0; j++) {
 				g.setColor(Color.blue);
 				g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			}
@@ -47,37 +50,37 @@ public class Obstacle {
 		
 		// Obstacle Outline
 		g.setColor(Color.red);
-		for (int i = -VIRTUAL_LENGTH; i < 0; i +=2) {
-			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, virtualy * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
-			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy + VIRTUAL_LENGTH - 1) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		for (int i = -VIRTUAL_LENGTH; i <= 0; i +=2) {
+			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH + VIRTUAL_LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 				
-		for (int j = 0; j < VIRTUAL_LENGTH; j += 2) {
-			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
-			g.fillRect((virtualx - VIRTUAL_LENGTH + 1) * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		for (int j = 0; j <= VIRTUAL_LENGTH; j += 2) {
+			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx - VIRTUAL_LENGTH) * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 	}
 	
 	public void paintObstacleSelector(Graphics g) {
 		
 		// Obstacle body
-		for (int i = -LENGTH; i < 0; i++) {
-			for (int j = 0; j < LENGTH; j++) {
+		for (int i = -LENGTH; i <= 0; i++) {
+			for (int j = -LENGTH; j <= 0; j++) {
 				g.setColor(Color.lightGray);
 				g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			}
 		}
-		
+				
 		// Obstacle Outline
 		g.setColor(Color.white);
-		for (int i = -VIRTUAL_LENGTH; i < 0; i +=2) {
-			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, virtualy * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
-			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy + VIRTUAL_LENGTH - 1) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		for (int i = -VIRTUAL_LENGTH; i <= 0; i +=2) {
+			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH + VIRTUAL_LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 				
-		for (int j = 0; j < VIRTUAL_LENGTH; j += 2) {
-			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
-			g.fillRect((virtualx - VIRTUAL_LENGTH - 1) * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		for (int j = 0; j <= VIRTUAL_LENGTH; j += 2) {
+			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx - VIRTUAL_LENGTH) * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 	}
 
@@ -97,36 +100,38 @@ public class Obstacle {
 
 		switch (dir) {
 			case NORTH:
-				// Colour upper row of pixels
-				for (int i = -LENGTH; i < 0; i++) {
-					for (int j = 0; j <= 1; j++) {
+				// Color upper row of pixels
+				for (int i = -LENGTH; i <= 0; i++) {
+					for (int j = -LENGTH; j < -8; j++) {
 						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
 				break;
 			case SOUTH:
-				// Colour bottom pixels purple
-				for (int i = -LENGTH; i < 0; i++) {
-					for (int j = 8; j <LENGTH; j++) {
+				// Color bottom pixels purple
+				for (int i = -LENGTH; i <= 0; i++) {
+					for (int j = -1 ; j <= 0; j++) {
 						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
 				break;
 			case EAST:
-				// Colour right pixels purple
-				for (int i = -LENGTH; i < -8; i++) {
-					for (int j = 0; j < LENGTH; j++) {
+				// Color right pixels purple
+				for (int i = -1; i <= 0; i++) {
+					for (int j = -LENGTH; j <= 0; j++) {
 						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
 				break;
 			case WEST:
-				// Colour left pixels purple
-				for (int i = -1; i <= 0; i++) {
-					for (int j = 0; j < LENGTH; j++) {
+				// Color left pixels purple
+				for (int i = -LENGTH; i < -8; i++) {
+					for (int j = -LENGTH; j <= 0; j++) {
 						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
+				break;
+			case UNSET:
 				break;
 		}
 	}
