@@ -2,12 +2,11 @@ package mdp.g18.algo;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.logging.Level;
 
 public class Obstacle {
 	
 	public int obstacleID;
-	// coordinates at bottom left-hand side
+	// coordinates at bottom right-hand side
 	public int xCoordinate; // x coordinate
 	public int yCoordinate; // y coordinate 
 	public Direction direction;  // orientation
@@ -17,12 +16,12 @@ public class Obstacle {
 	private static final int LENGTH = 10;
 	private static final int VIRTUAL_LENGTH = 40;
 	
-	Obstacle(int id, int xCoordinate, int yCoordinate, Direction direction){
+	Obstacle(int id,int xCoordinate,int yCoordinate, Direction direction){
 		this.obstacleID = id;
 		this.xCoordinate = xCoordinate;
 		this.yCoordinate = yCoordinate;
 		this.direction = direction;
-		this.virtualx = xCoordinate - 15;
+		this.virtualx = xCoordinate + 15;
 		this.virtualy = yCoordinate - 15;
 	}
 	
@@ -54,12 +53,11 @@ public class Obstacle {
 			g.setColor(Color.blue);
 		}
 
-		for (int i = 0; i < LENGTH; i++) {
-			for (int j = 0; j < LENGTH; j++) {
-				g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		for (int i = -LENGTH; i <= 0; i++) {
+			for (int j = -LENGTH; j <= 0; j++) {
+				g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			}
 		}
-				
 		// Obstacle Outline
 		if (selector) {
 			g.setColor(Color.white);
@@ -67,18 +65,18 @@ public class Obstacle {
 		else {
 			g.setColor(Color.red);
 		}
-
-		for (int i = 0; i <= VIRTUAL_LENGTH; i +=2) {
+		
+		for (int i = -VIRTUAL_LENGTH; i <= 0; i +=2) {
 			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH + VIRTUAL_LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 				
 		for (int j = 0; j <= VIRTUAL_LENGTH; j += 2) {
-			g.fillRect((virtualx + VIRTUAL_LENGTH) * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx - VIRTUAL_LENGTH) * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 	}
-
+	
 	// Set image direction of an obstacle
 	public void selectImage(Graphics g, boolean selector, Direction dir) {
 		if (selector) {
@@ -92,33 +90,33 @@ public class Obstacle {
 		switch (dir) {
 			case NORTH:
 				// Color upper row of pixels
-				for (int i = 0; i < LENGTH; i++) {
-					for (int j = -LENGTH; j < 2 - LENGTH; j++) {
+				for (int i = -LENGTH; i <= 0; i++) {
+					for (int j = -LENGTH; j < -8; j++) {
 						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
 				break;
 			case SOUTH:
 				// Color bottom pixels purple
-				for (int i = 0; i < LENGTH; i++) {
-					for (int j = 0; j > -2; j--) {
+				for (int i = -LENGTH; i <= 0; i++) {
+					for (int j = -1 ; j <= 0; j++) {
 						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
 				break;
 			case EAST:
 				// Color right pixels purple
-				for (int i = 8; i < LENGTH; i++) {
-					for (int j = 0; j > -LENGTH; j--) {
-						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+				for (int i = -1; i <= 0; i++) {
+					for (int j = -LENGTH; j <= 0; j++) {
+						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
 				break;
 			case WEST:
 				// Color left pixels purple
-				for (int i = 0; i < 2; i++) {
-					for (int j = 0; j > -LENGTH; j--) {
-						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+				for (int i = -LENGTH; i < -8; i++) {
+					for (int j = -LENGTH; j <= 0; j++) {
+						g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 					}
 				}
 				break;

@@ -102,7 +102,7 @@ public class ArenaFrame extends JPanel{
 			System.out.println(robot.getSensorY());
 			try {
 				checkObstacle(robot.getOrientaion());
-				checkCollisions();
+				//checkCollisions();
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -142,9 +142,9 @@ public class ArenaFrame extends JPanel{
 		case N:
 			for(int i = -10; i <= 40; i++) {
 				for(int j = 0; j <= 20; j++) {
-					if ((obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j] != 0) && (Arena.GRIDNO + robot.getSensorY() - 20 + j > -200)) {
+					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (Arena.GRIDNO + robot.getSensorY() - 20 + j > -200) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
-							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
+							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j]) {
 								System.out.println(obstacle.getDirection());
 							}
 						}
@@ -156,7 +156,7 @@ public class ArenaFrame extends JPanel{
 		case S:
 			for(int i = -40; i <= 10; i++) {
 				for(int j = 0; j <= 20; j++) {
-					if ((obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (Arena.GRIDNO + robot.getSensorY() + j > 0)) {
+					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (Arena.GRIDNO + robot.getSensorY() + j > 0) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
 								System.out.println(obstacle.getDirection());
@@ -170,7 +170,7 @@ public class ArenaFrame extends JPanel{
 		case E:
 			for(int i = 0; i <= 20; i++) {
 				for(int j = -10; j <= 40; j++) {
-					if ((obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (robot.getSensorX() + i < 200)) {
+					if ((robot.getSensorY() + j >= -200) && (robot.getSensorY() + j < 0) && (robot.getSensorX() + i < 200) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
 								System.out.println(obstacle.getDirection());
@@ -184,7 +184,7 @@ public class ArenaFrame extends JPanel{
 		case W:
 			for(int i = 0; i <= 20; i++) {
 				for(int j = -40; j <= 10; j++) {
-					if ((obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (robot.getSensorX() - 20 + i > 0)) {
+					if ((robot.getSensorY() + j >= -200) && (robot.getSensorY() + j < 0) && (obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (robot.getSensorX() - 20 + i > 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() +  j]) {
 								System.out.println(obstacle.getDirection());
@@ -220,11 +220,11 @@ public class ArenaFrame extends JPanel{
 		}
 		
 		public Direction mouseDirection() {
-			if (coordinateY() <= obstacle.yCoordinate - obstacle.getLength() && coordinateX() >= obstacle.xCoordinate) {
+			if (coordinateY() <= obstacle.yCoordinate - obstacle.getLength() && coordinateX() >= obstacle.xCoordinate - obstacle.getLength()) {
 				return Direction.NORTH;
-			} else if (coordinateY() >= obstacle.yCoordinate && coordinateX() <= obstacle.xCoordinate + obstacle.getLength()) {
+			} else if (coordinateY() >= obstacle.yCoordinate && coordinateX() <= obstacle.xCoordinate) {
 				return Direction.SOUTH;
-			} else if (coordinateY() >= obstacle.yCoordinate - obstacle.getLength() && coordinateX() >= obstacle.xCoordinate - obstacle.getLength()) {
+			} else if (coordinateY() >= obstacle.yCoordinate - obstacle.getLength() && coordinateX() >= obstacle.xCoordinate) {
 				return Direction.EAST;
 			} else {
 				return Direction.WEST;
