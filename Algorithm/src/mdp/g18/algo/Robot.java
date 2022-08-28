@@ -13,12 +13,26 @@ public class Robot {
 	private RobotOrientation orientation;
 		
 	ArenaFrame arena;
+	Sensor sensor;
 	
 	// Constructor
 	Robot(){	
-		this.x_coor = 100;
-		this.y_coor = -100;
-		this.orientation = RobotOrientation.SE1;
+		this.x_coor = 0;
+		this.y_coor = 0;
+		this.orientation = RobotOrientation.N;
+		sensor = new Sensor(this.x_coor,this.y_coor);
+	}
+	
+	public int getRobotSize() {
+		return ROBOT_SIZE;
+	}
+	
+	public int getSensorX() {
+		return this.sensor.getSensorX();
+	}
+	
+	public int getSensorY() {
+		return this.sensor.getSensorY();
 	}
 	
 	public int getX() {
@@ -43,6 +57,10 @@ public class Robot {
 	
 	public void setOrientation(RobotOrientation orientation) {
 		this.orientation = orientation;
+	}
+	
+	public void updateSensor() {
+		sensor.updateSensorDirection(this.orientation, this.x_coor, this.y_coor);
 	}
 	
 	void turnLeft() {
@@ -94,7 +112,7 @@ public class Robot {
 			break;
 		case SW3: // -3 -35
 			setOrientation(RobotOrientation.SW2);
-			setX(getX() - 5);
+			setX(getX() - 4);
 			setY(getY() - 5);
 			break;
 		case SE1: //-30 -22

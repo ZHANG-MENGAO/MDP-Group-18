@@ -2,7 +2,6 @@ package mdp.g18.algo;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-
 import javax.swing.JPanel;
 
 import java.awt.event.*;
@@ -34,7 +33,7 @@ public class ArenaFrame extends JPanel{
 	Obstacle obstacle;
 	Arena arena;
 	
-	int [][] obstacles = new int[Arena.GRIDNO][Arena.GRIDNO];
+	private static int [][] obstacles = new int[Arena.GRIDNO][Arena.GRIDNO];
 	
 	ArenaFrame(){
 		this.setPreferredSize(new Dimension(Arena.ARENA_WIDTH,Arena.ARENA_HEIGHT));
@@ -61,6 +60,7 @@ public class ArenaFrame extends JPanel{
 		
 		arena.paintArena(g);
 		robot.paintRobot(g);
+		
 		if (addObstacles) {
 			obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
 			obstacle.paintObstacleSelector(g);
@@ -98,15 +98,107 @@ public class ArenaFrame extends JPanel{
 		// Start
 		if(running) {
 			robot.moveForward();
-			
+			robot.updateSensor();
+			System.out.println(robot.getSensorY());
 			try {
-				Thread.sleep(10);
+				checkObstacle(robot.getOrientaion());
+				checkCollisions();
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			
 			repaint();
 		}
+	}
+	
+	public void setSensor(RobotOrientation orientation, int sensorX, int sensorY) {
+		for(int i = -10; i <= 40; i++) {
+			for(int j = 0; j <= 20; j++) {
+				ArenaFrame.obstacles[sensorX + i][Arena.GRIDNO + sensorY - 20 + j] = 1;
+			}
+		}
+	}
+	
+	public void checkCollisions() {
+		// Check Top & Bottom Border
+		if(robot.getY() - robot.getRobotSize() <= -Arena.GRIDNO || robot.getY() + robot.getRobotSize() >= 0) {
+			running = false;
+		}
+		
+		// Check Right & Left Border
+		if((robot.getX() + robot.getRobotSize() >= Arena.GRIDNO) || (robot.getX() - robot.getRobotSize() <= 0)) {
+			running = false;
+		}
+		
+		if (!running) {
+			Thread.yield();
+		}
+	}
+	
+	// Check hit obstacle
+	public void checkObstacle(RobotOrientation orientation) {
+		switch (orientation) {
+		case N:
+			for(int i = -10; i <= 40; i++) {
+				for(int j = 0; j <= 20; j++) {
+					if ((obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j] != 0) && (Arena.GRIDNO + robot.getSensorY() - 20 + j > -200)) {
+						for( Obstacle obstacle: obstacleObjects) {
+							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
+								System.out.println(obstacle.getDirection());
+							}
+						}
+						running = false;
+					}
+				}
+			}
+			break;
+		case S:
+			for(int i = -40; i <= 10; i++) {
+				for(int j = 0; j <= 20; j++) {
+					if ((obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (Arena.GRIDNO + robot.getSensorY() + j > 0)) {
+						for( Obstacle obstacle: obstacleObjects) {
+							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
+								System.out.println(obstacle.getDirection());
+							}
+						}
+						running = false;
+					}
+				}
+			}
+			break;
+		case E:
+			for(int i = 0; i <= 20; i++) {
+				for(int j = -10; j <= 40; j++) {
+					if ((obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (robot.getSensorX() + i < 200)) {
+						for( Obstacle obstacle: obstacleObjects) {
+							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
+								System.out.println(obstacle.getDirection());
+							}
+						}
+						running = false;
+					}
+				}
+			}
+			break;
+		case W:
+			for(int i = 0; i <= 20; i++) {
+				for(int j = -40; j <= 10; j++) {
+					if ((obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (robot.getSensorX() - 20 + i > 0)) {
+						for( Obstacle obstacle: obstacleObjects) {
+							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() +  j]) {
+								System.out.println(obstacle.getDirection());
+							}
+						}
+						running = false;
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+
 	}
 
 	public class Move implements MouseMotionListener{
@@ -121,7 +213,9 @@ public class ArenaFrame extends JPanel{
 			mx = e.getX();
 			my = e.getY();
 			ControlFrame.xLabel.setText("X Coordinate : " + String.valueOf(coordinateX()));
+			//ControlFrame.yLabel.setText("Y Coordinate : " + String.valueOf(coordinateY()));
 			ControlFrame.yLabel.setText("Y Coordinate : " + String.valueOf(Arena.GRIDNO - coordinateY() - 1));
+			//System.out.println(obstacles[coordinateX()][coordinateY()]);
 			repaint();
 		}
 		
@@ -250,5 +344,5 @@ public class ArenaFrame extends JPanel{
 		}
 		return -1;
 	}
-	
+
 }

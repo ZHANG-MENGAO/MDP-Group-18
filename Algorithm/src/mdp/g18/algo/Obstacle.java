@@ -2,7 +2,6 @@ package mdp.g18.algo;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Random;
 
 public class Obstacle {
 	
@@ -16,8 +15,6 @@ public class Obstacle {
 
 	private static final int LENGTH = 10;
 	private static final int VIRTUAL_LENGTH = 40;
-	
-	Random random;
 	
 	Obstacle(int id,int xCoordinate,int yCoordinate, Direction direction){
 		this.obstacleID = id;
@@ -34,6 +31,14 @@ public class Obstacle {
 	
 	public int getObstacleID() {
 		return this.obstacleID;
+	}
+	
+	private void setDirection(Direction dir) {
+		this.direction = dir;
+	}
+	
+	public Direction getDirection() {
+		return this.direction;
 	}
 
 	public int getLength() { return LENGTH; }
@@ -82,10 +87,6 @@ public class Obstacle {
 			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			g.fillRect((virtualx - VIRTUAL_LENGTH) * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
-	}
-
-	private void setDirection(Direction dir) {
-		this.direction = dir;
 	}
 
 	// Set image direction of an obstacle
