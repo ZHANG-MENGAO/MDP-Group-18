@@ -99,10 +99,9 @@ public class ArenaFrame extends JPanel{
 		if(running) {
 			robot.moveForward();
 			robot.updateSensor();
-			System.out.println(robot.getSensorY());
 			try {
 				checkObstacle(robot.getOrientaion());
-				//checkCollisions();
+				checkCollisions();
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -112,22 +111,14 @@ public class ArenaFrame extends JPanel{
 		}
 	}
 	
-	public void setSensor(RobotOrientation orientation, int sensorX, int sensorY) {
-		for(int i = -10; i <= 40; i++) {
-			for(int j = 0; j <= 20; j++) {
-				ArenaFrame.obstacles[sensorX + i][Arena.GRIDNO + sensorY - 20 + j] = 1;
-			}
-		}
-	}
-	
 	public void checkCollisions() {
 		// Check Top & Bottom Border
-		if(robot.getY() - robot.getRobotSize() <= -Arena.GRIDNO || robot.getY() + robot.getRobotSize() >= 0) {
+		if((robot.getY() - robot.getRobotSize() <= -Arena.GRIDNO && robot.getOrientaion() == RobotOrientation.N) || (robot.getY() + robot.getRobotSize() >= 0 && robot.getOrientaion() == RobotOrientation.S)) {
 			running = false;
 		}
 		
 		// Check Right & Left Border
-		if((robot.getX() + robot.getRobotSize() >= Arena.GRIDNO) || (robot.getX() - robot.getRobotSize() <= 0)) {
+		if((robot.getX() + robot.getRobotSize() >= Arena.GRIDNO && robot.getOrientaion() == RobotOrientation.E) || (robot.getX() - robot.getRobotSize() <= 0 && robot.getOrientaion() == RobotOrientation.W)) {
 			running = false;
 		}
 		
@@ -142,7 +133,7 @@ public class ArenaFrame extends JPanel{
 		case N:
 			for(int i = -10; i <= 40; i++) {
 				for(int j = 0; j <= 20; j++) {
-					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (Arena.GRIDNO + robot.getSensorY() - 20 + j > -200) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j] != 0)) {
+					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (robot.getSensorY() + j > -(Arena.GRIDNO - robot.getRobotSize())) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j]) {
 								System.out.println(obstacle.getDirection());
@@ -156,7 +147,7 @@ public class ArenaFrame extends JPanel{
 		case S:
 			for(int i = -40; i <= 10; i++) {
 				for(int j = 0; j <= 20; j++) {
-					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (Arena.GRIDNO + robot.getSensorY() + j > 0) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
+					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (robot.getSensorY() + j < -robot.getRobotSize()) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
 								System.out.println(obstacle.getDirection());
@@ -170,7 +161,7 @@ public class ArenaFrame extends JPanel{
 		case E:
 			for(int i = 0; i <= 20; i++) {
 				for(int j = -10; j <= 40; j++) {
-					if ((robot.getSensorY() + j >= -200) && (robot.getSensorY() + j < 0) && (robot.getSensorX() + i < 200) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
+					if ((robot.getSensorY() + j >= -Arena.GRIDNO) && (robot.getSensorY() + j < 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
 								System.out.println(obstacle.getDirection());
@@ -184,7 +175,7 @@ public class ArenaFrame extends JPanel{
 		case W:
 			for(int i = 0; i <= 20; i++) {
 				for(int j = -40; j <= 10; j++) {
-					if ((robot.getSensorY() + j >= -200) && (robot.getSensorY() + j < 0) && (obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() + j] != 0) && (robot.getSensorX() - 20 + i > 0)) {
+					if ((robot.getSensorY() + j >= -Arena.GRIDNO) && (robot.getSensorY() + j < 0)  && (robot.getSensorX() + i > robot.getRobotSize()) && (obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() +  j]) {
 								System.out.println(obstacle.getDirection());
@@ -198,7 +189,10 @@ public class ArenaFrame extends JPanel{
 		default:
 			break;
 		}
-
+		
+		if (!running) {
+			Thread.yield();
+		}
 	}
 
 	public class Move implements MouseMotionListener{
