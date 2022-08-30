@@ -34,6 +34,10 @@ public class Robot {
 	public int getSensorY() {
 		return this.sensor.getSensorY();
 	}
+
+	public int[] getCoord() {
+		return new int[] {this.x_coor, this.y_coor};
+	}
 	
 	public int getX() {
 		return this.x_coor;
