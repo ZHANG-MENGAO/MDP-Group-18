@@ -8,11 +8,11 @@ public class Obstacle {
 	
 	public int obstacleID;
 	// coordinates at bottom left-hand side
-	public int xCoordinate; // x coordinate
-	public int yCoordinate; // y coordinate 
-	public Direction direction;  // orientation
-	public int virtualx;  // x coordinate of virtual border
-	public int virtualy;  // y coordinate of virtual border
+	private int xCoordinate; // x coordinate
+	private int yCoordinate; // y coordinate
+	private Direction direction;  // orientation
+	private int virtualx;  // x coordinate of virtual border
+	private int virtualy;  // y coordinate of virtual border
 
 	private static final int LENGTH = 10;
 	private static final int VIRTUAL_LENGTH = 40;
@@ -32,6 +32,14 @@ public class Obstacle {
 	
 	public int getObstacleID() {
 		return this.obstacleID;
+	}
+
+	public int getxCoordinate() {
+		return this.xCoordinate;
+	}
+
+	public int getyCoordinate() {
+		return this.yCoordinate;
 	}
 	
 	private void setDirection(Direction dir) {

@@ -72,7 +72,7 @@ public class ArenaFrame extends JPanel{
 			mouseDir = move.mouseDirection();
 			
 			// Enables selection of the side the image
-			if (obstacle.direction == Direction.UNSET) {
+			if (obstacle.getDirection() == Direction.UNSET) {
 				if (setImage) {
 					// Remove outline of adding obstacles
 					addObstacles = false;
@@ -91,7 +91,7 @@ public class ArenaFrame extends JPanel{
 				}
 			}
 			else {
-				obstacle.selectImage(g, false, obstacle.direction);
+				obstacle.selectImage(g, false, obstacle.getDirection());
 			}
 		}
 		
@@ -220,11 +220,11 @@ public class ArenaFrame extends JPanel{
 		}
 		
 		public Direction mouseDirection() {
-			if (coordinateY() <= obstacle.yCoordinate - obstacle.getLength() && coordinateX() >= obstacle.xCoordinate) {
+			if (coordinateY() <= obstacle.getyCoordinate() - obstacle.getLength() && coordinateX() >= obstacle.getxCoordinate()) {
 				return Direction.NORTH;
-			} else if (coordinateY() >= obstacle.yCoordinate && coordinateX() <= obstacle.xCoordinate + obstacle.getLength()) {
+			} else if (coordinateY() >= obstacle.getyCoordinate() && coordinateX() <= obstacle.getxCoordinate() + obstacle.getLength()) {
 				return Direction.SOUTH;
-			} else if (coordinateY() >= obstacle.yCoordinate - obstacle.getLength() && coordinateX() >= obstacle.xCoordinate - obstacle.getLength()) {
+			} else if (coordinateY() >= obstacle.getyCoordinate() - obstacle.getLength() && coordinateX() >= obstacle.getxCoordinate() - obstacle.getLength()) {
 				return Direction.EAST;
 			} else {
 				return Direction.WEST;
@@ -293,7 +293,7 @@ public class ArenaFrame extends JPanel{
 
 		for (int i = -10; i <= 0; i++) {
 			for (int j = -10; j <= 0; j++) {
-				obstacles[obstacle.xCoordinate + i][obstacle.yCoordinate + j] = obstacle.getObstacleID(); // top right coordinate
+				obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = obstacle.getObstacleID(); // top right coordinate
 			}
 		}
 	}
