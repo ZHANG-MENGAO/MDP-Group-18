@@ -52,13 +52,15 @@ public class PathFinder {
 		while (true) {
 			int[] p1 = getP1(robot, left);
 			int[] p2 = getP2(nextCoord, imageDir, left);
+			// Find every possible path and add it to path array
+
 			if (left) {
 				left = false;
 			} else {
 				break;
 			}
 		}
-
+		// Return shortest path by distance
 	}
 
 	private int[] getP1(Robot robot, boolean left) {
@@ -143,6 +145,20 @@ public class PathFinder {
 			default -> System.out.println("Image direction unset.");
 		}
 		return p2;
+	}
+
+	public class Path {
+		private double dist;
+		private double[] pt1;
+		private double[] pt2;
+
+		public double getDist() {
+			return this.dist;
+		}
+
+		public void setDist(double dist) {
+			this.dist = dist;
+		}
 	}
 
 }
