@@ -33,7 +33,7 @@ public class ArenaFrame extends JPanel{
 	Obstacle obstacle;
 	Arena arena;
 	
-	private static int [][] obstacles = new int[Arena.GRIDNO][Arena.GRIDNO];
+	public static int [][] obstacles = new int[Arena.GRIDNO][Arena.GRIDNO];
 	
 	ArenaFrame(){
 		this.setPreferredSize(new Dimension(Arena.ARENA_WIDTH,Arena.ARENA_HEIGHT));
@@ -344,5 +344,4 @@ public class ArenaFrame extends JPanel{
 		}
 		return -1;
 	}
-
 }

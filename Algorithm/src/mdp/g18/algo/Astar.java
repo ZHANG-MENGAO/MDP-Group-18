@@ -26,9 +26,6 @@ public class Astar {
 
 	    while(!openList.isEmpty()){
 	        Node n = openList.peek();
-	        if(openList.isEmpty()){
-	            return n;
-	        }
 
 	        for(Node.Edge edge : n.neighbour){
 	            Node m = edge.node;
@@ -55,6 +52,9 @@ public class Astar {
 
 	        openList.remove(n);
 	        closedList.add(n);
+		    if(openList.isEmpty()){
+			    return n;
+		    }
 	    }
 	    return null;
 	}

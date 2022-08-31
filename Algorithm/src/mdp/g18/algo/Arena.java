@@ -8,10 +8,8 @@ public class Arena {
 	public static final int UNIT_SIZE = 600 / GRIDNO;
 	public static final int ARENA_WIDTH = 600;
 	public static final int ARENA_HEIGHT = 600 + UNIT_SIZE;
-	
-	Arena(){
-		
-	}
+
+	Arena(){}
 	
 	public void paintArena(Graphics g) {
 		
