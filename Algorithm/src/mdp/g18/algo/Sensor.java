@@ -1,18 +1,7 @@
 package mdp.g18.algo;
 
 public class Sensor {
-	
-	private static final int SENSOR_HEIGHT = 20;
-	private static final int SENSOR_WIDTH = 50;
-	private static final int NO_OF_SENSORS = 6;
-	
-	//public static int[][] sensorDirection = new int[3][1];
-	public static int[][] sensorLocation = new int[NO_OF_SENSORS][2];
-	
-	public final static int SHORT_SENSOR_MAX_RANGE = 3; // This is in number of grid.
-    public final static int FAR_SENSOR_MAX_RANGE = 7; // This is in number of grid.
-    public final static int FAR_SENSOR_OFFSET = 13; // This is in cm.
-	
+
     private int sensorX;
     private int sensorY;
 	
@@ -40,20 +29,67 @@ public class Sensor {
 	public void updateSensorDirection(RobotOrientation orientation, int robotX, int robotY) {
 		switch(orientation) {
 			case N:
-				this.sensorY = robotY - 30;
+				this.sensorY = robotY - Robot.ROBOT_SIZE;
 				break;
 			case S:
-				this.sensorY = robotY + 30;
+				this.sensorY = robotY + Robot.ROBOT_SIZE;
 				break;
 			case E:
-				this.sensorX = robotX + 30;
+				this.sensorX = robotX + Robot.ROBOT_SIZE;
 				break;
 			case W:
-				this.sensorX = robotX - 30;
+				this.sensorX = robotX - Robot.ROBOT_SIZE;
+				break;
+			case NE1:
+				this.sensorX = robotX + 10;
+				this.sensorY = robotY - 28;
+				break;
+			case NE2:
+				this.sensorX = robotX + 18;
+				this.sensorY = robotY - 24;
+				break;
+			case NE3:
+				this.sensorX = robotX + 24;
+				this.sensorY = robotY - 18;
+				break;
+			case SE1:
+				this.sensorX = robotX + 18;
+				this.sensorY = robotY + 25;
+				break;
+			case SE2:
+				this.sensorX = robotX + 24;
+				this.sensorY = robotY + 18;
+				break;
+			case SE3:
+				this.sensorX = robotX + 28;
+				this.sensorY = robotY + 10;
+				break;
+			case NW1:
+				this.sensorX = robotX - 10;
+				this.sensorY = robotY - 28;
+				break;
+			case NW2:
+				this.sensorX = robotX - 18;
+				this.sensorY = robotY - 24;
+				break;
+			case NW3:
+				this.sensorX = robotX - 24;
+				this.sensorY = robotY - 18;
+				break;
+			case SW1:
+				this.sensorX = robotX - 19;
+				this.sensorY = robotY + 24;
+				break;
+			case SW2:
+				this.sensorX = robotX - 25;
+				this.sensorY = robotY + 18;
+				break;
+			case SW3:
+				this.sensorX = robotX - 18;
+				this.sensorY = robotY + 10;
 				break;
 			default:
 				break;
-		}
-				
+		}	
 	}
 }

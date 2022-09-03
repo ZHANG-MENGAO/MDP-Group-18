@@ -59,8 +59,8 @@ public class ArenaFrame extends JPanel{
 		super.paintComponent(g);
 		
 		arena.paintArena(g);
-		robot.paintRobot(g);
-		
+		robot.robotimage.paintImage(g);
+
 		if (addObstacles) {
 			obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
 			obstacle.paintObstacle(g, true);
@@ -100,7 +100,7 @@ public class ArenaFrame extends JPanel{
 			robot.moveForward();
 			robot.updateSensor();
 			try {
-				checkObstacle(robot.getOrientaion());
+				checkObstacle(robot.getOrientation());
 				checkCollisions();
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -112,13 +112,68 @@ public class ArenaFrame extends JPanel{
 	}
 	
 	public void checkCollisions() {
-		// Check Top & Bottom Border
-		if((robot.getY() - robot.getRobotSize() <= -Arena.GRIDNO && robot.getOrientaion() == RobotOrientation.N) || (robot.getY() + robot.getRobotSize() >= 0 && robot.getOrientaion() == RobotOrientation.S)) {
+		
+		if(robot.getSensorY() <= -Arena.GRIDNO + 1 && robot.getOrientation() == RobotOrientation.N){
 			running = false;
 		}
 		
-		// Check Right & Left Border
-		if((robot.getX() + robot.getRobotSize() >= Arena.GRIDNO && robot.getOrientaion() == RobotOrientation.E) || (robot.getX() - robot.getRobotSize() <= 0 && robot.getOrientaion() == RobotOrientation.W)) {
+		if (robot.getSensorY() >= 0 && robot.getOrientation() == RobotOrientation.S) {
+			running = false;
+		}
+		
+		if (robot.getSensorX() >= Arena.GRIDNO - 1 && robot.getOrientation() == RobotOrientation.E) {
+			running = false;
+		}
+		
+		if (robot.getSensorX() <= 0 && robot.getOrientation() == RobotOrientation.W) {
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.NE1 && (robot.getY() - 29 <= -Arena.GRIDNO || robot.getX() + 40 >= Arena.GRIDNO)){
+			running = false;
+		}
+
+		if(robot.getOrientation() == RobotOrientation.NE2 && (robot.getY() - 25 <= -Arena.GRIDNO || robot.getX() + 45 >= Arena.GRIDNO)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.NE3 && (robot.getY() - 19 <= -Arena.GRIDNO || robot.getX() + 45 >= Arena.GRIDNO)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.NW1 && (robot.getY() - 39 <= -Arena.GRIDNO || robot.getX() - 10 <= 0)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.NW2 && (robot.getY() - 43 <= -Arena.GRIDNO || robot.getX() - 19 <= 0)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.NW3 && (robot.getY() - 43 <= -Arena.GRIDNO || robot.getX() - 25 <= 0)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.SE1 && (robot.getY() + 43 >= 0 || robot.getX() + 19 >= Arena.GRIDNO)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.SE2 && (robot.getY() + 43 >= 0 || robot.getX() + 26 >= Arena.GRIDNO)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.SE3 && (robot.getY() + 39 >= 0 || robot.getX() + 30 >= Arena.GRIDNO)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.SW1 && (robot.getY() + 24 >= 0 || robot.getX() - 43 <= 0)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.SW2 && (robot.getY() + 18	 >= 0 || robot.getX() - 43 <= 0)){
+			running = false;
+		}
+		
+		if(robot.getOrientation() == RobotOrientation.SW3 && (robot.getY() + 10 >= 0 || robot.getX() - 39 <= 0)){
 			running = false;
 		}
 		
@@ -178,6 +233,34 @@ public class ArenaFrame extends JPanel{
 					if ((robot.getSensorY() + j >= -Arena.GRIDNO) && (robot.getSensorY() + j < 0)  && (robot.getSensorX() + i > robot.getRobotSize()) && (obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
 						for( Obstacle obstacle: obstacleObjects) {
 							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() +  j]) {
+								System.out.println(obstacle.getDirection());
+							}
+						}
+						running = false;
+					}
+				}
+			}
+			break;
+		case NE1:
+			for(int i = -20; i <= 100; i++) {
+				for(int j = 0; j <= 20; j++) {
+					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (robot.getSensorY() + j > -(Arena.GRIDNO - robot.getRobotSize())) && (obstacles[robot.getSensorX() + i + 5][Arena.GRIDNO + robot.getSensorY() - 20 + j] != 0)) {
+						for( Obstacle obstacle: obstacleObjects) {
+							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j]) {
+								System.out.println(obstacle.getDirection());
+							}
+						}
+						running = false;
+					}
+				}
+			}
+			break;
+		case NE2:
+			for(int i = 0; i <= 20; i++) {
+				for(int j = -10; j <= 40; j++) {
+					if ((robot.getSensorY() + j >= -Arena.GRIDNO) && (robot.getSensorY() + j < 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
+						for( Obstacle obstacle: obstacleObjects) {
+							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
 								System.out.println(obstacle.getDirection());
 							}
 						}
