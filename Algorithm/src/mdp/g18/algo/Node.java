@@ -6,21 +6,23 @@ public class Node implements Comparable<Node>{
 	private double g;
 	private int h;
 	private int cost;
-
 	private int[] coord;
+	private int obstacleID; // -1 if robot
 	public ArrayList<Edge> neighbour;
 
 	private Node parent;
 
-	Node(int g, int h, int[] coord, Node parent) {
+	Node(int g, int h, int[] coord, Node parent, int id) {
 		this.g = g;
 		this.h = h;
+		this.cost = g + h;
 		this.coord = coord;
 		this.parent = parent;
+		this.obstacleID = id;
 	}
 
 	public void setCost(double g, int h) {
-		this.cost = (int)g + h;
+		this.cost = (int) g + h;
 	}
 
 	public double getG() {
@@ -58,7 +60,11 @@ public class Node implements Comparable<Node>{
 	public void setParent(Node parent) {
 		this.parent = parent;
 	}
-	
+
+	public int getObstacleID() {
+		return this.obstacleID;
+	}
+
 	public int calculateH(Node current, Node target) {
 		int x = Math.abs(current.getCoord()[0] - target.getCoord()[0]);
         int y = Math.abs(current.getCoord()[1] - target.getCoord()[1]);

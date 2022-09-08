@@ -7,9 +7,11 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class MainFrame extends JFrame implements ActionListener{
@@ -29,10 +31,11 @@ public class MainFrame extends JFrame implements ActionListener{
 		this.add(control, BorderLayout.EAST);
 		this.setTitle("Testing");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setResizable(false);
 		this.pack();
+		this.setResizable(false);
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);
+
 	}
 	
 	@Override

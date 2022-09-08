@@ -3,6 +3,7 @@ package mdp.g18.algo;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -14,15 +15,15 @@ public class RobotImage {
 	
 	private int x_coor;
 	private int y_coor;
-	private RobotOrientation orientation;
+	private int angle;
 	
 	BufferedImage robotImage;
 	
 	
-	RobotImage(int x, int y, RobotOrientation orientation){	
+	RobotImage(int x, int y, int angle){	
 		this.x_coor = x;
 		this.y_coor = y;
-		this.orientation = orientation;
+		this.angle = angle;
 		try{
 	        robotImage = ImageIO.read(getClass().getResource("/Resources/robot.png"));
 	        robotImage = resizeImage(robotImage, RADIUS + Arena.UNIT_SIZE, RADIUS + Arena.UNIT_SIZE);
@@ -30,7 +31,7 @@ public class RobotImage {
 	    catch(Exception e){e.printStackTrace();}
 	}
 	
-	public BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) throws IOException {
+	private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) throws IOException {
 	    BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
 	    Graphics2D graphics2D = resizedImage.createGraphics();
 	    graphics2D.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
@@ -38,104 +39,24 @@ public class RobotImage {
 	    return resizedImage;
 	}
 	
-	public void paintImage(Graphics g){
-		
+	
+	// Draw robot with center coordinates of robot
+	public void drawRobot(Graphics g, Point2D.Double c, int angle){
 		Graphics2D g2 = (Graphics2D) g;
         AffineTransform at = new AffineTransform();
-        
-        int theta; // in degrees
-        int ty;
-        int tx;
-
-        switch (getOrientation()){
-        case E:
-        	theta = 90;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = - Arena.UNIT_SIZE;
-        	break;
-        case S:
-        	theta = 180;
-        	ty =  - RADIUS;
-        	tx = - Arena.UNIT_SIZE;
-        	break;
-        case W:
-        	theta = -90;
-        	ty =  - RADIUS;
-        	tx = 0;
-        	break;
-        case NE1:
-        	theta = 20;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = 0;
-        	break;
-        case NE2:
-        	theta = 37;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = 0;
-        	break;
-        case NE3:
-        	theta = 53;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = 0;
-        	break;
-        case SE1:
-        	theta = 143;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = - Arena.UNIT_SIZE;
-        	break;
-        case SE2:
-        	theta = 127;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = - Arena.UNIT_SIZE;
-        	break;
-        case SE3:
-        	theta = 110;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = - Arena.UNIT_SIZE;
-        	break;
-        case NW1:
-        	theta = -20;
-        	ty =  - RADIUS;
-        	tx = 0;
-        	break;
-        case NW2:
-        	theta = -37;
-        	ty =  - RADIUS - Arena.UNIT_SIZE;
-        	tx = 0;
-        	break;
-        case NW3:
-        	theta = -53;
-        	ty = - RADIUS;
-        	tx = 0;
-        	break;
-        case SW1:
-        	theta = -143;
-        	ty =  - RADIUS;
-        	tx = 0;
-        	break;
-        case SW2:
-        	theta = -127;
-        	ty =  - RADIUS;
-        	tx = 0;
-        	break;
-        case SW3:
-        	theta = -110;
-        	ty =  - RADIUS;
-        	tx = 0;
-        	break;
-        default:
-        	theta = 0;
-        	ty = - RADIUS - Arena.UNIT_SIZE;
-        	tx = 0;
-        	break;
-        }
-        
-        at.translate(getX() * Arena.UNIT_SIZE,Arena.ARENA_HEIGHT + getY() * Arena.UNIT_SIZE);
-        at.rotate(Math.toRadians(theta));
-        at.translate(tx,ty);
+        at.translate(round(c.getX()) * Arena.UNIT_SIZE,Arena.ARENA_HEIGHT + round(c.getY()) * Arena.UNIT_SIZE);
+        //System.out.println(round(c.getX()));
+        //System.out.println(round(c.getY()));
+        setAngle(angle);
+        at.rotate(Math.toRadians(getAngle()));
+        at.translate(-RADIUS/2,-RADIUS/2);
         g2.drawImage(robotImage, at, null);
-    }
+	}
 	
+	private static int round(double val) {
+        return (int) Math.round(val);
+    }
+
 	public int getX() {
 		return this.x_coor;
 	}
@@ -152,11 +73,12 @@ public class RobotImage {
 		this.y_coor = y;
 	}
 	
-	public RobotOrientation getOrientation() {
-		return this.orientation;
+	public int getAngle() {
+		return this.angle;
 	}
 	
-	public void setOrientation(RobotOrientation orientation) {
-		this.orientation = orientation;
+	public void setAngle(int angle) {
+		this.angle = angle;
 	}
+	
 }

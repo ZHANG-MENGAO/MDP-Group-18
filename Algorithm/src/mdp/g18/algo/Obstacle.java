@@ -2,9 +2,14 @@ package mdp.g18.algo;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.geom.Point2D;
 
 public class Obstacle {
 	
+	private Point2D.Double center = new Point2D.Double();
+    private static final double DEG_TO_RAD = Math.PI / 180;
+    public TurningRadius turningRadius;
+
 	public int obstacleID;
 	// coordinates at bottom right-hand side
 	public int xCoordinate; // x coordinate
@@ -23,6 +28,53 @@ public class Obstacle {
 		this.direction = direction;
 		this.virtualx = xCoordinate + 15;
 		this.virtualy = yCoordinate - 15;
+		
+		this.center.setLocation(this.xCoordinate - 5, this.yCoordinate - 5);
+	}
+	
+	public void createCircleLeft(int[] coordinates) {
+    	
+		int angle = 0;
+		
+		switch(getDirection()) {
+		case NORTH:
+			angle = 180;
+			break;
+		case EAST:
+			angle = -90;
+			break;
+		case WEST:
+			angle = 90;
+			break;
+		default:
+			break;
+		}
+		
+    	double x = coordinates[0] - TurningRadius.getRadius() * Math.cos(angle * DEG_TO_RAD);
+    	double y = coordinates[1] - TurningRadius.getRadius() * Math.sin(angle * DEG_TO_RAD);
+    	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
+	}
+    
+    public void createCircleRight(int[] coordinates) {
+    	int angle = 0;
+		
+		switch(getDirection()) {
+		case NORTH:
+			angle = 180;
+			break;
+		case EAST:
+			angle = -90;
+			break;
+		case WEST:
+			angle = 90;
+			break;
+		default:
+			break;
+		}
+    	
+    	double x = coordinates[0] + TurningRadius.getRadius() * Math.cos(angle * DEG_TO_RAD);
+    	double y = coordinates[1] + TurningRadius.getRadius() * Math.sin(angle * DEG_TO_RAD);
+    	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
 	}
 	
 	public void setObstacleID(int id) {
@@ -31,6 +83,18 @@ public class Obstacle {
 	
 	public int getObstacleID() {
 		return this.obstacleID;
+	}
+	
+	public int getxCoordinate() {
+		return this.xCoordinate;
+	}
+
+	public int getyCoordinate() {
+		return this.yCoordinate;
+	}
+	
+	public Point2D.Double getObstacleCenter() {
+		return this.center;
 	}
 	
 	private void setDirection(Direction dir) {
