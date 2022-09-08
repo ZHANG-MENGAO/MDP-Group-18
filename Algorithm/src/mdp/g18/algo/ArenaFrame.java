@@ -21,7 +21,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	// Check for button pressed
 	public boolean addObstacles = false;
 	public boolean setImage = true;
-	public boolean selectImage = false;
 	public boolean clearObstacles = false;
 	
 	public boolean running = false;
@@ -65,7 +64,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		arena.paintArena(g);
 		robot.drawRobot(g);
 		
-		pathfinder = new PathFinder(robot,new Obstacle(getmaxID() + 1, 200, -100, Direction.SOUTH)); // input robot and obstacle object
+		pathfinder = new PathFinder(robot, obstacleObjects); // input robot and obstacle object
 		
 		if (addObstacles) {
 			obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
@@ -102,9 +101,15 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		}
 		
 		// Start
-		if(running) {
+		if (running) {
 			timer = new Timer(100,this);
 			timer.start();
+
+			if (obstacleObjects.size() == 5) {
+				pathfinder.findBestPath();
+
+			}
+
 			/*pathfinder.CC();
 			//if (robot.checkBoundaries()) {
 				//robot.tick();

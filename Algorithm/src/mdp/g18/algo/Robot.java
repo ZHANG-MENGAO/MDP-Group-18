@@ -230,10 +230,6 @@ public class Robot {
 		return this.sensor.getSensorY();
 	}
 
-	public int[] getCoord() {
-		return new int[] {this.x_coor, this.y_coor};
-	}
-	
 	public int getAngle() {
 		return this.angle;
 	}
@@ -272,6 +268,10 @@ public class Robot {
 		default:
 			break;
 		}
+	}
+
+	public RobotOrientation getOrientaion() {
+		return this.orientation;
 	}
 	
 

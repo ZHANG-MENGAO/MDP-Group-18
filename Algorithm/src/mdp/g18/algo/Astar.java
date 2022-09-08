@@ -17,11 +17,10 @@ public class Astar {
 	}
 	
 	public Node runAStar(Node start, Node target){
-	    PriorityQueue<Node> closedList = new PriorityQueue<>(); // visited
-	    PriorityQueue<Node> openList = new PriorityQueue<>(); //frontier
-	    
+	    PriorityQueue<Node> closedList = new PriorityQueue<>(); // Visited
+	    PriorityQueue<Node> openList = new PriorityQueue<>(); // Frontier
 
-	    start.setCost(start.getG(),start.calculateH(start,target));
+	    start.setCost(start.getG(), start.calculateH(start,target));
 	    openList.add(start);
 
 	    while(!openList.isEmpty()){
@@ -60,14 +59,9 @@ public class Astar {
 	}
 	
 	public double calDistance(int[] current, int[] destination) {
-		try {
-			int x = Math.abs(current[0] - destination[0]);
-			int y = Math.abs(current[1] - destination[1]);
-			return Math.sqrt(Math.pow(x, 2) - Math.pow(y, 2));
-		} catch (Exception e) {
-			System.out.println("Null value in either node.");
-		}
-		return -1;
+		int x = Math.abs(current[0] - destination[0]);
+		int y = Math.abs(current[1] - destination[1]);
+		return Math.sqrt(Math.abs(Math.pow(x, 2) - Math.pow(y, 2)));
 	}
 
 	// Creates an ArrayList of Nodes to be used for the A* algorithm
@@ -78,8 +72,21 @@ public class Astar {
 
 		for (Obstacle obstacle: obstacles) {
 			int[] obstacleCoord = new int[] {obstacle.getxCoordinate() - 5, obstacle.getyCoordinate() - 5};
-			Node newNode = new Node(0, 0, obstacleCoord, null, obstacle.getObstacleID());
+			Node newNode = new Node((int) calDistance(obstacleCoord, robotPos.getCoord()), 0, obstacleCoord, null, obstacle.getObstacleID());
 			nodes.add(newNode);
+		}
+
+		// Add neighbours
+		for (Node start : nodes) {
+			ArrayList<Node.Edge> neighbours = new ArrayList<Node.Edge>();
+			for (Node end : nodes) {
+				if (start != end) {
+					double dist = calDistance(start.getCoord(), end.getCoord());
+					Node.Edge e = new Node.Edge((int) dist, end);
+					neighbours.add(e);
+				}
+			}
+			start.setNeighbour(neighbours);
 		}
 		return nodes;
 	}
