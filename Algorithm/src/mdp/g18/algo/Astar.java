@@ -73,11 +73,11 @@ public class Astar {
 	// Creates an ArrayList of Nodes to be used for the A* algorithm
 	public List<Node> createNodes() {
 		List<Node> nodes = new ArrayList<Node>();
-		Node robotPos = new Node(0, 0, new int[] {robot.getX(), robot.getY()}, null, -1);
+		Node robotPos = new Node(0, 0, new int[] {(int) robot.getRobotCenter().getX(), (int) robot.getRobotCenter().getX()}, null, -1);
 		nodes.add(robotPos);
 
 		for (Obstacle obstacle: obstacles) {
-			int[] obstacleCoord = new int[] {obstacle.getxCoordinate(), obstacle.getyCoordinate()};
+			int[] obstacleCoord = new int[] {obstacle.getxCoordinate() - 5, obstacle.getyCoordinate() - 5};
 			Node newNode = new Node(0, 0, obstacleCoord, null, obstacle.getObstacleID());
 			nodes.add(newNode);
 		}
