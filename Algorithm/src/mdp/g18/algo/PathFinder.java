@@ -191,73 +191,13 @@ package mdp.g18.algo;
 //	 }
 //
 //
-//	 // TODO: implement logic for valid path check
-//	 public boolean isValidPath(int[] robotCoord, Path path) {
-//		 if (robotCoord == null) return false;
 //
-//		 int x = robotCoord[0];
-//		 int y = robotCoord[1];
-//		 int[][] robotPos = {
-//				 {x - 1, y + 1}, {x, y + 1}, {x + 1, y + 1},
-//				 {x - 1, y}, {x, y}, {x + 1, y},
-//				 {x - 1, y - 1}, {x, y - 1}, {x + 1, y - 1},
-//				 {(int) path.pt1[0], (int) path.pt1[1]}, {(int) path.pt2[0], (int) path.pt2[1]}
-//		 };
-//
-//		 if ((0 < x) && (x < Arena.ARENA_WIDTH - 1) && (0 < y) && (y < Arena.ARENA_HEIGHT - 1)) {
-//			 for (int[] coordinate : robotPos) {
-//				 if (ArenaFrame.obstacles[coordinate[0]][coordinate[1]] != 0) return false;
-//			 }
-//		 }
-//
-//		 return true;
-//	 }
-//
-//	 public class Path implements Comparable<Path> {
-//		 private double dist;
-//		 private double[] pt1;
-//		 private double[] pt2;
-//		 private String[] instructions; // Instruction format: turn at pt1, straight (if any), turn at pt2
-//
-//		 public double getDist() {
-//			 return this.dist;
-//		 }
-//
-//		 public void setDist(double dist) {
-//			 this.dist = dist;
-//		 }
-//
-//		 public void setPt1(double[] pt1) {
-//			 this.pt1 = pt1;
-//		 }
-//
-//		 public double[] getPt1() {
-//			 return pt1;
-//		 }
-//
-//		 public void setPt2(double[] pt2) {
-//			 this.pt2 = pt2;
-//		 }
-//
-//		 public double[] getPt2() {
-//			 return pt2;
-//		 }
-//
-//		 @Override
-//		 public int compareTo(Path o) {
-//			 if (this.getDist() > o.getDist()) {
-//				 return 1;
-//			 } else if (this.getDist() < o.getDist()) {
-//				 return -1;
-//			 }
-//			 return 0;
-//		 }
-//	 }
 // }
 
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -301,7 +241,6 @@ public class PathFinder {
 
 		 // If image is in front of robot, move robot forward
 		 if (isGoalAcrossRobot(robot, nextCoord, nextImgDir)) {
-			 // TODO: check if need to add loop for moveForward
 			 robot.moveForward();
 		 }
 
@@ -314,6 +253,28 @@ public class PathFinder {
 //		 Path bestPath = calculatePath(nodes.get(0), nextNode);
 
 		 // TODO: how to execute path???
+	 }
+
+	 // TODO: redo method, do a simulation to determine if path is valid
+	 public boolean isValidPath(int[] robotCoord, Path path) {
+		 if (robotCoord == null) return false;
+
+		 int x = robotCoord[0];
+		 int y = robotCoord[1];
+		 int[][] robotPos = {
+				 {x - 1, y + 1}, {x, y + 1}, {x + 1, y + 1},
+				 {x - 1, y}, {x, y}, {x + 1, y},
+				 {x - 1, y - 1}, {x, y - 1}, {x + 1, y - 1},
+				 {(int) path.pt1[0], (int) path.pt1[1]}, {(int) path.pt2[0], (int) path.pt2[1]}
+		 };
+
+		 if ((0 < x) && (x < Arena.ARENA_WIDTH - 1) && (0 < y) && (y < Arena.ARENA_HEIGHT - 1)) {
+			 for (int[] coordinate : robotPos) {
+				 if (ArenaFrame.obstacles[coordinate[0]][coordinate[1]] != 0) return false;
+			 }
+		 }
+
+		 return true;
 	 }
 
 	// LSL & RSR shortest path finding
@@ -983,7 +944,9 @@ public class PathFinder {
 		System.out.println(methodname);
 		return methodname;
 	}*/
-	 // Check if robot can travel straight to goal without any turns
+
+	// Check if robot can travel straight to goal without any turns
+	// TODO: change robot orientation to robot angle, account for range of values
 	 public boolean isGoalAcrossRobot(Robot robot, int[] goalCoord, Direction imageDir) {
 		 Point2D.Double robotCoord = robot.getRobotCenter();
 		 RobotOrientation robotOrient = robot.getOrientaion();
@@ -1196,6 +1159,83 @@ public class PathFinder {
 
 	public int[] getRobotCenter() {
 		return robotCenter;
+	}
+
+	public class Path implements Comparable<Path> {
+		private double dist;
+		// TODO: create array of instructions with following format:
+//		 private [angle1, direction1, angle 2, direction 2, angle 3 direction 3] // set to NULL if segment does not exist
+		ArrayList<Instruction> instructions = new ArrayList<>();
+		private double[] pt1;
+		private double[] pt2;
+
+		public void setPt1(double[] pt1) {
+			this.pt1 = pt1;
+		}
+
+		public void setPt2(double[] pt2) {
+			this.pt2 = pt2;
+		}
+
+		public double[] getPt1() {
+			return pt1;
+		}
+
+		public double[] getPt2() {
+			return pt2;
+		}
+
+		public double getDist() {
+			return this.dist;
+		}
+
+		public void setDist(double dist) {
+			this.dist = dist;
+		}
+
+		public ArrayList<Instruction> getInstructions() {
+			return instructions;
+		}
+
+		public void setInstructions(ArrayList<Instruction> instructions) {
+			this.instructions = instructions;
+		}
+
+		@Override
+		public int compareTo(Path o) {
+			if (this.getDist() > o.getDist()) {
+				return 1;
+			} else if (this.getDist() < o.getDist()) {
+				return -1;
+			}
+			return 0;
+		}
+
+		public class Instruction {
+			int angle;
+			String turnDirection;
+
+			Instruction(int angle, String turnDirection) {
+				this.angle = angle;
+				this.turnDirection = turnDirection;
+			}
+
+			public int getAngle() {
+				return angle;
+			}
+
+			public void setAngle(int angle) {
+				this.angle = angle;
+			}
+
+			public String getTurnDirection() {
+				return turnDirection;
+			}
+
+			public void setTurnDirection(String turnDirection) {
+				this.turnDirection = turnDirection;
+			}
+		}
 	}
 
 }

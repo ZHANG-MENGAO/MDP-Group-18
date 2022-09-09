@@ -299,7 +299,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	
 	// Add obstacle to array
 	public void addObstacle() {
-
+		// TODO: insert virtual obstacle into obstacles as -1
 		for (int i = -10; i <= 0; i++) {
 			for (int j = -10; j <= 0; j++) {
 				obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = obstacle.getObstacleID(); // top right coordinate
