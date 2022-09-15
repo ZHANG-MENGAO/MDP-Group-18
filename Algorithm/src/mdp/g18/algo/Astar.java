@@ -1,6 +1,7 @@
 package mdp.g18.algo;
 
 import java.awt.event.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -65,8 +66,8 @@ public class Astar {
 	}
 
 	// Creates an ArrayList of Nodes to be used for the A* algorithm
-	public List<Node> createNodes() {
-		List<Node> nodes = new ArrayList<Node>();
+	public ArrayList<Node> createNodes() {
+		ArrayList<Node> nodes = new ArrayList<Node>();
 		Node robotPos = new Node(0, 0, new int[] {(int) robot.getRobotCenter().getX(), (int) robot.getRobotCenter().getX()}, null, -1);
 		nodes.add(robotPos);
 
@@ -78,16 +79,38 @@ public class Astar {
 
 		// Add neighbours
 		for (Node start : nodes) {
-			ArrayList<Node.Edge> neighbours = new ArrayList<Node.Edge>();
-			for (Node end : nodes) {
-				if (start != end) {
-					double dist = calDistance(start.getCoord(), end.getCoord());
-					Node.Edge e = new Node.Edge((int) dist, end);
-					neighbours.add(e);
-				}
-			}
+			ArrayList<Node.Edge> neighbours = createNeighbours(start, nodes);
 			start.setNeighbour(neighbours);
 		}
+		return nodes;
+	}
+
+	private ArrayList<Node.Edge> createNeighbours(Node n, ArrayList<Node> nodes) {
+		// Add neighbours
+		ArrayList<Node.Edge> neighbours = new ArrayList<>();
+		for (Node end : nodes) {
+			if (n != end) {
+				double dist = calDistance(n.getCoord(), end.getCoord());
+				Node.Edge e = new Node.Edge((int) dist, end);
+				neighbours.add(e);
+			}
+		}
+		return neighbours;
+	}
+
+	public ArrayList<Node> updateNodes(ArrayList<Node> nodes) {
+		Node robotPos = new Node(0, 0, new int[] {(int) robot.getRobotCenter().getX(), (int) robot.getRobotCenter().getX()}, null, -1);
+		nodes.set(0, robotPos);
+
+		for (Node start : nodes) {
+			double dist = calDistance(start.getCoord(), robotPos.getCoord());
+			Node.Edge e = new Node.Edge((int) dist, robotPos);
+			start.neighbour.set(0, e);
+		}
+
+		ArrayList<Node.Edge> robotNeighbour = createNeighbours(robotPos, nodes);
+		nodes.get(0).setNeighbour(robotNeighbour);
+
 		return nodes;
 	}
 }

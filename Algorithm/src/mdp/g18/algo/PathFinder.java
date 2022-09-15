@@ -949,198 +949,18 @@ public class PathFinder {
 	// TODO: change robot orientation to robot angle, account for range of values
 	 public boolean isGoalAcrossRobot(Robot robot, int[] goalCoord, Direction imageDir) {
 		 Point2D.Double robotCoord = robot.getRobotCenter();
-		 RobotOrientation robotOrient = robot.getOrientaion();
-
-		 switch (robotOrient) {
-			 case N:
-				 if (imageDir == Direction.SOUTH && goalCoord[0] == (int) robotCoord.getX() && goalCoord[1] > robotCoord.getY()) {
-					 return true;
-				 }
-				 break;
-			 case S:
-				 if (imageDir == Direction.NORTH && goalCoord[0] == (int) robotCoord.getX() && goalCoord[1] < robotCoord.getY()) {
-					 return true;
-				 }
-				 break;
-			 case E:
-				 if (imageDir == Direction.WEST && goalCoord[1] == (int) robotCoord.getY() && goalCoord[0] > robotCoord.getX()) {
-					 return true;
-				 }
-				 break;
-			 case W:
-				 if (imageDir == Direction.EAST && goalCoord[1] == (int) robotCoord.getY() && goalCoord[0] < robotCoord.getX()) {
-					 return true;
-				 }
-				 break;
+		 int robotAngle = robot.getAngle();
+		 if (robotAngle == 0) {
+			 return imageDir == Direction.SOUTH && goalCoord[0] == (int) robotCoord.getX() && goalCoord[1] > robotCoord.getY();
+		 } else if (robotAngle == Math.PI) {
+			 return imageDir == Direction.NORTH && goalCoord[0] == (int) robotCoord.getX() && goalCoord[1] < robotCoord.getY();
+		 } else if (robotAngle == Math.PI / 2) {
+			 return imageDir == Direction.WEST && goalCoord[1] == (int) robotCoord.getY() && goalCoord[0] > robotCoord.getX();
+		 } else if (robotAngle == -Math.PI / 2) {
+			 return imageDir == Direction.EAST && goalCoord[1] == (int) robotCoord.getY() && goalCoord[0] < robotCoord.getX();
 		 }
 		 return false;
 	 }
-
-	public int[] calculateRobotCenter(int x, int y, RobotOrientation orientation) {
-
-		int valuex;
-		int valuey;
-		int[] robotCenter = new int[2];
-
-		switch(orientation) {
-		case N:
-			valuex = x + 15;
-			valuey = y - 15;
-			break;
-		case S:
-			valuex = x - 15;
-			valuey = y + 15;
-			break;
-		case E:
-			valuex = x + 15;
-			valuey = y + 15;
-			break;
-		case W:
-			valuex = x - 15;
-			valuey = y - 15;
-			break;
-		case NE1:
-			valuex = x + 19;
-			valuey = y - 8;
-			break;
-		case NE2:
-			valuex = x + 21;
-			valuey = y - 2;
-			break;
-		case NE3:
-			valuex = x + 20;
-			valuey = y - 4;
-			break;
-		case SE1:
-			valuex = x - 3;
-			valuey = y + 21;
-			break;
-		case SE2:
-			valuex = x + 3;
-			valuey = y + 21;
-			break;
-		case SE3:
-			valuex = x + 9;
-			valuey = y + 19;
-			break;
-		case NW1:
-			valuex = x + 9;
-			valuey = y - 18;
-			break;
-		case NW2:
-			valuex = x + 3;
-			valuey = y - 21;
-			break;
-		case NW3:
-			valuex = x - 2;
-			valuey = y - 21;
-			break;
-		case SW1:
-			valuex = x - 22;
-			valuey = y + 2;
-			break;
-		case SW2:
-			valuex = x + 21;
-			valuey = y - 4;
-			break;
-		case SW3:
-			valuex = x - 19;
-			valuey = y - 9;
-			break;
-		default:
-			valuex = 0;
-			valuey = 0;
-			break;
-		}
-
-		robotCenter[0] = valuex;
-		robotCenter[1] = valuey;
-
-		return robotCenter;
-	}
-
-	public int[] originalRobotCenter(int x, int y, RobotOrientation orientation) {
-
-		int valuex;
-		int valuey;
-		int[] robotCenter = new int[2];
-
-		switch(orientation) {
-		case N:
-			valuex = x + 15;
-			valuey = y - 15;
-			break;
-		case S:
-			valuex = x - 15;
-			valuey = y + 15;
-			break;
-		case E:
-			valuex = x + 15;
-			valuey = y + 15;
-			break;
-		case W:
-			valuex = x - 15;
-			valuey = y - 15;
-			break;
-		case NE1:
-			valuex = x + 19;
-			valuey = y - 8;
-			break;
-		case NE2:
-			valuex = x + 21;
-			valuey = y - 2;
-			break;
-		case NE3:
-			valuex = x + 20;
-			valuey = y - 4;
-			break;
-		case SE1:
-			valuex = x - 3;
-			valuey = y + 21;
-			break;
-		case SE2:
-			valuex = x + 3;
-			valuey = y + 21;
-			break;
-		case SE3:
-			valuex = x + 9;
-			valuey = y + 19;
-			break;
-		case NW1:
-			valuex = x + 9;
-			valuey = y - 18;
-			break;
-		case NW2:
-			valuex = x + 3;
-			valuey = y - 21;
-			break;
-		case NW3:
-			valuex = x - 2;
-			valuey = y - 21;
-			break;
-		case SW1:
-			valuex = x - 22;
-			valuey = y + 2;
-			break;
-		case SW2:
-			valuex = x + 21;
-			valuey = y - 4;
-			break;
-		case SW3:
-			valuex = x - 19;
-			valuey = y - 9;
-			break;
-		default:
-			valuex = 0;
-			valuey = 0;
-			break;
-		}
-
-		robotCenter[0] = valuex;
-		robotCenter[1] = valuey;
-
-		return robotCenter;
-	}
 
 	// Center of obstacle
 	public void setObstacleCenter() {
@@ -1163,8 +983,6 @@ public class PathFinder {
 
 	public class Path implements Comparable<Path> {
 		private double dist;
-		// TODO: create array of instructions with following format:
-//		 private [angle1, direction1, angle 2, direction 2, angle 3 direction 3] // set to NULL if segment does not exist
 		ArrayList<Instruction> instructions = new ArrayList<>();
 		private double[] pt1;
 		private double[] pt2;
