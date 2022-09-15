@@ -171,10 +171,10 @@ public class Simulate {
 	}*/
     
     public void turnRight(double[] target, double angle){
-    	//System.out.println((int)(target[0]));
-		//System.out.println((int)(target[1]));
-		//System.out.println(round(this.robot.getRobotCenter().getX()));
-		//System.out.println(round(this.robot.getRobotCenter().getY()));
+    	System.out.println((int)(target[0]));
+		System.out.println((int)(target[1]));
+		System.out.println(round(this.robot.getRobotCenter().getX()));
+		System.out.println(round(this.robot.getRobotCenter().getY()));
     	double tickNew = this.robot.getTick();
     	
     	double originalAngle = this.robot.getAngle();
@@ -199,22 +199,22 @@ public class Simulate {
     		this.robot.turnRight();
     		this.coordinate.add(new Data(round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())));
     		//System.out.println(this.robot.getAngle());
-    		//System.out.println(angle);
-    		//System.out.println(this.robot.getAngle());
+    		System.out.println(angle);
+    		System.out.println(this.robot.getAngle());
     		//System.out.println(round(this.robot.getRobotCenter().getX()));
     		//System.out.println(round(this.robot.getRobotCenter().getY()));
     	}
-    	//System.out.println("R");
-    	//System.out.println(this.robot.getAngle());
+    	System.out.println("R");
+    	System.out.println(this.robot.getAngle());
     	//System.out.println(round(this.robot.getRobotCenter().getX()));
 		//System.out.println(round(this.robot.getRobotCenter().getY()));
     }
     
     public void turnLeft(double[] target, double angle){
-    	//System.out.println((int)(target[0]));
-		//System.out.println((int)(target[1]));
-		//System.out.println(round(this.robot.getRobotCenter().getX()));
-		//System.out.println(round(this.robot.getRobotCenter().getY()));
+    	System.out.println((int)(target[0]));
+		System.out.println((int)(target[1]));
+		System.out.println(round(this.robot.getRobotCenter().getX()));
+		System.out.println(round(this.robot.getRobotCenter().getY()));
     	double tickNew = this.robot.getTick();
     	
     	double originalAngle = this.robot.getAngle();
@@ -236,14 +236,14 @@ public class Simulate {
 			}
     		this.robot.turnLeft();
     		this.coordinate.add(new Data(round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())));
-    		//System.out.println(this.robot.getAngle());
-    		//System.out.println(angle);
-    		//System.out.println(originalAngle);
+    		System.out.println(this.robot.getAngle());
+    		System.out.println(angle);
+    		System.out.println(originalAngle);
     		//System.out.println(round(this.robot.getRobotCenter().getX()));
     		//System.out.println(round(this.robot.getRobotCenter().getY()));
     	}
-    	//System.out.println("L");
-    	//System.out.println(this.robot.getAngle());
+    	System.out.println("L");
+    	System.out.println(this.robot.getAngle());
     }
 
     public void moveForward(double[] target, double distance) {
@@ -251,11 +251,11 @@ public class Simulate {
     	
     	double[] p1 = new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()};
     	
-    	while(!Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())},new double[] {round(target[0]),round(target[1])}) ||
-    			(dist < distance)) {
+    	while(!Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())},new double[] {round(target[0]),round(target[1])})) {
     		
     		
-			if (this.robot.checkBoundaries() || this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
+			if (this.robot.checkBoundaries() || (dist >= distance)
+					|| this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
 				break;
 			}
 			
