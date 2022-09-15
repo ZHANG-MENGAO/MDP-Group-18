@@ -8,7 +8,7 @@ public class Node implements Comparable<Node>{
 	private int cost;
 	private int[] coord;
 	private int obstacleID; // -1 if robot
-	public ArrayList<Edge> neighbour;
+	public ArrayList<Edge> neighbour = new ArrayList<>();
 
 	private Node parent;
 
@@ -65,13 +65,18 @@ public class Node implements Comparable<Node>{
 		return this.obstacleID;
 	}
 
+	public void setNeighbour(ArrayList<Edge> neighbour) {
+		this.neighbour = neighbour;
+	}
+
 	public int calculateH(Node current, Node target) {
 		int x = Math.abs(current.getCoord()[0] - target.getCoord()[0]);
         int y = Math.abs(current.getCoord()[1] - target.getCoord()[1]);
 
-        if (current.getParent().coord[0] == current.coord[0] && x == 0) return y;
-        else if (current.getParent().coord[1] == current.coord[1] && y == 0) return x;
-        else return x + y;
+//        if (current.getParent().coord[0] == current.coord[0] && x == 0) return y;
+//        else if (current.getParent().coord[1] == current.coord[1] && y == 0) return x;
+//        else return x + y;
+		return x + y;
 	}
 
 	@Override

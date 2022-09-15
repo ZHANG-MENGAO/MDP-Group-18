@@ -16,22 +16,29 @@ import javax.swing.SwingUtilities;
 
 public class MainFrame extends JFrame implements ActionListener{
 
+	public static final int WIDTH = 615;
+	public static final int HEIGHT = 700;
+	
 	ArenaFrame arena;
 	ControlFrame control;
+	LabelFrame label;
 	
 	MainFrame(){		
 		arena = new ArenaFrame();
 		control = new ControlFrame();
+		label = new LabelFrame();
 		control.resetButton.addActionListener(this);
 		control.obstacleButton.addActionListener(this);
 		control.clearButton.addActionListener(this);
+		control.planButton.addActionListener(this);
 		control.startButton.addActionListener(this);
 		
-		this.add(arena, BorderLayout.WEST);
-		this.add(control, BorderLayout.EAST);
-		this.setTitle("Testing");
+		this.add(label, BorderLayout.NORTH);
+		this.add(arena, BorderLayout.CENTER);
+		this.add(control, BorderLayout.SOUTH);
+		this.setTitle("Simulator");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.pack();
+		this.setSize(WIDTH,HEIGHT);
 		this.setResizable(false);
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);
@@ -66,10 +73,18 @@ public class MainFrame extends JFrame implements ActionListener{
 		}
 		
 		// start simulation
-		if (e.getSource() == control.startButton) {
+		if (e.getSource() == control.planButton) {
 			arena.addObstacles = false;
 			arena.clearObstacles = false;
 			arena.running = !arena.running;
+			SwingUtilities.updateComponentTreeUI(this);
+		}
+		
+		// start execute path
+		if (e.getSource() == control.startButton) {
+			arena.addObstacles = false;
+			arena.clearObstacles = false;
+			arena.start = !arena.start;
 			SwingUtilities.updateComponentTreeUI(this);
 		}
 	}

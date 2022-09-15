@@ -1,43 +1,33 @@
 package mdp.g18.algo;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
 
-public class Robot {
+public abstract class Robot {
 	
-	private Point2D.Double center = new Point2D.Double();
-    private static final double DEG_TO_RAD = Math.PI / 180;
+	private Point2D.Double center = new Point2D.Double(); // robot Center
+	private Point2D.Double centerFront = new Point2D.Double(); // robot Front
+    protected final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
     public TurningRadius turningRadius;
 
 	public static final int ROBOT_SIZE = 30;
 	
-	private int tick;
-	private int angle; // rotate angle
-	private RobotOrientation orientation;
-
-	Sensor sensor;
-	RobotImage robotimage;
+	protected double tick;
+	private double angle; // rotate angle
+	
+	protected Sensor sensor;
 	
 	// Constructor
-	Robot(int x, int y, int angle){	
+	Robot(int x, int y, int angle){
+		this.center.setLocation(x, y); // set center location
 		setAngle(angle); // set angle
-		setOrientation(angle);  // set orientation
-		this.center.setLocation(x, y);
-		//createCircleLeft(new int[] {x,y},"front");
-		robotimage = new RobotImage(x,y,this.angle);
-		sensor = new Sensor(x,y);
+		setCenterFront(angle);
+		sensor = new Sensor(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
 	}
-
-	public void tick(){
-		moveForward();
-    }
 	
-    public void createCircleLeft(int[] coordinates, String movement) {
+	// Create only when turning left
+    public void createCircleLeft(double[] coordinates, String movement) {
     	
-    	int angle = this.angle;
+    	double angle = getAngle();
     	if (movement == "front") {
     		setTick(-angle);
     	}
@@ -50,9 +40,10 @@ public class Robot {
     	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
 	}
     
-    public void createCircleRight(int[] coordinates, String movement) {
+    // create only when turning right
+    public void createCircleRight(double[] coordinates, String movement) {
     	
-    	int angle = this.angle;
+    	double angle = getAngle();
     	if (movement == "reverse") {
     		setTick(-angle);
     	}
@@ -65,111 +56,65 @@ public class Robot {
     	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
 	}
     
-    public void turnLeft(){
-    	this.tick += 1;
-        final double xCenter = this.turningRadius.getCenter().getX(); // x center of turning radius
-        final double yCenter = this.turningRadius.getCenter().getY(); // y center of turning radius
-        final double rad = TurningRadius.getRadius(); // radius of robot
-        this.center.setLocation(xCenter + rad * Math.cos(this.tick * DEG_TO_RAD),
-                      yCenter + rad * Math.sin(-this.tick * DEG_TO_RAD));
-        setRobotCenter(this.center);
-        
-        this.angle = (int) calculateAngle(this.center,xCenter - rad, yCenter);
-        this.setOrientation(this.angle);
-        
-        //System.out.println(this.tick);
-        //System.out.println(this.center);
-        //System.out.println(this.angle);
-    }
-
-	public void reverseLeft(){
-		this.tick += 1;
-        final double xCenter = turningRadius.getCenter().getX(); // x center of turning radius
-        final double yCenter = turningRadius.getCenter().getY(); // y center of turning radius
-        final double rad = TurningRadius.getRadius(); // radius of robot
-        this.center.setLocation(xCenter + rad * Math.cos(this.tick  * DEG_TO_RAD),
-                      yCenter + rad * Math.sin(this.tick * DEG_TO_RAD));
-        setRobotCenter(this.center);
-        this.angle = (int) calculateAngle(this.center,xCenter - rad, yCenter);
-        this.setOrientation(this.angle);
-
-        //System.out.println(this.center);
-        //System.out.println(this.angle);
-    }
-
-    public void turnRight(){
-    	this.tick+=1;
-        final double xCenter = this.turningRadius.getCenter().getX(); // x center of turning radius
-        final double yCenter = this.turningRadius.getCenter().getY(); // y center of turning radius
-        final double rad = TurningRadius.getRadius(); // radius of robot
-        this.center.setLocation(xCenter - rad * Math.cos(this.tick * DEG_TO_RAD),
-                      yCenter - rad * Math.sin(this.tick * DEG_TO_RAD));
-        setRobotCenter(this.center);
-        this.angle = (int) calculateAngle(this.center,xCenter + rad, yCenter);
-        this.setOrientation(this.angle);
-        //System.out.println(this.center);
-        //System.out.println(this.angle);
-    }
-	
-    // need reverse tick
-    public void reverseRight(){
-    	this.tick += 1;
-    	final double xCenter = this.turningRadius.getCenter().getX(); // x center of turning radius
-        final double yCenter = this.turningRadius.getCenter().getY(); // y center of turning radius
-        final double rad = TurningRadius.getRadius(); // radius of robot
-        this.center.setLocation(xCenter - rad * Math.cos(this.tick * DEG_TO_RAD),
-                      yCenter - rad * Math.sin(-this.tick * DEG_TO_RAD));
-        setRobotCenter(this.center);
-        this.angle = (int) calculateAngle(this.center,xCenter + rad, yCenter);
-        this.setOrientation(this.angle);
-        
-        //System.out.println(this.center);
-        //System.out.println(this.angle);
-    }
-    
-    public void moveForward() {
-		int speed = 1;
-		double dx = this.center.getX() + speed * Math.cos(Math.PI/2 - this.angle * DEG_TO_RAD);
-		double dy = this.center.getY() - speed * Math.sin(Math.PI/2 - this.angle * DEG_TO_RAD);
-		this.center.setLocation(dx,dy);
-		setRobotCenter(this.center);
-	}
-    
-    public void reverseBackward() {
-		int speed = 1;
-		double dx = this.center.getX() + speed * Math.cos(this.angle * DEG_TO_RAD + Math.PI/2);
-		double dy = this.center.getY() + speed * Math.sin(this.angle * DEG_TO_RAD + Math.PI/2);
-		this.center.setLocation(dx,dy);
-		setRobotCenter(this.center);
-	}
-    
     public boolean checkBoundaries() {
     	// center of robot within the grid
     	if ((Math.max(15, this.center.getX()) == Math.min(this.center.getX(), 185)) && (Math.max(-184, this.center.getY()) == Math.min(this.center.getY(), -16))) {
+    		return false;
+    	}
+    	return true;
+    }
+    
+    public boolean checkObstacleFront(Obstacle obstacle) {
+    	
+    	// Up
+    	if (this.angle == 0 && obstacle.getDirection() == Direction.SOUTH && (obstacle.getObstacleCenter().getY() < this.center.getY() - 15) && (Math.max(this.center.getX() - 15, obstacle.getObstacleCenter().getX()) == Math.min(obstacle.getObstacleCenter().getX(), this.center.getX() + 15))) {
+    		return true;
+    	} 
+    	//Down
+    	else if (this.angle == 180 && obstacle.getDirection() == Direction.NORTH && (obstacle.getObstacleCenter().getY() > this.center.getY() + 15) && (Math.max(this.center.getX() - 15, obstacle.getObstacleCenter().getX()) == Math.min(obstacle.getObstacleCenter().getX(), this.center.getX() + 15))) {
     		return true;
     	}
+    	
+    	//Left
+    	else if (this.angle == -90 && obstacle.getDirection() == Direction.EAST && (obstacle.getObstacleCenter().getX() < this.center.getX() - 15) && (Math.max(this.center.getY() - 15, obstacle.getObstacleCenter().getY()) == Math.min(obstacle.getObstacleCenter().getY(), this.center.getY() + 15))) {
+    		return true;
+    	}
+    	
+    	//Right
+    	else if (this.angle == 90 && obstacle.getDirection() == Direction.WEST && (obstacle.getObstacleCenter().getX() > this.center.getX() + 15) && (Math.max(this.center.getY() - 15, obstacle.getObstacleCenter().getY()) == Math.min(obstacle.getObstacleCenter().getY(), this.center.getY() + 15))) {
+    		return true;
+    	}
+
     	return false;
     }
     
     // problem
-    public boolean canReachStraight(int[] destination) {
-    	int speed = 1;
-    	double dx = this.center.getX();
-    	double dy = this.center.getY();
+    public boolean canReachStraightPoint(double[] destination) {
     	
-    	while(checkBoundaries()) {
-    		dx = dx + speed * Math.cos(this.angle * DEG_TO_RAD + Math.PI/2);
-    		dy = dy + speed * Math.sin(this.angle * DEG_TO_RAD + Math.PI/2);
-    		
-    		if (round(dx) == destination[0] && round(dy) == destination[1]) {
-    			return true; // reach destination
-    		}
+    	// Up
+    	if (this.angle == 0 && (this.getRobotCenter().getX() == destination[0])) {
+    		return true;
+    	} 
+    	
+    	//Down
+    	else if (this.angle == 180 && (this.getRobotCenter().getX() == destination[0])) {
+    		return true;
     	}
     	
+    	//Left
+    	else if (this.angle == -90 && (this.getRobotCenter().getY() == destination[1])) {
+    		
+    	}
+    	
+    	//Right
+    	else if (this.angle == 90 && (this.getRobotCenter().getY() == destination[1])) {
+    		
+    	}
+
     	return false;
     }
     
-    public boolean canReachTurn(int[] destination) {
+    public boolean canReachTurn(double[] destination) {
     	
     	// true if robot can reach obstacle by turning left or right
     	if (this.turningRadius.getCenter().getX() == destination[0] && this.turningRadius.getCenter().getY() == destination[1]) {
@@ -182,21 +127,13 @@ public class Robot {
     	
     	// true if robot can reach obstacle by turning lr or rl
     	//circle touch if distance between center is 2 * radius
-    	if (distance == 2 * TurningRadius.getRadius()) {
+    	if ((Math.max(2 * TurningRadius.getRadius() - 1, distance) == Math.min(distance, 2 * TurningRadius.getRadius() + 1))) {
     		return true;
     	}
     	return false;
     }
-    
-    private static int round(double val) {
-        return (int) Math.round(val);
-    }
-    
-    
-    public void drawRobot(Graphics g){
-    	robotimage.drawRobot(g, this.center, this.angle);
-	}
 	
+    /*
 	public double calculateAngle(Point2D.Double p1, double centerX, double centerY){
     	//p0(x,y) = (center.x, center.y - radius)
     	//radius = 25
@@ -204,14 +141,41 @@ public class Robot {
     	Point2D.Double p0 = new Point2D.Double();
     	p0.setLocation(centerX, centerY);
     	return (2 * Math.atan2(p1.getY() - p0.getY(), p1.getX() - p0.getX())) / DEG_TO_RAD;
-    }
+    }*/
 	
-    public void setTick(int angle) {
+	public double computeAngle(double[] p, double[] p1, double[] pt1, String direction) {
+		
+		double[] v1 = new double[2];
+		double[] v2 = new double[2];
+		double angle;
+		
+		v1[0] = p[0] - p1[0];
+		v1[1] = (-p[1])  - (-p1[1]);
+		v2[0] = pt1[0] - p1[0];
+		v2[1] = (-pt1[1])  - (-p1[1]);
+
+		angle = Math.atan2(v2[1], v2[0]) - Math.atan2(v1[1], v1[0]);
+		
+		if (angle < 0 && direction == "L") {
+			angle += 2 * Math.PI;
+		} else if (angle > 0 && direction == "R"){
+			angle -= 2 * Math.PI;
+		}
+
+		return -angle / DEG_TO_RAD ;
+	}
+
+	public double getTick() {
+		return this.tick;
+	}
+	
+    public void setTick(double angle) {
 		this.tick = angle;
 	}
 	
     public void setRobotCenter(Point2D.Double c){
         center = c;
+        sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
     }
     
     public Point2D.Double getRobotCenter(){
@@ -222,570 +186,39 @@ public class Robot {
 		return ROBOT_SIZE;
 	}
 	
-	public int getSensorX() {
-		return this.sensor.getSensorX();
-	}
-	
-	public int getSensorY() {
-		return this.sensor.getSensorY();
-	}
-	
-	public int getAngle() {
+	public double getAngle() {
 		return this.angle;
 	}
 	
-	public void setAngle(int angle) {
+	public void setAngle(double angle) {
 		this.angle = angle;
 	}
 	
-	public RobotOrientation getOrientation() {
-		return this.orientation;
+	public TurningRadius getTurningRadius() {
+		return this.turningRadius;
 	}
+	
+	public void setCenterFront(double angle) {
+    	
+    	double dx = this.getRobotCenter().getX() + 15 * Math.sin(angle * DEG_TO_RAD);
+    	double dy = this.getRobotCenter().getY() - 15 * Math.cos(angle * DEG_TO_RAD);
+    	
+    	this.centerFront.setLocation(dx, dy);
+	}
+	
+	public Point2D.Double getCenterFront(){
+        return this.centerFront;
+    }
+    
+    public abstract void turnLeft();
 
-	public void setOrientation(int angle) {
-		switch(angle) {
-		case 0:
-			this.orientation = RobotOrientation.N;
-			break;
-		case 90:
-			this.orientation = RobotOrientation.W;
-			break;
-		case -180:
-			this.orientation = RobotOrientation.S;
-			break;
-		case -90:
-			this.orientation = RobotOrientation.E;
-			break;
-		case 360:
-			this.orientation = RobotOrientation.N;
-			break;
-		case 270:
-			this.orientation = RobotOrientation.W;
-			break;
-		case -270:
-			this.orientation = RobotOrientation.E;
-			break;
-		default:
-			break;
-		}
-	}
-	
+	public abstract void reverseLeft();
 
+    public abstract void turnRight();
 	
-	/*
-	public void turnLeft() {
-		switch(orientation){
-		case N:
-			setOrientation(RobotOrientation.NW1);
-			setX(getX() + 4);
-			setY(getY() - 2);
-			break;
-		case W:
-			setOrientation(RobotOrientation.SW3);
-			setX(getX() - 2);
-			setY(getY() - 4);
-			break;
-		case S:
-			setOrientation(RobotOrientation.SE1);
-			setX(getX() - 4);
-			setY(getY() + 2);
-			break;
-		case E:
-			setOrientation(RobotOrientation.NE3);
-			setX(getX() + 2);
-			setY(getY() + 4);
-			break;
-		case NW1:
-			setOrientation(RobotOrientation.NW2);
-			setX(getX() + 3);
-			setY(getY() - 4);
-			break;
-		case NW2: 
-			setOrientation(RobotOrientation.NW3);
-			setX(getX() - 3);
-			setY(getY() - 7);
-			break;
-		case NW3:
-			setOrientation(RobotOrientation.W);
-			setX(getX() + 1);
-			setY(getY() - 12);
-			break;
-		case SW1:
-			setOrientation(RobotOrientation.S);
-			setX(getX() - 12);
-			setY(getY() - 1);
-			break;
-		case SW2:
-			setOrientation(RobotOrientation.SW1);
-			setX(getX() - 7);
-			setY(getY() + 3);
-			break;
-		case SW3:
-			setOrientation(RobotOrientation.SW2);
-			setX(getX() - 4);
-			setY(getY() - 3);
-			break;
-		case SE1:
-			setOrientation(RobotOrientation.SE2);
-			setX(getX() - 3);
-			setY(getY() + 4);
-			break;
-		case SE2:
-			setOrientation(RobotOrientation.SE3);
-			setX(getX() + 3);
-			setY(getY() + 7);
-			break;
-		case SE3:
-			setOrientation(RobotOrientation.E);
-			setX(getX() - 1);
-			setY(getY() + 12);
-			break;
-		case NE1:
-			setOrientation(RobotOrientation.N);
-			setX(getX() + 12);
-			setY(getY() + 1);
-			break;
-		case NE2:
-			setOrientation(RobotOrientation.NE1);
-			setX(getX() + 7);
-			setY(getY() - 3);
-			break;
-		case NE3:
-			setOrientation(RobotOrientation.NE2);
-			setX(getX() + 4);
-			setY(getY() + 3);
-			break;
-		default:
-			break;
-		}
-		
-		robotimage.setOrientation(getOrientation());
-		robotimage.setX(getX());
-		robotimage.setY(getY());
-	}
-	
-	public void reverseLeft() {
-		switch(orientation){
-		case N: 
-			setOrientation(RobotOrientation.NE1);
-			setX(getX() - 12);
-			setY(getY() - 1);
-			break;
-		case W:
-			setOrientation(RobotOrientation.NW3);
-			setX(getX() - 1);
-			setY(getY() + 12);
-			break;
-		case S:
-			setOrientation(RobotOrientation.SW1);
-			setX(getX() + 12);
-			setY(getY() + 1);
-			break;
-		case E:
-			setOrientation(RobotOrientation.SE3);
-			setX(getX() + 1);
-			setY(getY() - 12);
-			break;
-		case NW1:
-			setOrientation(RobotOrientation.N);
-			setX(getX() - 4);
-			setY(getY() + 2);
-			break;
-		case NW2:
-			setOrientation(RobotOrientation.NW1);
-			setX(getX() - 3);
-			setY(getY() + 4);
-			break;
-		case NW3:
-			setOrientation(RobotOrientation.NW2);
-			setX(getX() + 3);
-			setY(getY() + 7);
-			break;
-		case SW1:
-			setOrientation(RobotOrientation.SW2);
-			setX(getX() + 7);
-			setY(getY() - 3);
-			break;
-		case SW2:
-			setOrientation(RobotOrientation.SW3);
-			setX(getX() + 4);
-			setY(getY() + 3);
-			break;
-		case SW3:
-			setOrientation(RobotOrientation.W);
-			setX(getX() + 2);
-			setY(getY() + 4);
-			break;
-		case SE1:
-			setOrientation(RobotOrientation.S);
-			setX(getX() + 4);
-			setY(getY() - 2);
-			break;
-		case SE2:
-			setOrientation(RobotOrientation.SE1);
-			setX(getX() + 3);
-			setY(getY() - 4);
-			break;
-		case SE3:
-			setOrientation(RobotOrientation.SE2);
-			setX(getX() - 3);
-			setY(getY() - 7);
-			break;
-		case NE1:
-			setOrientation(RobotOrientation.NE2);
-			setX(getX() - 7);
-			setY(getY() + 3);
-			break;
-		case NE2:
-			setOrientation(RobotOrientation.NE3);
-			setX(getX() - 4);
-			setY(getY() - 3);
-			break;
-		case NE3:
-			setOrientation(RobotOrientation.E);
-			setX(getX() - 2);
-			setY(getY() - 4);
-			break;
-		default:
-			break;
-		}
-		
-		robotimage.setOrientation(getOrientation());
-		robotimage.setX(getX());
-		robotimage.setY(getY());
-	}
-	
-	public void turnRight() {
-		switch(orientation){
-			case N:
-				setOrientation(RobotOrientation.NE1);
-				setX(getX() - 3);
-				setY(getY() - 12);
-				break;
-			case E:
-				setOrientation(RobotOrientation.SE3);
-				setX(getX() + 12);
-				setY(getY() - 3);
-				break;
-			case S:
-				setOrientation(RobotOrientation.SW1);
-				setX(getX() + 3);
-				setY(getY() + 12);
-				break;
-			case W:
-				setOrientation(RobotOrientation.NW3);
-				setX(getX() - 12);
-				setY(getY() + 3);
-				break;
-			case NE1:
-				setOrientation(RobotOrientation.NE2);
-				setX(getX() + 2);
-				setY(getY() - 13);
-				break;
-			case NE2:
-				setOrientation(RobotOrientation.NE3);
-				setX(getX() + 9);
-				setY(getY() - 13);
-				break;
-			case NE3:
-				setOrientation(RobotOrientation.E);
-				setX(getX() + 17);
-				setY(getY() - 17);
-				break;
-			case SE1:
-				setOrientation(RobotOrientation.S);
-				setX(getX() + 17);
-				setY(getY() + 17);
-				break;
-			case SE2:
-				setOrientation(RobotOrientation.SE1);
-				setX(getX() + 13);
-				setY(getY() + 9);
-				break;
-			case SE3:
-				setOrientation(RobotOrientation.SE2);
-				setX(getX() + 13);
-				setY(getY() + 2);
-				break;
-			case NW1:
-				setOrientation(RobotOrientation.N);
-				setX(getX() - 17);
-				setY(getY() - 17);
-				break;
-			case NW2:
-				setOrientation(RobotOrientation.NW1);
-				setX(getX() - 13);
-				setY(getY() - 9);
-				break;
-			case NW3:
-				setOrientation(RobotOrientation.NW2);
-				setX(getX() - 13);
-				setY(getY() - 2);
-				break;
-			case SW1:
-				setOrientation(RobotOrientation.SW2);
-				setX(getX() - 2);
-				setY(getY() + 13);
-				break;
-			case SW2:
-				setOrientation(RobotOrientation.SW3);
-				setX(getX() - 9);
-				setY(getY() + 13);
-				break;
-			case SW3:
-				setOrientation(RobotOrientation.W);
-				setX(getX() - 17);
-				setY(getY() + 17);
-				break;
-			default:
-				break;
-		}
-		
-		robotimage.setOrientation(getOrientation());
-		robotimage.setX(getX());
-		robotimage.setY(getY());
-	}
-	
-	public void reverseRight() {
-		switch(orientation){
-		case N:
-			setOrientation(RobotOrientation.NW1);
-			setX(getX() + 17);
-			setY(getY() + 17);
-			break;
-		case E:
-			setOrientation(RobotOrientation.NE3);
-			setX(getX() - 17);
-			setY(getY() + 17);
-			break;
-		case S:
-			setOrientation(RobotOrientation.SE1);
-			setX(getX() - 17);
-			setY(getY() - 17);
-			break;
-		case W:
-			setOrientation(RobotOrientation.SW3);
-			setX(getX() + 17);
-			setY(getY() - 17);
-			break;
-		case NE1:
-			setOrientation(RobotOrientation.N);
-			setX(getX() + 3);
-			setY(getY() + 12);
-			break;
-		case NE2:
-			setOrientation(RobotOrientation.NE1);
-			setX(getX() - 2);
-			setY(getY() + 13);
-			break;
-		case NE3:
-			setOrientation(RobotOrientation.NE2);
-			setX(getX() - 9);
-			setY(getY() + 13);
-			break;
-		case SE1:
-			setOrientation(RobotOrientation.SE2);
-			setX(getX() - 13);
-			setY(getY() - 9);
-			break;
-		case SE2:
-			setOrientation(RobotOrientation.SE3);
-			setX(getX() - 13);
-			setY(getY() - 2);
-			break;
-		case SE3:
-			setOrientation(RobotOrientation.E);
-			setX(getX() - 12);
-			setY(getY() + 3);
-			break;
-		case NW1:
-			setOrientation(RobotOrientation.NW2);
-			setX(getX() + 13);
-			setY(getY() + 9);
-			break;
-		case NW2:
-			setOrientation(RobotOrientation.NW3);
-			setX(getX() + 13);
-			setY(getY() + 2);
-			break;
-		case NW3:
-			setOrientation(RobotOrientation.W);
-			setX(getX() + 12);
-			setY(getY() - 3);
-			break;
-		case SW1:
-			setOrientation(RobotOrientation.S);
-			setX(getX() - 3);
-			setY(getY() - 12);
-			break;
-		case SW2:
-			setOrientation(RobotOrientation.SW1);
-			setX(getX() + 2);
-			setY(getY() - 13);
-			break;
-		case SW3:
-			setOrientation(RobotOrientation.SW2);
-			setX(getX() + 9);
-			setY(getY() - 13);
-			break;
-		default:
-			break;
-		}
-		
-		robotimage.setOrientation(getOrientation());
-		robotimage.setX(getX());
-		robotimage.setY(getY());
-	}
-		
-	public void moveForward() {
-		switch(orientation){
-			case N:
-				this.y_coor -= 1;
-				break;
-			case S:
-				this.y_coor += 1;
-				break;
-			case E:
-				this.x_coor += 1;
-				break;
-			case W:
-				this.x_coor -= 1;
-				break;
-			case NE1:
-				this.y_coor -= 1;
-				this.x_coor += 1;
-				break;
-			case NE2:
-				this.y_coor -= 1;
-				this.x_coor += 2;
-				break;
-			case NE3:
-				this.y_coor -= 1;
-				this.x_coor += 3;
-				break;
-			case SE1:
-				this.y_coor += 1;
-				this.x_coor += 1;
-				break;
-			case SE2:
-				this.y_coor += 1;
-				this.x_coor += 2;
-				break;
-			case SE3:
-				this.y_coor += 1;
-				this.x_coor += 3;
-				break;
-			case NW1:
-				this.y_coor -= 1;
-				this.x_coor -= 1;
-				break;
-			case NW2:
-				this.y_coor -= 1;
-				this.x_coor -= 2;
-				break;
-			case NW3:
-				this.y_coor -= 1;
-				this.x_coor -= 3;
-				break;
-			case SW1:
-				this.y_coor += 1;
-				this.x_coor -= 1;
-				break;
-			case SW2:
-				this.y_coor += 1;
-				this.x_coor -= 2;
-				break;
-			case SW3:
-				this.y_coor += 1;
-				this.x_coor -= 3;
-				break;
-			default:
-				break;
-		}
-		
-		robotimage.setX(getX());
-		robotimage.setY(getY());
-	}
-	
-	public void reverse() {
-		switch(orientation){
-			case N:
-				this.y_coor += 1;
-				break;
-			case S:
-				this.y_coor -= 1;
-				break;
-			case E:
-				this.x_coor -= 1;
-				break;
-			case W:
-				this.x_coor += 1;
-				break;
-			case NE1:
-				this.y_coor += 1;
-				this.x_coor -= 1;
-				break;
-			case NE2:
-				this.y_coor += 1;
-				this.x_coor -= 2;
-				break;
-			case NE3:
-				this.y_coor += 1;
-				this.x_coor -= 3;
-				break;
-			case SE1:
-				this.y_coor -= 1;
-				this.x_coor -= 1;
-				break;
-			case SE2:
-				this.y_coor -= 1;
-				this.x_coor -= 2;
-				break;
-			case SE3:
-				this.y_coor -= 1;
-				this.x_coor -= 3;
-				break;
-			case NW1:
-				this.y_coor += 1;
-				this.x_coor += 1;
-				break;
-			case NW2:
-				this.y_coor += 1;
-				this.x_coor += 2;
-				break;
-			case NW3:
-				this.y_coor += 1;
-				this.x_coor += 3;
-				break;
-			case SW1:
-				this.y_coor -= 1;
-				this.x_coor += 1;
-				break;
-			case SW2:
-				this.y_coor -= 1;
-				this.x_coor += 2;
-				break;
-			case SW3:
-				this.y_coor -= 1;
-				this.x_coor += 3;
-				break;
-			default:
-				break;
-		}
-		
-		robotimage.setX(getX());
-		robotimage.setY(getY());
-	}
-
-	void senseFront() {
-		
-	}
-	
-	void senseLeft() {
-			
-	}
-	
-	void senseRight() {
-		
-	}*/
+    public abstract void reverseRight();
+    
+    public abstract void moveForward(); 
+    
+    public abstract void reverseBackward();
 }

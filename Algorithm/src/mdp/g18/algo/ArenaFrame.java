@@ -6,34 +6,53 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import java.awt.event.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ArenaFrame extends JPanel implements ActionListener{
 
 	// list of obstacles
 	public List<Obstacle> obstacleObjects = new ArrayList<Obstacle>();
+	public List<Obstacle> obstacleSimulator = new ArrayList<Obstacle>();
+	public List<Obstacle> obstacleCompleted = new ArrayList<Obstacle>();
+	public List<Path> pathList = new ArrayList<Path>();
+	public List<Path> pathComplete = new ArrayList<Path>();
+	public List<Instruction> instructionCompleted = new ArrayList<Instruction>();
+	public List<Node> nodes;
 	
 	// get mouse coordinates 
 	public int mx = -100;
 	public int my = -100;
+	private double planDistance = 0;
 	
 	// Check for button pressed
 	public boolean addObstacles = false;
 	public boolean setImage = true;
 	public boolean selectImage = false;
 	public boolean clearObstacles = false;
-	
 	public boolean running = false;
+	public boolean start = false;
+	
+	private Obstacle currentObstacle;
+	private Path currentPath;
+	private Instruction currentInstruction;
+	private int sizeOfPath;
+	private int iteration = 0;
 	
 	Direction mouseDir = Direction.UNSET;
 	
 	Move move;
 	Click click;
-	Robot robot;
+	RealRobot robot;
+	SimulatorRobot simrobot;
 	Obstacle obstacle;
 	Arena arena;
+	Astar astar;
+	Simulate simulator;
 	Timer timer;
+	Timer timer2;
 	
 	PathFinder pathfinder;
 	
@@ -41,7 +60,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	
 	ArenaFrame(){
 		this.setPreferredSize(new Dimension(Arena.ARENA_WIDTH,Arena.ARENA_HEIGHT));
-		
+
 		move = new Move();
 		this.addMouseMotionListener(move);
 		
@@ -49,7 +68,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		this.addMouseListener(click);
 		
 		arena = new Arena();
-		robot = new Robot(95,-105,0);
+		robot = new RealRobot(100,-16,0);
 		
 		// Initialize no obstacles
 		for(int i = 0; i < Arena.GRIDNO; i++) {
@@ -64,8 +83,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		
 		arena.paintArena(g);
 		robot.drawRobot(g);
-		
-		pathfinder = new PathFinder(robot,new Obstacle(getmaxID() + 1, 200, -100, Direction.SOUTH)); // input robot and obstacle object
 		
 		if (addObstacles) {
 			obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
@@ -87,7 +104,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 					obstacle.selectImage(g, true, mouseDir);
 				}
 				else {
-					// Paint image location in correct colour and set direction of image
+					// Paint image location in correct color and set direction of image
 					obstacle.selectImage(g, false, mouseDir);
 								// Allow image selection on next obstacle
 					setImage = true;
@@ -101,91 +118,23 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			}
 		}
 		
-		// Start
-		if(running) {
-			timer = new Timer(100,this);
-			timer.start();
-			/*pathfinder.CC();
-			//if (robot.checkBoundaries()) {
-				//robot.tick();
-			//}
-			try {
-				//checkObstacle(robot.getOrientation());
-				//checkCollisions();
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			repaint();*/
-		}
-	}
-	
-	// Check hit obstacle
-	public void checkObstacle(RobotOrientation orientation) {
-		switch (orientation) {
-		case N:
-			for(int i = -10; i <= 40; i++) {
-				for(int j = 0; j <= 20; j++) {
-					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (robot.getSensorY() + j > -(Arena.GRIDNO - robot.getRobotSize())) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j] != 0)) {
-						for( Obstacle obstacle: obstacleObjects) {
-							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() - 20 + j]) {
-								System.out.println(obstacle.getDirection());
-							}
-						}
-						running = false;
-					}
-				}
-			}
-			break;
-		case S:
-			for(int i = -40; i <= 10; i++) {
-				for(int j = 0; j <= 20; j++) {
-					if ((robot.getSensorX() + i >= 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (robot.getSensorY() + j < -robot.getRobotSize()) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
-						for( Obstacle obstacle: obstacleObjects) {
-							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
-								System.out.println(obstacle.getDirection());
-							}
-						}
-						running = false;
-					}
-				}
-			}
-			break;
-		case E:
-			for(int i = 0; i <= 20; i++) {
-				for(int j = -10; j <= 40; j++) {
-					if ((robot.getSensorY() + j >= -Arena.GRIDNO) && (robot.getSensorY() + j < 0) && (robot.getSensorX() + i < Arena.GRIDNO - robot.getRobotSize()) && (obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
-						for( Obstacle obstacle: obstacleObjects) {
-							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() + i][Arena.GRIDNO + robot.getSensorY() + j]) {
-								System.out.println(obstacle.getDirection());
-							}
-						}
-						running = false;
-					}
-				}
-			}
-			break;
-		case W:
-			for(int i = 0; i <= 20; i++) {
-				for(int j = -40; j <= 10; j++) {
-					if ((robot.getSensorY() + j >= -Arena.GRIDNO) && (robot.getSensorY() + j < 0)  && (robot.getSensorX() + i > robot.getRobotSize()) && (obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() + j] != 0)) {
-						for( Obstacle obstacle: obstacleObjects) {
-							if (obstacle.getObstacleID() == obstacles[robot.getSensorX() - 20 + i][Arena.GRIDNO + robot.getSensorY() +  j]) {
-								System.out.println(obstacle.getDirection());
-							}
-						}
-						running = false;
-					}
-				}
-			}
-			break;
-		default:
-			break;
+		if (pathfinder != null) {
+			pathfinder.paintPath(g);
 		}
 		
-		if (!running) {
-			Thread.yield();
+		// Simulation
+		if(running) {
+			timer = new Timer(500,this);
+			timer.start();
+		}
+		
+		if(start) {
+			timer2 = new Timer(500,this);
+			timer2.start();
+			
+			//if (obstacleCompleted.size() == obstacleSimulator.size()) {
+			//	start = false;
+			//}
 		}
 	}
 
@@ -200,9 +149,9 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		public void mouseMoved(MouseEvent e) {
 			mx = e.getX();
 			my = e.getY();
-			ControlFrame.xLabel.setText("X Coordinate : " + String.valueOf(coordinateX()));
+			LabelFrame.xLabel.setText("X Coordinate : " + String.valueOf(coordinateX()));
 			//ControlFrame.yLabel.setText("Y Coordinate : " + String.valueOf(coordinateY()));
-			ControlFrame.yLabel.setText("Y Coordinate : " + String.valueOf(Arena.GRIDNO - coordinateY() - 1));
+			LabelFrame.yLabel.setText("Y Coordinate : " + String.valueOf(Arena.GRIDNO - coordinateY() - 1));
 			//System.out.println(obstacles[coordinateX()][coordinateY()]);
 			repaint();
 		}
@@ -230,8 +179,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 				obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
 				addObstacle();
 				obstacleObjects.add(obstacle);
-				//System.out.print(obstacle.getX());
-				//System.out.print(obstacle.getY());
 				repaint();
 			}
 			
@@ -281,16 +228,215 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (running) {
-			move();
+
+			findBestPath();
+		}
+		
+		if (start) {
+			
+			//move();
+			perform();
 		}
 	    repaint();
 	}
 	
-	public void move() {
-		if (robot.checkBoundaries()) {
-			robot.canReachStraight(new int[] {100,-10});
+	public void perform() {
+		if (!this.robot.checkBoundaries()) {
+			this.robot.turnLeft();
+			System.out.println(round(this.robot.getAngle()));
+			//System.out.println(round(this.robot.getRobotCenter().getX()));
+    		//System.out.println(round(this.robot.getRobotCenter().getY()));
 		}
 	}
+	
+	public void performMovement(String movement, double[] target) {
+		//System.out.println(movement);
+		double tickNew = this.robot.getTick();
+		switch(movement){
+			case "S":
+				if (!this.robot.checkBoundaries()) {
+					this.robot.moveForward();
+				}
+				break;
+			case "R":
+				if (this.robot.turningRadius == null) {
+					this.robot.createCircleRight(new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()}, "Forward");
+				}
+				if (!this.robot.checkBoundaries()) {
+					this.robot.turnRight();
+				}
+				this.robot.turningRadius = null;
+				break;
+			case "L":
+				if (this.robot.turningRadius == null) {
+					this.robot.createCircleLeft(new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()}, "Forward");
+				}
+				if (!this.robot.checkBoundaries()) {
+					this.robot.turnLeft();
+				}
+				this.robot.turningRadius = null;
+				break;
+			default:
+				break;
+		}
+		//System.out.println(round(this.robot.getRobotCenter().getX()));
+		//System.out.println(round(this.robot.getRobotCenter().getY()));
+		//System.out.println(round(target[0]));
+		//System.out.println(round(target[1]));
+		//System.out.println(this.currentInstruction.getTurnDirection());
+		// scan obstacle or reach target
+		if (Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()), round(this.robot.getRobotCenter().getY())},new double[] {round(target[0]),round(target[1])})) {
+			this.iteration++;
+			instructionCompleted.add(this.currentInstruction);
+			this.currentInstruction = null;
+		}
+	}
+
+	public void move() {
+		
+		// if no obstacle -> get obstacle
+		if (this.currentObstacle == null)
+			getTargetObstacle();
+		
+		// if no path -> get path
+		if (this.currentPath == null) {
+			getNewPath();
+		}
+		
+		// if no instruction -> get instruction
+		if (this.currentInstruction == null) {
+			getCurrentInstruction();
+		}
+		
+		if (this.currentPath != null) {
+			this.sizeOfPath = this.currentPath.getInstructions().size();  // get size of instructions
+		}
+
+		if (this.currentInstruction != null || this.currentObstacle != null) {
+			if (this.sizeOfPath == 1) {
+				performMovement(this.currentInstruction.getTurnDirection(),new double[] {this.currentObstacle.getImageCenter().getX(),this.currentObstacle.getImageCenter().getY()});
+			}
+			// two instructions
+			else if (this.sizeOfPath == 2) {
+				if (iteration == 0) {
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentPath.getPt1());
+				} 
+				else {
+					performMovement(this.currentInstruction.getTurnDirection(),new double[] {this.currentObstacle.getImageCenter().getX(),this.currentObstacle.getImageCenter().getY()});
+				}
+			} 
+			// three instructions
+			else {
+				if (iteration == 0) {
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentPath.getPt1());
+				} 
+				else if (iteration == 1) {
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentPath.getPt2());
+				} 
+				else {
+					performMovement(this.currentInstruction.getTurnDirection(),new double[] {this.currentObstacle.getImageCenter().getX(),this.currentObstacle.getImageCenter().getY()});
+				}
+			}
+		}
+		
+		// reach obstacle
+		if (this.robot.sensor.scanObstacle(new double[] {this.currentObstacle.getObstacleCenter().getX(),this.currentObstacle.getObstacleCenter().getY()})) {
+			obstacleCompleted.add(this.currentObstacle); 
+			pathComplete.add(this.currentPath);
+			this.currentObstacle = null;
+			this.currentPath = null;
+			this.currentInstruction = null;
+			this.instructionCompleted.clear();
+			this.iteration = 0;
+		}
+	}
+	
+	public void getNewPath() {
+		
+		for(Path path: this.pathList) {
+			if (!this.pathComplete.contains(path) && this.currentPath == null) {
+				this.currentPath = path;
+			}
+		}
+	}
+	
+	public void getCurrentInstruction() {
+		
+		for(Instruction instruction: this.currentPath.getInstructions()) {
+			if (!this.instructionCompleted.contains(instruction) && this.currentInstruction == null) {
+				this.currentInstruction = instruction;
+			}
+		}
+	}
+
+	public void getTargetObstacle() {
+		
+		for(Obstacle obstacle: this.obstacleSimulator) {
+			if (!this.obstacleCompleted.contains(obstacle) && this.currentObstacle == null) {
+				this.currentObstacle  = obstacle;
+			}
+		}
+	}
+	
+	// from astar get node
+	public void getClosestObstacle() {
+		
+		for(Obstacle obstacle: this.obstacleObjects) {
+			if (!this.obstacleSimulator.contains(obstacle) && this.currentObstacle == null) {
+				this.currentObstacle  = obstacle;
+			}
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private Obstacle getObstacle(Node node) {
+		 for (Obstacle obstacle : obstacleObjects) {
+			 if (obstacle.getObstacleID() == node.getObstacleID()) {
+				 return obstacle;
+			 }
+		 }
+		 return null;
+	 }
+	
+	public void findBestPath() {
+		
+		if (this.currentObstacle == null)
+			getClosestObstacle();
+			
+		if (this.pathfinder == null) {
+			this.simrobot = new SimulatorRobot(25,-16,0); // create simulator robot --> no visualization
+			this.pathfinder = new PathFinder(ArenaFrame.obstacles); // input robot and nearest obstacle object
+		}
+		
+		if(this.simrobot != null && this.currentObstacle != null) {
+			// Set robot and obstacle
+			this.pathfinder.setRobot(this.simrobot);
+			this.pathfinder.setObstacle(this.currentObstacle);
+	
+			Path bestPath = this.pathfinder.bestPath(); // found best path
+			pathList.add(bestPath);
+				
+			this.planDistance += bestPath.getDist();
+			LabelFrame.distLabel.setText(String.format("Planned Distance : %.2f",this.planDistance));
+		
+			if (bestPath != null) {
+				obstacleSimulator.add(this.currentObstacle); // remove from obstacle
+				this.currentObstacle = null;
+				/*System.out.println(bestPath.getDist());
+				for (Instruction instruction: bestPath.getInstructions()) {
+					System.out.println(instruction.getTurnDirection());
+				}*/
+			}
+			
+			if (obstacleSimulator.size() == obstacleObjects.size()) {
+				running = false;
+			}
+		}
+	}
+	
+	private static int round(double val) {
+        return (int) Math.round(val);
+    }
 	
 	// Add obstacle to array
 	public void addObstacle() {

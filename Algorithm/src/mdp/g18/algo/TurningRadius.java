@@ -4,8 +4,6 @@ import java.awt.geom.Point2D;
 
 public class TurningRadius {
 	
-	private static final double DEG_TO_RAD = Math.PI / 180;
-	
 	private Point2D.Double center;
     private static int radius = 25;
 

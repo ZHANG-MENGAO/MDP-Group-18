@@ -6,7 +6,8 @@ import java.awt.geom.Point2D;
 
 public class Obstacle {
 	
-	private Point2D.Double center = new Point2D.Double();
+	private Point2D.Double center = new Point2D.Double(); // center of obstacle
+	private Point2D.Double imageCenter = new Point2D.Double(); // center of image on obstacle
     private static final double DEG_TO_RAD = Math.PI / 180;
     public TurningRadius turningRadius;
 
@@ -27,12 +28,12 @@ public class Obstacle {
 		this.yCoordinate = yCoordinate;
 		this.direction = direction;
 		this.virtualx = xCoordinate + 15;
-		this.virtualy = yCoordinate - 15;
+		this.virtualy = yCoordinate + 15;
 		
-		this.center.setLocation(this.xCoordinate - 5, this.yCoordinate - 5);
+		this.center.setLocation(this.xCoordinate - 5, -(200 - this.yCoordinate + 4));
 	}
 	
-	public void createCircleLeft(int[] coordinates) {
+	public void createCircleLeft(double[] coordinates) {
     	
 		int angle = 0;
 		
@@ -55,7 +56,7 @@ public class Obstacle {
     	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
 	}
     
-    public void createCircleRight(int[] coordinates) {
+    public void createCircleRight(double[] coordinates) {
     	int angle = 0;
 		
 		switch(getDirection()) {
@@ -76,6 +77,26 @@ public class Obstacle {
     	double y = coordinates[1] + TurningRadius.getRadius() * Math.sin(angle * DEG_TO_RAD);
     	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
 	}
+    
+    public void setImageCenter(Direction dir) {
+    	
+    	switch(dir) {
+		case NORTH:
+			this.imageCenter.setLocation(this.center.getX(), this.center.getY() - 20);
+			break;
+		case EAST:
+			this.imageCenter.setLocation(this.center.getX() + 20, this.center.getY());
+			break;
+		case WEST:
+			this.imageCenter.setLocation(this.center.getX() - 20, this.center.getY());
+			break;
+		case SOUTH:
+			this.imageCenter.setLocation(this.center.getX(), this.center.getY() + 20);
+			break;
+		default:
+			break;
+		}
+	}
 	
 	public void setObstacleID(int id) {
 		this.obstacleID = id;
@@ -95,6 +116,10 @@ public class Obstacle {
 	
 	public Point2D.Double getObstacleCenter() {
 		return this.center;
+	}
+	
+	public Point2D.Double getImageCenter() {
+		return this.imageCenter;
 	}
 	
 	private void setDirection(Direction dir) {
@@ -131,13 +156,13 @@ public class Obstacle {
 		}
 		
 		for (int i = -VIRTUAL_LENGTH; i <= 0; i +=2) {
-			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
-			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - LENGTH + VIRTUAL_LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, virtualy * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - VIRTUAL_LENGTH) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 				
-		for (int j = 0; j <= VIRTUAL_LENGTH; j += 2) {
-			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
-			g.fillRect((virtualx - VIRTUAL_LENGTH) * Arena.UNIT_SIZE, (virtualy - LENGTH + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		for (int j = -VIRTUAL_LENGTH; j <= 0; j += 2) {
+			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+			g.fillRect((virtualx - VIRTUAL_LENGTH) * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 	}
 	
@@ -149,6 +174,7 @@ public class Obstacle {
 		else {
 			g.setColor(Color.magenta);
 			setDirection(dir);
+			setImageCenter(dir);
 		}
 
 		switch (dir) {
