@@ -1,319 +1,387 @@
 package mdp.g18.algo;
 
-// import java.awt.geom.Point2D;
-// import java.util.ArrayList;
-// import java.util.Collections;
-// import java.util.List;
-
-// public class PathFinder {
-//	 public List<Obstacle> obstacleObjects;
-//	 Arena arena;
-//	 Robot robot;
-//
-//	 public static final int turnRad = 25;
-//
-//	 PathFinder(List<Obstacle> obstacles, Arena arena, Robot robot) {
-//		 this.obstacleObjects = obstacles;
-//		 this.arena = arena;
-//		 this.robot = robot;
-//	 }
-//
-//	 Astar Astar = new Astar(obstacleObjects, arena, robot);
-//
-//	 public void findBestPath() {
-//		 // run A* to get next goal node
-//		 List<Node> nodes = Astar.createNodes();
-//		 int[] robotCurrCoord = nodes.get(0).getCoord();
-//		 Node nextNode = Astar.runAStar(nodes.get(0), nodes.get(nodes.size() - 1));
-//		 int[] nextCoord = nextNode.getCoord();
-//		 Direction nextImgDir = getImgDir(nextNode);
-//
-//		 // If image is in front of robot, move robot forward
-//		 if (isGoalAcrossRobot(robot, nextCoord, nextImgDir)) {
-//			 // TODO: check if need to add loop for moveForward
-//			 robot.moveForward();
-//		 }
-//
-//		 // If image is too close to an obstacle, reverse
-//		 if (ArenaFrame.obstacles[robotCurrCoord[0]][robotCurrCoord[1]] != 0) {
-//			 robot.reverse();
-//		 }
-//
-//		 // Get best path
-//		 Path bestPath = calculatePath(nodes.get(0), nextNode);
-//
-//		 // TODO: how to execute path???
-//
-//	 }
-//
-//	 public Path calculatePath(Node currNode, Node nextNode) {
-//		 int[] currCoord = currNode.getCoord();
-//		 int[] nextCoord = nextNode.getCoord();
-//
-//		 Direction imageDir = getImgDir(nextNode);
-//
-//		 boolean left = true;
-//		 // TODO: initialise path array
-//		 List<Path> pathArray = new ArrayList<Path>();
-//
-//		 while (true) {
-//			 int[] p1 = getP1(robot, left);
-//			 int[] p2 = getP2(nextCoord, imageDir, left);
-//			 Path path = new Path();
-//
-//			 // Find every possible path and add it to path array
-//			 if (left) {
-//				 left = false;
-//				 /*
-//				  * TODO: get all paths possible (starting with left turn?)
-//				  * Main problem: how to loop through all possible paths as each path has a
-//				  * different configuration (i.e. no. and direction of turns, whether there
-//				  * is a straight line in the path)
-//				  */
-//				 double l = Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2));
-//				 double[] v1 = new double[]{p2[0] - p1[0], p2[1] - p1[1]};
-//				 double[] v2 = rotatePt(v1, Math.PI / 2);
-//				 path.setPt1(new double[]{p1[0] + (turnRad / l) * v2[0], p1[1] + (turnRad / l) * v2[1]});
-//				 path.setPt2(new double[]{path.getPt1()[0] + v1[0], path.getPt1()[1] + v1[1]});
-//
-//				 // Add path to path array if it is valid
-//				 if (isValidPath(currCoord, path)) {
-//					 pathArray.add(path);
-//				 }
-//
-//
-//			 } else {
-//				 // Get all paths possible starting with right turn
-//				 break;
-//			 }
-//		 }
-//		 // Return shortest path by distance
-//		 return Collections.min(pathArray);
-//	 }
-//
-//	 // Rotate a set of coordinates by angle
-//	 private double[] rotatePt(double[] coord, double angle) {
-//		 double[] rotatedPt = new double[]{0, 0};
-//		 if (angle == Math.PI / 2) {
-//			 rotatedPt = new double[]{coord[1], -coord[0]};
-//		 } else if (angle == -Math.PI / 2) {
-//			 rotatedPt = new double[]{-coord[1], coord[0]};
-//		 } else if (angle == Math.PI) {
-//			 rotatedPt = new double[]{-coord[0], -coord[1]};
-//		 } else {
-//			 rotatedPt = new double[]{coord[0] * Math.cos(angle) - coord[1] * Math.sin(angle), coord[0] * Math.sin(angle) + coord[1] * Math.cos(angle)};
-//		 }
-//		 return rotatedPt;
-//	 }
-//
-//	 private int[] getP1(Robot robot, boolean left) {
-//		 Point2D.DOuble robotCoord = robot.getRobotCenter();
-//		 int[] p1 = new int[2];
-//		 switch (robot.getOrientaion()) {
-//			 case N -> {
-//				 if (left) {
-//					 p1[0] = robotCoord[0] - turnRad;
-//				 } else {
-//					 p1[0] = robotCoord[0] + turnRad;
-//				 }
-//				 p1[1] = robotCoord[1];
-//			 }
-//			 case S -> {
-//				 if (left) {
-//					 p1[0] = robotCoord[0] + turnRad;
-//				 } else {
-//					 p1[0] = robotCoord[0] - turnRad;
-//				 }
-//				 p1[1] = robotCoord[1];
-//			 }
-//			 // TODO: check if y-coordinates are correct for case E and W
-//			 case E -> {
-//				 p1[0] = robotCoord[0];
-//				 if (left) {
-//					 p1[1] = robotCoord[1] + turnRad;
-//				 } else {
-//					 p1[1] = robotCoord[1] - turnRad;
-//				 }
-//			 }
-//			 case W -> {
-//				 p1[0] = robotCoord[0];
-//				 if (left) {
-//					 p1[1] = robotCoord[1] - turnRad;
-//				 } else {
-//					 p1[1] = robotCoord[1] + turnRad;
-//				 }
-//			 }
-//		 }
-//		 return p1;
-//	 }
-//
-//	 //TODO: check if coordinates are correct (!!! goal coordinate != obstacle coordinate)
-//	 private int[] getP2(int[] goalCoord, Direction imageDir, boolean left) {
-//		 int[] p2 = new int[2];
-//
-//		 switch (imageDir) {
-//			 case NORTH -> {
-//				 if (left) {
-//					 p2[0] = goalCoord[0] - turnRad;
-//				 } else {
-//					 p2[0] = goalCoord[0] + turnRad;
-//				 }
-//				 p2[1] = goalCoord[1];
-//			 }
-//			 case SOUTH -> {
-//				 if (left) {
-//					 p2[0] = goalCoord[0] + turnRad;
-//				 } else {
-//					 p2[0] = goalCoord[0] - turnRad;
-//				 }
-//				 p2[1] = goalCoord[1];
-//			 }
-//			 // TODO: check if y-coordinates are correct for case EAST and WEST
-//			 case EAST -> {
-//				 p2[0] = goalCoord[0];
-//				 if (left) {
-//					 p2[1] = goalCoord[1] + turnRad;
-//				 } else {
-//					 p2[1] = goalCoord[1] - turnRad;
-//				 }
-//			 }
-//			 case WEST -> {
-//				 p2[0] = goalCoord[0];
-//				 if (left) {
-//					 p2[1] = goalCoord[1] - turnRad;
-//				 } else {
-//					 p2[1] = goalCoord[1] + turnRad;
-//				 }
-//			 }
-//			 default -> System.out.println("Image direction unset.");
-//		 }
-//		 return p2;
-//	 }
-//
-//
-//
-// }
-
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class PathFinder {
-
-	public Robot robot;
-	public Arena arena;
-	public List<Obstacle> obstacleObjects;
+	
+	private static final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
+	private static List<String> bothDirection = Arrays.asList("R","L");
+	ArrayList<Path> pathList = new ArrayList<>();
+	ArrayList<Data> pathCoordinates = new ArrayList<Data>();
+	
+	public SimulatorRobot robot;
+	public Obstacle obstacle;
 	public TurningRadius turningRadius;
-	private Obstacle obs;
-
-	private static List<String> bothDirection = Arrays.asList("right","left");
-	private static List<String> movement = Arrays.asList("front","reverse");
-
-	private int[] obstacleCenter = new int[2];
-	private int[] robotCenter = new int[2];
-
-	PathFinder(Robot robot, List<Obstacle> obstacle) {
-		this.robot = robot;
-		this.obstacleObjects = obstacle;
-		setRobotCenter();
+	public Path path;
+	public Path bestPath;
+	public Simulate simulator;
+	
+	private double[] obstacleImageCenter = new double[2];
+	private double[] robotCenter = new double[2];
+	private int[][] obstacleCoordinates;
+	
+	PathFinder(int[][] obstacleCoordinates){
+		this.obstacleCoordinates = obstacleCoordinates;
 	}
+	
+	public Path bestPath() {
+		ArrayList <Path> possiblePaths = possiblePaths();
+		simulator = new Simulate(this.robot,possiblePaths,this.obstacle,this.obstacleCoordinates);
+		
+		bestPath = simulator.simulateMove();
+		pathCoordinates.addAll(simulator.getPathCoordinates());
+		
+		return bestPath;
+	}
+	
+	public ArrayList<Path> possiblePaths() {
+		listOfPath();
+		// sort path by distance
+		Collections.sort(pathList);
+		
+		return pathList;
+	}
+	
+	public void paintPath(Graphics g) {
+		g.setColor(Color.red);
+		for(Data path: pathCoordinates) {
+			g.fillRect((path.getElement(0)) * Arena.UNIT_SIZE, (200 + path.getElement(1)) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		}
+	}
+	
+	public void listOfPath(){
+		Method[] methods = this.getClass().getMethods(); // get all methods
 
+		for( int index =0; index < methods.length; index++){
+			// find those that have find in method name
+			if( methods[index].getName().contains("find")){ 
+				try {
+					// execute method
+					methods[index].invoke(this);
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) { 
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/*
+	// S shortest path finding
+	public void findS() {
+		
+		if (this.robot.checkObstacleFront(this.obstacle)) {
+			
+			Instruction instruction;
+			
+			path = new Path();
 
-	 public void findBestPath() {
-		 // run A* to get next goal node
-		 Astar Astar = new Astar(obstacleObjects, arena, robot);
-		 List<Node> nodes = Astar.createNodes();
-		 int[] robotCurrCoord = nodes.get(0).getCoord();
-		 Node nextNode = Astar.runAStar(nodes.get(0), nodes.get(nodes.size() - 1));
-		 for (Obstacle obstacle : obstacleObjects) {
-			 if (obstacle.getObstacleID() == nextNode.getObstacleID()) {
-				 obs = obstacle;
-				 break;
-			 }
-		 }
-		 setObstacleCenter();
-
-		 int[] nextCoord = nextNode.getCoord();
-		 Direction nextImgDir = getImgDir(nextNode);
-
-		 // If image is in front of robot, move robot forward
-		 if (isGoalAcrossRobot(robot, nextCoord, nextImgDir)) {
-			 robot.moveForward();
-		 }
-
-		 // If image is too close to an obstacle, reverse
-		 if (ArenaFrame.obstacles[robotCurrCoord[0]][robotCurrCoord[1]] != 0) {
-			 robot.reverseBackward();
-		 }
-
-		 // Get best path
-//		 Path bestPath = calculatePath(nodes.get(0), nextNode);
-
-		 // TODO: how to execute path???
-	 }
-
-	 // TODO: redo method, do a simulation to determine if path is valid
-	 public boolean isValidPath(int[] robotCoord, Path path) {
-		 if (robotCoord == null) return false;
-
-		 int x = robotCoord[0];
-		 int y = robotCoord[1];
-		 int[][] robotPos = {
-				 {x - 1, y + 1}, {x, y + 1}, {x + 1, y + 1},
-				 {x - 1, y}, {x, y}, {x + 1, y},
-				 {x - 1, y - 1}, {x, y - 1}, {x + 1, y - 1},
-				 {(int) path.pt1[0], (int) path.pt1[1]}, {(int) path.pt2[0], (int) path.pt2[1]}
-		 };
-
-		 if ((0 < x) && (x < Arena.ARENA_WIDTH - 1) && (0 < y) && (y < Arena.ARENA_HEIGHT - 1)) {
-			 for (int[] coordinate : robotPos) {
-				 if (ArenaFrame.obstacles[coordinate[0]][coordinate[1]] != 0) return false;
-			 }
-		 }
-
-		 return true;
-	 }
-
-	// LSL & RSR shortest path finding
-	public void CSCsameC () {
-		int[] pt1 = new int[2];
-		int[] pt2 = new int[2];
-		int[] v1 = new int[2];
-		int[] v2 = new int[2];
-		int[] p1 = new int[2];
-		int[] p2 = new int[2];
-
-		double robotArc;
-		double obstacleArc;
-		double new_distance = 0;
-		String path = "";
-		String bestDir = "";
-		double distance = Double.POSITIVE_INFINITY;
-
+			double d = straightDistance(this.robotCenter, this.obstacleImageCenter);
+			
+			instruction = new Instruction(this.robot.getAngle() * DEG_TO_RAD,d,"S");
+			path.addInstructions(instruction);
+			path.setDist(d);
+			this.pathList.add(path);
+		}
+	}
+	
+	// R & L shortest path finding
+	public void findC () {
+		double[] p1 = new double[2];
+		double[] p2 = new double[2];
+					
+		double[] robotArc = new double[2];
+		
+		Instruction instruction;
+					
 		for (String direction: bothDirection) {
-			if (direction == "right") {
+			
+			double distance = 0;
+			
+			path = new Path();
+			
+			if (direction == "R") {
 				this.robot.createCircleRight(robotCenter,"front");
-				this.obs.createCircleRight(obstacleCenter);
-				path = "RSR";
+				this.obstacle.createCircleRight(obstacleImageCenter);
 			} else {
 				this.robot.createCircleLeft(robotCenter,"front");
-				this.obs.createCircleLeft(obstacleCenter);
-				path = "LSL";
+				this.obstacle.createCircleLeft(obstacleImageCenter);
+			}
+						
+			p1[0] = this.robot.turningRadius.getCenter().getX();
+			p1[1] = this.robot.turningRadius.getCenter().getY();
+						
+			p2[0] = this.obstacle.turningRadius.getCenter().getX();
+			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+				
+			//robot can reach obstacle by turning
+			if (this.robot.canReachTurn(p2)) {
+				
+				robotArc = computeArcLength(robotCenter,p1,obstacleImageCenter,direction);
+				distance = robotArc[1];
+				
+				instruction = new Instruction(robotArc[0],distance,direction);
+
+				path.addInstructions(instruction);
+				path.setDist(distance);
+				this.pathList.add(path);
+			}
+		}
+	}
+	
+	
+	// SL & SR shortest path finding
+	public void findSC () {
+		double p2[] = new double[2];
+		double pt1[] = new double[2];
+		
+		double[] obstacleArc = new double[2];
+		
+		Instruction instruction1;
+		Instruction instruction2;
+				
+		for (String direction: bothDirection) {
+			
+			double distance = 0;
+			
+			path = new Path();
+			
+			if (direction == "R") {
+				this.obstacle.createCircleRight(obstacleImageCenter);
+			} else {
+				this.obstacle.createCircleLeft(obstacleImageCenter);
+			}
+			
+			p2[0] = this.obstacle.turningRadius.getCenter().getX();
+			p2[1] = this.obstacle.turningRadius.getCenter().getY(); 
+				
+			if (direction == "R") {
+				if (this.robot.getAngle() == 0) {
+					pt1 = new double[] {p2[0] - 25, p2[1]};
+				} else if (this.robot.getAngle() == 180) {
+					pt1 = new double[] {p2[0] + 25, p2[1]};
+				} else if (this.robot.getAngle() == -90) {
+					pt1 = new double[] {p2[0], p2[1] + 25};
+				} else if (this.robot.getAngle() == 90) {
+					pt1 = new double[] {p2[0], p2[1] - 25};
+				}
+			}
+			else {
+				if (this.robot.getAngle() == 0) {
+					pt1 = new double[] {p2[0] + 25, p2[1]};
+				} else if (this.robot.getAngle() == 180) {
+					pt1 = new double[] {p2[0] - 25, p2[1]};
+				} else if (this.robot.getAngle() == -90) {
+					pt1 = new double[] {p2[0], p2[1] - 25};
+				} else if (this.robot.getAngle() == 90) {
+					pt1 = new double[] {p2[0], p2[1] + 25};
+				}
 			}
 
-			p1[0] = (int) this.robot.turningRadius.getCenter().getX();
-			p1[1] = (int) this.robot.turningRadius.getCenter().getY();
+			 // Check if robot center can reach pt1
+			if (this.robot.canReachStraightPoint(pt1)) {
+				
+				double d = straightDistance(this.robotCenter, pt1);
+				obstacleArc = computeArcLength(pt1, p2, obstacleImageCenter, direction);
+				distance = d + obstacleArc[1];
+				
+				instruction1 = new Instruction(this.robot.getAngle() * DEG_TO_RAD,d,"S");
+				instruction2 = new Instruction(obstacleArc[0],obstacleArc[1],direction);
+					
+				path.addInstructions(instruction1);
+				path.addInstructions(instruction2);
+				path.setDist(distance);
+				path.setPt1(pt1);
+				this.pathList.add(path);
+			}
+		}
+	}
+	
+	
+	// RS & LS shortest path finding
+	public void findCS () {
+		double p1[] = new double[2];
+		double pt1[] = new double[2];
+		
+		double[] robotArc = new double[2];
+		
+		Instruction instruction1;
+		Instruction instruction2;
+				
+		for (String direction: bothDirection) {
+			
+			double distance = Double.POSITIVE_INFINITY;
+			
+			path = new Path();
+			
+			if (direction == "R") {
+				this.robot.createCircleRight(robotCenter,"front");
+			} else {
+				this.robot.createCircleLeft(robotCenter,"front");
+			}
+			
+			p1[0] = this.robot.turningRadius.getCenter().getX();
+			p1[1] = this.robot.turningRadius.getCenter().getY(); 
+				
+			if (direction == "R") {
+				if (this.obstacle.getDirection() == Direction.SOUTH) {
+					pt1 = new double[] {p1[0] - 25, p1[1]};
+				} else if (this.obstacle.getDirection() == Direction.NORTH) {
+					pt1 = new double[] {p1[0] + 25, p1[1]};
+				} else if (this.obstacle.getDirection() == Direction.EAST) {
+					pt1 = new double[] {p1[0], p1[1] + 25};
+				} else if (this.obstacle.getDirection() == Direction.WEST) {
+					pt1 = new double[] {p1[0], p1[1] - 25};
+				}
+			}
+			else {
+				if (this.obstacle.getDirection() == Direction.SOUTH) {
+					pt1 = new double[] {p1[0] + 25, p1[1]};
+				} else if (this.obstacle.getDirection() == Direction.NORTH) {
+					pt1 = new double[] {p1[0] - 25, p1[1]};
+				} else if (this.obstacle.getDirection() == Direction.EAST) {
+					pt1 = new double[] {p1[0], p1[1] - 25};
+				} else if (this.obstacle.getDirection() == Direction.WEST) {
+					pt1 = new double[] {p1[0], p1[1] + 25};
+				}
+			}
 
-			p2[0] = (int) this.obs.turningRadius.getCenter().getX();
-			p2[1] = (int) this.obs.turningRadius.getCenter().getY();
-
+			robotArc = computeArcLength(robotCenter, p1, pt1, direction);
+			double d = straightDistance(pt1, obstacleImageCenter);
+			distance = robotArc[1] + d;
+				
+			instruction1 = new Instruction(robotArc[0],robotArc[1],direction);
+			instruction2 = new Instruction(robotArc[0],d,"S");
+			
+			//System.out.println(robotArc[0]);
+					
+			path.addInstructions(instruction1);
+			path.addInstructions(instruction2);
+			path.setDist(distance);
+			path.setPt1(pt1);
+			this.pathList.add(path);
+		}
+	}
+	
+	
+	// RL & LR shortest path finding
+	public void findCC () {
+		double[] p1 = new double[2];
+		double[] p2 = new double[2];
+		double[] pt1 = new double[2];
+				
+		double[] robotArc = new double[2];
+		double[] obstacleArc = new double[2];
+		
+		Instruction instruction1;
+		Instruction instruction2;
+				
+		for (String direction: bothDirection) {
+			
+			double distance = 0;
+			
+			path = new Path();
+			
+			if (direction == "R") {
+				this.robot.createCircleRight(robotCenter,"front");
+				this.obstacle.createCircleLeft(obstacleImageCenter);
+			} else {
+				this.robot.createCircleLeft(robotCenter,"front");
+				this.obstacle.createCircleRight(obstacleImageCenter);
+			}
+					
+			p1[0] = this.robot.turningRadius.getCenter().getX();
+			p1[1] = this.robot.turningRadius.getCenter().getY();
+					
+			p2[0] = this.obstacle.turningRadius.getCenter().getX();
+			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			
+			pt1 = midPoint(p1,p2);
+			double d = straightDistance(p1, p2);		
+			
+			//robot can reach obstacle
+			if (this.robot.canReachTurnTurn(d)) {
+				
+				robotArc = computeArcLength(robotCenter,p1,pt1,direction);
+				
+				if (direction == "R") {
+					obstacleArc = computeArcLength(pt1,p2,obstacleImageCenter,"L");
+					instruction2 = new Instruction(obstacleArc[0],obstacleArc[1],"L");
+				} else {
+					obstacleArc = computeArcLength(pt1,p2,obstacleImageCenter,"R");
+					instruction2 = new Instruction(obstacleArc[0],obstacleArc[1],"R");
+				}
+				
+				distance = robotArc[1] + obstacleArc[1];
+				
+				instruction1 = new Instruction(robotArc[0],robotArc[1],direction);
+					
+				path.addInstructions(instruction1);
+				path.addInstructions(instruction2);
+				path.setDist(distance);
+				path.setPt1(pt1);
+				this.pathList.add(path);
+			}
+		}
+	}*/
+	
+	
+	// LSL & RSR shortest path finding
+	public void findCSCsameC () {
+		
+		double[] pt1 = new double[2];
+		double[] pt2 = new double[2];
+		double[] v1 = new double[2];
+		double[] v2 = new double[2];
+		double[] p1 = new double[2];
+		double[] p2 = new double[2];
+		
+		// 0 for angle 1 for distance
+		double[] robotArc = new double[2];
+		double[] obstacleArc = new double[2];
+		
+		Instruction instruction1;
+		Instruction instruction2;
+		Instruction instruction3;
+		
+		for (String direction: bothDirection) {
+			
+			double distance = 0;
+			
+			path = new Path();
+			
+			if (direction == "R") {
+				this.robot.createCircleRight(robotCenter,"front");
+				this.obstacle.createCircleRight(obstacleImageCenter);
+			} else {
+				this.robot.createCircleLeft(robotCenter,"front");
+				this.obstacle.createCircleLeft(obstacleImageCenter);
+			}
+			
+			p1[0] = this.robot.turningRadius.getCenter().getX();
+			p1[1] = this.robot.turningRadius.getCenter().getY();
+				
+			p2[0] = this.obstacle.turningRadius.getCenter().getX();
+			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			
 			double l = straightDistance(p1, p2);
 
 			v1 = this.vector1(p1,p2);
-			if (direction == "right") {
+			if (direction == "R") {
 				v2 = this.vector2(v1, (Math.PI/2));
 			} else {
 				v2 = this.vector2(v1, -(Math.PI/2));
@@ -321,69 +389,75 @@ public class PathFinder {
 			pt1 = this.pt1(p1, v2, l);
 			pt2 = this.pt2(pt1, v1);
 
-			System.out.println(p1[0]);
-			System.out.println(p1[1]);
-			System.out.println(p2[0]);
-			System.out.println(p2[1]);
-
 			robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-			obstacleArc = computeArcLength(pt2,p2,obstacleCenter,direction);
-
-			new_distance = robotArc + l + obstacleArc;
-
-			if(new_distance < distance) {
-				distance = new_distance;
-				bestDir = path;
-			}
-
+			obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,direction);
+			distance = robotArc[1] + l + obstacleArc[1];
+				
+			instruction1 = new Instruction(robotArc[0],robotArc[1],direction);
+			instruction2 = new Instruction(robotArc[0],l,"S");
+			instruction3 = new Instruction(obstacleArc[0],obstacleArc[1],direction);
+			
+			//System.out.println(pt1[0]);
+			//System.out.println(pt1[1]);
+			//System.out.println(pt2[0]);
+			//System.out.println(pt2[1]);
+				
+			path.addInstructions(instruction1);
+			path.addInstructions(instruction2);
+			path.addInstructions(instruction3);
+			path.setDist(distance);
+			path.setPt1(pt1);
+			path.setPt2(pt2);
+			this.pathList.add(path);
 		}
-
-		System.out.println(distance);
-		System.out.println(bestDir);
 	}
-
+	
+	/*
 	// RSL & LSR shortest path finding
-	public void CSCdiffC () {
-		int[] pt1 = new int[2];
-		int[] pt2 = new int[2];
-		int[] v1 = new int[2];
-		int[] v2 = new int[2];
-		int[] v3 = new int[2];
-		int[] p1 = new int[2];
-		int[] p2 = new int[2];
-
-		double robotArc;
-		double obstacleArc;
-		double new_distance = 0;
+	public void findCSCdiffC () {
+		double[] pt1 = new double[2];
+		double[] pt2 = new double[2];
+		double[] v1 = new double[2];
+		double[] v2 = new double[2];
+		double[] v3 = new double[2];
+		double[] p1 = new double[2];
+		double[] p2 = new double[2];
+			
+		double[] robotArc = new double[2];
+		double[] obstacleArc = new double[2];
 		double theta = 0;
-		String path = "";
-		String bestDir = "";
-		double distance = Double.POSITIVE_INFINITY;
-
+		
+		Instruction instruction1;
+		Instruction instruction2;
+		Instruction instruction3;
+			
 		for (String direction: bothDirection) {
-			if (direction == "right") {
+			
+			double distance = 0;
+			
+			path = new Path();
+			
+			if (direction == "R") {
 				this.robot.createCircleRight(robotCenter,"front");
-				this.obs.createCircleLeft(obstacleCenter);
-				path = "RSL";
+				this.obstacle.createCircleLeft(obstacleImageCenter);
 			} else {
 				this.robot.createCircleLeft(robotCenter,"front");
-				this.obs.createCircleRight(obstacleCenter);
-				path = "LSR";
+				this.obstacle.createCircleRight(obstacleImageCenter);
 			}
-
-			p1[0] = (int) this.robot.turningRadius.getCenter().getX();
-			p1[1] = (int) this.robot.turningRadius.getCenter().getY();
-
-			p2[0] = (int) this.obs.turningRadius.getCenter().getX();
-			p2[1] = (int) this.obs.turningRadius.getCenter().getY();
-
+				
+			p1[0] = this.robot.turningRadius.getCenter().getX();
+			p1[1] = this.robot.turningRadius.getCenter().getY();
+			
+			p2[0] = this.obstacle.turningRadius.getCenter().getX();				
+			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+				
 			double d = straightDistance(p1, p2);
 			double l = straightTravel(d,2 * TurningRadius.getRadius());
 
 			theta = Math.acos(2 * TurningRadius.getRadius() / d);
 			v1 = this.vector1(p1,p2);
-
-			if (direction == "right") {
+				
+			if (direction == "R") {
 				v2 = this.vector2_version2(v1, theta);
 			} else {
 				v2 = this.vector2_version2(v1, -theta);
@@ -392,668 +466,379 @@ public class PathFinder {
 			pt1 = this.pt1(p1, v2, d);
 			v3 = this.vector3(v2);
 			pt2 = this.pt1(p2, v3, d);
-
-			if (direction == "right") {
+				
+			if (direction == "R") {
 				robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-				obstacleArc = computeArcLength(pt2,p2,obstacleCenter,"left");
+				obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,"left");
+				
+				instruction3 = new Instruction(obstacleArc[0],"L");
+				
 			} else {
 				robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-				obstacleArc = computeArcLength(pt2,p2,obstacleCenter,"right");
+				obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,"right");
+				
+				instruction3 = new Instruction(obstacleArc[0],"R");
 			}
-
-			new_distance = robotArc + l + obstacleArc;
-
-			if(new_distance < distance) {
-				distance = new_distance;
-				bestDir = path;
-			}
+			
+			instruction1 = new Instruction(robotArc[0],direction);
+			instruction2 = new Instruction(robotArc[0],"S");
+					
+			distance = robotArc[1] + l + obstacleArc[1];
+				
+			path.addInstructions(instruction1);
+			path.addInstructions(instruction2);
+			path.addInstructions(instruction3);
+			path.setDist(distance);
+			path.setPt1(pt1);
+			path.setPt2(pt2);
+			this.pathList.add(path);
 		}
-		System.out.println(distance);
-		System.out.println(bestDir);
-	}
-
+	}*/
+	
+	/*
 	// RLR & LRL shortest path finding(case 1)
-	public void CCCcase1 () {
-		int[] q = new int[2];
-		int[] pt1 = new int[2];
-		int[] pt2 = new int[2];
-		int[] v1 = new int[2];
-		int[] v2 = new int[2];
-		int[] p1 = new int[2];
-		int[] p2 = new int[2];
-		int[] p3 = new int[2];
-		int[] c3 = new int[2];
-
-		double robotArc;
-		double obstacleArc;
-		double c3Arc;
-		double new_distance = 0;
-		String path = "";
-		String bestDir = "";
-		double distance = Double.POSITIVE_INFINITY;
-
+	public void findCCCcase1 () {
+		double[] q =  new double [2];
+		double[] pt1 = new double[2];
+		double[] pt2 = new double[2];
+		double[] v1 = new double[2];
+		double[] v2 = new double[2];
+		double[] p1 = new double[2];
+		double[] p2 = new double[2];
+		double[] p3 = new double[2];
+		double[] c3 = new double[2];
+			
+		double[] robotArc = new double[2];
+		double[] obstacleArc = new double[2];
+		double[] c3Arc = new double[2];
+		
+		Instruction instruction1;
+		Instruction instruction2;
+		Instruction instruction3;
+			
 		for (String direction: bothDirection) {
-			if (direction == "right") {
+			
+			double distance = 0;
+			
+			path = new Path();
+			
+			if (direction == "R") {
 				this.robot.createCircleRight(robotCenter,"front");
-				this.obs.createCircleRight(obstacleCenter);
-				path = "RLR";
+				this.obstacle.createCircleRight(obstacleImageCenter);
 			} else {
 				this.robot.createCircleLeft(robotCenter,"front");
-				this.obs.createCircleLeft(obstacleCenter);
-				path = "LRL";
+				this.obstacle.createCircleLeft(obstacleImageCenter);
 			}
-
-			p1[0] = (int) this.robot.turningRadius.getCenter().getX();
-			p1[1] = (int) this.robot.turningRadius.getCenter().getY();
-
-			p2[0] = (int) this.obs.turningRadius.getCenter().getX();
-			p2[1] = (int) this.obs.turningRadius.getCenter().getY();
-
+				
+			p1[0] = this.robot.turningRadius.getCenter().getX();
+			p1[1] = this.robot.turningRadius.getCenter().getY();
+				
+			p2[0] = this.obstacle.turningRadius.getCenter().getX();
+			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+				
 			double d = straightDistance(p1, p2);
-
-			q = this.midPoint(p1,p2);
-			v1 = this.vector1(p1,p2);
-
-			if(direction == "right") {
-				v2 = this.vector2_version3(p1,p2);
-			} else {
-				v2 = this.vector2_version4(p1,p2);
+			
+			if (d < 4 * TurningRadius.getRadius()) {
+				q = this.midPoint(p1,p2);
+				v1 = this.vector1(p1,p2);
+				
+				if(direction == "R") {
+					v2 = this.vector2_version3(p1,p2);
+				} else {
+					v2 = this.vector2_version4(p1,p2);
+				}
+				
+				double d1 = this.d1(TurningRadius.getRadius(),d);
+				p3 = this.p3(q, v2, d1, d);
+				pt1 = this.midPoint(p1, p3);
+				pt2 = this.midPoint(p2, p3);
+				
+				System.out.println(pt1[0]);
+				System.out.println(pt1[1]);
+				System.out.println(pt2[0]);
+				System.out.println(pt2[1]);
+				System.out.println(p3[0]);
+				System.out.println(p3[1]);
+				
+				if (this.robot.canReachTurnTurn(Math.ceil(straightDistance(p1, p3))) && this.robot.canReachTurnTurn(Math.ceil(straightDistance(p2, p3)))) {
+					
+					if (direction == "R") {
+						turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
+						c3[0] = (int) this.turningRadius.getCenter().getX();
+						c3[1] = (int) this.turningRadius.getCenter().getY();
+						c3Arc = computeArcLength(pt1,c3,pt2,"L");
+						
+						instruction2 = new Instruction(c3Arc[0],c3Arc[1],"L");
+						
+					} else {
+						turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
+						c3[0] = (int) this.turningRadius.getCenter().getX();
+						c3[1] = (int) this.turningRadius.getCenter().getY();
+						c3Arc = computeArcLength(pt1,c3,pt2,"R");
+	
+						instruction2 = new Instruction(c3Arc[0],c3Arc[1],"R");
+					}
+					
+					robotArc = computeArcLength(robotCenter,p1,pt1,direction);
+					obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,direction);
+					
+					distance = robotArc[1] + c3Arc[1] + obstacleArc[1];
+					
+					instruction1 = new Instruction(robotArc[0],robotArc[1],direction);
+					instruction3 = new Instruction(obstacleArc[0],obstacleArc[1],direction);
+					
+					path.addInstructions(instruction1);
+					path.addInstructions(instruction2);
+					path.addInstructions(instruction3);
+					path.setDist(distance);
+					path.setPt1(pt1);
+					path.setPt2(pt2);
+					this.pathList.add(path);
+				}
 			}
-
-			double d1 = this.d1(TurningRadius.getRadius(),d);
-			p3 = this.p3(q, v2, d1, d);
-			pt1 = this.midPoint(p1, p3);
-			pt2 = this.midPoint(p2, p3);
-
-			if (direction == "right") {
-				turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
-				c3[0] = (int) this.turningRadius.getCenter().getX();
-				c3[1] = (int) this.turningRadius.getCenter().getY();
-				c3Arc = computeArcLength(pt1,c3,pt2,"left");
-			} else {
-				turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
-				c3[0] = (int) this.turningRadius.getCenter().getX();
-				c3[1] = (int) this.turningRadius.getCenter().getY();
-				c3Arc = computeArcLength(pt1,c3,pt2,"right");
-			}
-
-			robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-			obstacleArc = computeArcLength(pt2,p2,obstacleCenter,direction);
-
-			new_distance = robotArc + c3Arc + obstacleArc;
-
-			if(new_distance < distance) {
-				distance = new_distance;
-				bestDir = path;
-			}
-			//System.out.println(p1[0]);
-			//System.out.println(p1[1]);
-			//System.out.println(p3[0]);
-			//System.out.println(p3[1]);
-			//System.out.println(p_new[0]);
-			//System.out.println(p_new[1]);
-			//System.out.println(pt1[0]);
-			//System.out.println(pt1[1]);
-			//System.out.println(pt2[0]);
-			//System.out.println(pt2[1]);
-			System.out.println(robotArc);
-			System.out.println(c3Arc);
-			System.out.println(obstacleArc);
 		}
-		System.out.println(distance);
-		System.out.println(bestDir);
-	}
-
+	}*/
+	/*
 	// RLR & LRL shortest path finding(case 2)
-	public void CCCcase2 () {
-		int[] q = new int[2];
-		int[] pt1 = new int[2];
-		int[] pt2 = new int[2];
-		int[] v1 = new int[2];
-		int[] v2 = new int[2];
-		int[] p1 = new int[2];
-		int[] p2 = new int[2];
-		int[] p3 = new int[2];
-		int[] c3 = new int[2];
-
-		double robotArc;
-		double obstacleArc;
-		double c3Arc;
-		double new_distance = 0;
-		String path = "";
-		String bestDir = "";
-		double distance = Double.POSITIVE_INFINITY;
-
+	public void findCCCcase2 () {
+		double[] q = new double[2];
+		double[] pt1 = new double[2];
+		double[] pt2 = new double[2];
+		double[] v1 = new double[2];
+		double[] v2 = new double[2];
+		double[] p1 = new double[2];
+		double[] p2 = new double[2];
+		double[] p3 = new double[2];
+		double[] c3 = new double[2];
+				
+		double[] robotArc = new double[2];
+		double[] obstacleArc = new double[2];
+		double[] c3Arc = new double[2];
+		
+		Instruction instruction1;
+		Instruction instruction2;
+		Instruction instruction3;
+				
 		for (String direction: bothDirection) {
-			if (direction == "right") {
+			
+			double distance = 0;
+			
+			path = new Path();
+			
+			if (direction == "R") {
 				this.robot.createCircleRight(robotCenter,"front");
-				this.obs.createCircleRight(obstacleCenter);
-				path = "RLR";
+				this.obstacle.createCircleRight(obstacleImageCenter);
 			} else {
 				this.robot.createCircleLeft(robotCenter,"front");
-				this.obs.createCircleLeft(obstacleCenter);
-				path = "LRL";
+				this.obstacle.createCircleLeft(obstacleImageCenter);
 			}
-
-			p1[0] = (int) this.robot.turningRadius.getCenter().getX();
-			p1[1] = (int) this.robot.turningRadius.getCenter().getY();
-
-			p2[0] = (int) this.obs.turningRadius.getCenter().getX();
-			p2[1] = (int) this.obs.turningRadius.getCenter().getY();
-
+					
+			p1[0] = this.robot.turningRadius.getCenter().getX();
+			p1[1] = this.robot.turningRadius.getCenter().getY();
+					
+			p2[0] = this.obstacle.turningRadius.getCenter().getX();
+			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+					
 			double d = straightDistance(p1, p2);
-
-			q = this.midPoint(p1,p2);
-			v1 = this.vector1(p1,p2);
-
-			if(direction == "right") {
-				v2 = this.vector2_version4(p1,p2);
-			} else {
-				v2 = this.vector2_version3(p1,p2);
-			}
-
-			double d1 = this.d1(TurningRadius.getRadius(),d);
-			p3 = this.p3(q, v2, d1, d);
-			pt1 = this.midPoint(p1, p3);
-			pt2 = this.midPoint(p2, p3);
-
-			if (direction == "right") {
-				turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
-				c3[0] = (int) this.turningRadius.getCenter().getX();
-				c3[1] = (int) this.turningRadius.getCenter().getY();
-				c3Arc = computeArcLength(pt1,c3,pt2,"left");
-			} else {
-				turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
-				c3[0] = (int) this.turningRadius.getCenter().getX();
-				c3[1] = (int) this.turningRadius.getCenter().getY();
-				c3Arc = computeArcLength(pt1,c3,pt2,"right");
-			}
-
-			robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-			obstacleArc = computeArcLength(pt2,p2,obstacleCenter,direction);
-
-			new_distance = robotArc + c3Arc + obstacleArc;
-
-			if(new_distance < distance) {
-				distance = new_distance;
-				bestDir = path;
-			}
-				//System.out.println(d);
-				//System.out.println(p1[0]);
-				//System.out.println(p1[1]);
-				//System.out.println(p3[0]);
-				//System.out.println(p3[1]);
-				//System.out.println(pt1[0]);
-				//System.out.println(pt1[1]);
-				//System.out.println(pt2[0]);
-				//System.out.println(pt2[1]);
-				//System.out.println(robotArc);
-				//System.out.println(c3Arc);
-				//System.out.println(obstacleArc);
-		}
-		System.out.println(distance);
-		System.out.println(bestDir);
-	}
-
-	// R & L shortest path finding
-	public void C () {
-		int[] p1 = new int[2];
-		int[] p2 = new int[2];
-
-		double robotArc;
-		double new_distance = 0;
-		String path = "";
-		String bestDir = "";
-		double distance = Double.POSITIVE_INFINITY;
-
-		for (String direction: bothDirection) {
-			if (direction == "right") {
-				this.robot.createCircleRight(robotCenter,"front");
-				this.obs.createCircleRight(obstacleCenter);
-				path = "R";
-			} else {
-				this.robot.createCircleLeft(robotCenter,"front");
-				this.obs.createCircleLeft(obstacleCenter);
-				path = "L";
-			}
-
-			p1[0] = (int) this.robot.turningRadius.getCenter().getX();
-			p1[1] = (int) this.robot.turningRadius.getCenter().getY();
-
-			p2[0] = (int) this.obs.turningRadius.getCenter().getX();
-			p2[1] = (int) this.obs.turningRadius.getCenter().getY();
-
-			//robot can reach obstacle
-			if (this.robot.canReachTurn(p2)) {
-				robotArc = computeArcLength(robotCenter,p1,obstacleCenter,direction);
-
-				new_distance = robotArc;
-
-				if(new_distance < distance) {
-					distance = new_distance;
-					bestDir = path;
+			
+			if (d < 4 * TurningRadius.getRadius()) {
+				q = this.midPoint(p1,p2);
+				v1 = this.vector1(p1,p2);
+					
+				if(direction == "R") {
+					v2 = this.vector2_version4(p1,p2);
+				} else {
+					v2 = this.vector2_version3(p1,p2);
+				}
+					
+				double d1 = this.d1(TurningRadius.getRadius(),d);
+				p3 = this.p3(q, v2, d1, d);
+				pt1 = this.midPoint(p1, p3);
+				pt2 = this.midPoint(p2, p3);
+				
+				if (this.robot.canReachTurnTurn(straightDistance(p1, p3)) && this.robot.canReachTurnTurn(straightDistance(p2, p3))) {
+					
+					if (direction == "R") {
+						turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
+						c3[0] = (int) this.turningRadius.getCenter().getX();
+						c3[1] = (int) this.turningRadius.getCenter().getY();
+						c3Arc = computeArcLength(pt1,c3,pt2,"L");
+						
+						instruction2 = new Instruction(c3Arc[0],c3Arc[1],"L");
+					} else {
+						turningRadius = new TurningRadius(new Point2D.Double(p3[0], p3[1]));
+						c3[0] = (int) this.turningRadius.getCenter().getX();
+						c3[1] = (int) this.turningRadius.getCenter().getY();
+						c3Arc = computeArcLength(pt1,c3,pt2,"R");
+	
+						instruction2 = new Instruction(c3Arc[0],c3Arc[1],"R");
+					}
+					
+					robotArc = computeArcLength(robotCenter,p1,pt1,direction);
+					obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,direction);
+					
+					distance = robotArc[1] + c3Arc[1] + obstacleArc[1];
+					
+					instruction1 = new Instruction(robotArc[0],robotArc[1],direction);
+					instruction3 = new Instruction(obstacleArc[0],obstacleArc[1],direction);
+					
+					path.addInstructions(instruction1);
+					path.addInstructions(instruction2);
+					path.addInstructions(instruction3);
+					path.setDist(distance);
+					path.setPt1(pt1);
+					path.setPt2(pt2);
+					this.pathList.add(path);
 				}
 			}
 		}
-		System.out.println(distance);
-		System.out.println(bestDir);
-	}
-
-	// RL & LR shortest path finding
-	public void CC () {
-		int[] p1 = new int[2];
-		int[] p2 = new int[2];
-		int[] pt1 = new int[2];
-
-		double robotArc;
-		double obstacleArc;
-		double new_distance = 0;
-		String path = "";
-		String bestDir = "";
-		double distance = Double.POSITIVE_INFINITY;
-
-		for (String direction: bothDirection) {
-			if (direction == "right") {
-				this.robot.createCircleRight(robotCenter,"front");
-				this.obs.createCircleLeft(obstacleCenter);
-				path = "RL";
-			} else {
-				this.robot.createCircleLeft(robotCenter,"front");
-				this.obs.createCircleRight(obstacleCenter);
-				path = "LR";
-			}
-
-			p1[0] = (int) this.robot.turningRadius.getCenter().getX();
-			p1[1] = (int) this.robot.turningRadius.getCenter().getY();
-
-			p2[0] = (int) this.obs.turningRadius.getCenter().getX();
-			p2[1] = (int) this.obs.turningRadius.getCenter().getY();
-
-			pt1 = midPoint(p1,p2);
-			double d = straightDistance(p1, p2);
-
-			System.out.println(d);
-			System.out.println(p1[0]);
-			System.out.println(p1[1]);
-			System.out.println(p2[0]);
-			System.out.println(p2[1]);
-
-
-			//robot can reach obstacle
-			if (this.robot.canReachTurnTurn(d)) {
-				robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-				obstacleArc = computeArcLength(pt1,p2,obstacleCenter,direction);
-
-				new_distance = robotArc + obstacleArc;
-
-				if(new_distance < distance) {
-					distance = new_distance;
-					bestDir = path;
-				}
-			}
-		}
-		System.out.println(distance);
-		System.out.println(bestDir);
-	}
-
-	public int[] vector1(int[] p1, int[] p2) {
-		int[] v1 = new int[2];
+	}*/
+	
+	public double[] vector1(double[] p1, double[] p2) {
+		double[] v1 = new double[2];
 		v1[0] = p2[0] - p1[0];
 		v1[1] = p2[1]  - p1[1];
 		return v1;
 	}
-
-	public int[] vector2(int[] v1, double theta) {
-		int[] v2 = new int[2];
-		v2[0] = round(v1[0] * Math.cos(theta) - v1[1] * Math.sin(theta));
-		v2[1] = round(v1[0] * Math.sin(theta) + v1[1] * Math.cos(theta));
+	
+	public double[] vector2(double[] v1, double theta) {
+		double[] v2 = new double[2];
+		v2[0] = v1[0] * Math.cos(theta) - v1[1] * Math.sin(theta);
+		v2[1] = v1[0] * Math.sin(theta) + v1[1] * Math.cos(theta);
 		return v2;
 	}
-
-	public int[] vector2_version2(int[] v1, double theta) {
-		int[] v2 = new int[2];
-		v2[0] = round(v1[0] * Math.cos(theta) + v1[1] * Math.sin(theta));
-		v2[1] = round(v1[0] * Math.sin(theta) - v1[1] * Math.cos(theta));
+	
+	public double[] vector2_version2(double[] v1, double theta) {
+		double[] v2 = new double[2];
+		v2[0] = v1[0] * Math.cos(theta) + v1[1] * Math.sin(theta);
+		v2[1] = v1[0] * Math.sin(theta) - v1[1] * Math.cos(theta);
 		return v2;
 	}
-
-	public int[] vector2_version3(int[] p1, int[] p2) {
-		int[] v2 = new int[2];
+	
+	public double[] vector2_version3(double[] p1, double[] p2) {
+		double[] v2 = new double[2];
 		v2[0] = p2[1] - p1[1];
 		v2[1] = p1[0] - p2[0];
 		return v2;
 	}
-
-	public int[] vector2_version4(int[] p1, int[] p2) {
-		int[] v2 = new int[2];
+	
+	public double[] vector2_version4(double[] p1, double[] p2) {
+		double[] v2 = new double[2];
 		v2[0] = p1[1] - p2[1];
 		v2[1] = p2[0] - p1[0];
 		return v2;
 	}
-
-	public int[] vector3(int[] v2) {
-		int[] v3 = new int[2];
+	
+	public double[] vector3(double[] v2) {
+		double[] v3 = new double[2];
 		v3[0] = -v2[0];
 		v3[1] = -v2[1];
 		return v3;
 	}
-
-	public int[] pt1(int[] p1, int[] v2, double l) {
-		int[] pt1 = new int[2];
-		pt1[0] = round(p1[0] - (25.0/l * v2[0]));
-		pt1[1] = round(p1[1] - (25.0/l * v2[1]));
+	
+	public double[] pt1(double[] p1, double[] v2, double l) {
+		double[] pt1 = new double[2];
+		pt1[0] = p1[0] - (25.0/l * v2[0]);
+		pt1[1] = p1[1] - (25.0/l * v2[1]);
 		return pt1;
 	}
-
-	public int[] pt2(int[] pt1, int[] v1) {
-		int[] pt2 = new int[2];
+	
+	public double[] pt2(double[] pt1, double[] v1) {
+		double[] pt2 = new double[2];
 		pt2[0] = pt1[0] + v1[0];
 		pt2[1] = pt1[1] + v1[1];
 		return pt2;
 	}
-
-	public double straightDistance(int[] p1, int[] p2) {
-		int x = Math.abs(p2[0] - p1[0]);
-		int y = Math.abs(p2[1] - p1[1]);
+	
+	public double straightDistance(double[] p1, double[] p2) {
+		double x = Math.abs(p2[0] - p1[0]);
+		double y = Math.abs(p2[1] - p1[1]);
 		return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
 	}
 
 	public double straightTravel(double d, double r) {
 		return Math.sqrt(Math.pow(d,2) - Math.pow(r,2));
 	}
-
-	public int[] midPoint(int[] v1, int[] v2) {
-		int[] mid = new int[2];
-		mid[0] = round((v1[0] + v2[0]) / 2);
-		mid[1] = round((v1[1] + v2[1]) / 2);
+	
+	public double[] midPoint(double[] v1, double[] v2) {
+		double[] mid = new double[2];
+		mid[0] = (v1[0] + v2[0]) / 2;
+		mid[1] = (v1[1] + v2[1]) / 2;
 		return mid;
 	}
 
 	public double d1(double r, double d) {
 		return Math.sqrt(Math.pow(2 * r,2) - Math.pow(d / 2,2));
 	}
-
-	public int[] p3(int[] q, int[] v2, double d1, double d) {
-		int[] pt1 = new int[2];
-		pt1[0] = round(q[0] - (d1/d * v2[0]));
-		pt1[1] = round(q[1] - (d1/d * v2[1]));
-		return pt1;
+	
+	public double[] p3(double[] q, double[] v2, double d1, double d) {
+		double[] p3 = new double[2];
+		p3[0] = q[0] - (d1/d * v2[0]);
+		p3[1] = q[1] - (d1/d * v2[1]);
+		return p3;
 	}
-
-	public double computeArcLength(int[] p, int[] p1, int[] pt1, String direction) {
-
-		int[] v1 = new int[2];
-		int[] v2 = new int[2];
-		double theta;
-
+	
+	public double[] computeArcLength(double[] p, double[] p1, double[] pt1, String direction) {
+		
+		double[] v1 = new double[2];
+		double[] v2 = new double[2];
+		double[] arcLength = new double[2]; // angle in radians, arcLength
+		
 		v1[0] = p[0] - p1[0];
 		v1[1] = (-p[1])  - (-p1[1]);
 		v2[0] = pt1[0] - p1[0];
 		v2[1] = (-pt1[1])  - (-p1[1]);
 
-		theta = Math.atan2(v2[1], v2[0]) - Math.atan2(v1[1], v1[0]);
-
-		if (theta < 0 && direction == "left") {
-			theta += 2 * Math.PI;
-		} else if (theta > 0 && direction == "right"){
-			theta -= 2 * Math.PI;
+		arcLength[0] = Math.atan2(v2[1], v2[0]) - Math.atan2(v1[1], v1[0]);
+		
+		if (arcLength[0] < 0 && direction == "L") {
+			arcLength[0] += 2 * Math.PI;
+		} else if (arcLength[0] > 0 && direction == "R"){
+			arcLength[0] -= 2 * Math.PI;
 		}
-		//System.out.println(theta);
-		//System.out.println(Math.atan2(v2[1], v2[0]));
-		//System.out.println(Math.atan2(v1[1], v1[0]));
-		return Math.abs(theta * TurningRadius.getRadius());
+		
+		System.out.println(arcLength[0]);
+		arcLength[1] = Math.abs(arcLength[0] * TurningRadius.getRadius());
+		return arcLength;
 	}
 
 	private static int round(double val) {
         return (int) Math.round(val);
     }
-
-		 // Gets corresponding image direction based on node coordinate
-	 private Direction getImgDir(Node node) {
-		 for (Obstacle obstacle : obstacleObjects) {
-			 if (obstacle.getObstacleID() == node.getObstacleID()) {
-				 return obstacle.getDirection();
-			 }
-		 }
-		 return Direction.UNSET;
-	 }
-	/*
-	public void rsr(boolean running) {
-
-		int[] pt1 = new int[2];
-		int[] pt2 = new int[2];
-		int[] v1 = new int[2];
-		int[] v2 = new int[2];
-		int[] p1 = new int[2];
-
-		// 22 - 32
-		this.robot.createCircleRight(); // create turning radius for robot
-		//double l = l(p1, obstacleCenter);
-
-		p1[0] = (int) this.robot.turningRadius.getCenter().getX();
-		p1[1] = (int) this.robot.turningRadius.getCenter().getY();
-		//robotCenter = calculateRobotCenter(this.robot.getX(), this.robot.getY(), this.robot.getOrientation());
-		v1 = this.vector1(p1); // done
-		v2 = this.vector2(v1);
-		System.out.println(v2[0]);
-		System.out.println(v2[1]);
-		/*v2 = this.vector2(v1);
-		pt1 = this.pt1(p1, v2, l);
-		pt2 = this.pt2(pt1, v1);
-
-		System.out.println(robotCenter[0]);
-		System.out.println(robotCenter[1]);
-		System.out.println(pt1[0]);
-		System.out.println(pt1[1]);
-
-		this.robot.turnRight();
-		this.robot.turnRight();
-		this.robot.moveForward();*/
-
-		/*do {
-			this.robot.moveForward();
-		}while(robotCenter[0] != pt2[0] && robotCenter[1] != pt2[1]);
-
-		do {
-			this.robot.turnRight();
-		}while(this.robot.getOrientation() == RobotOrientation.E);
-	}*/
-
-	/*
-	public void findPath(boolean running) {
-
-		if(running) {
-			// find best action
-			String bestAction = findBestAction(this.robot.getX(),this.robot.getY(),this.robot.getOrientation());
-			switch(bestAction) {
-			case "reverse":
-				this.robot.reverseBackward();
-				this.robot.updateSensor();
-				break;
-			case "moveFroward":
-				this.robot.moveForward();
-				this.robot.updateSensor();
-				break;
-			case "reverseLeft":
-				this.robot.reverseLeft();
-				this.robot.updateSensor();
-				break;
-			case "reverseRight":
-				this.robot.reverseRight();
-				this.robot.updateSensor();
-				break;
-			case "turnLeft":
-				this.robot.turnLeft();
-				this.robot.updateSensor();
-				break;
-			case "turnRight":
-				this.robot.turnRight();
-				this.robot.updateSensor();
-				break;
-			default:
-				break;
-			}
-			//System.out.print(this.robot.getSensorY());
-		}
-	}
-
-	public String findBestAction(int x, int y, RobotOrientation orientation) {
-		String methodname = "";
-		double new_distance;
-		double distance = Double.POSITIVE_INFINITY;
-		int[] robotCenter = new int[2];
-
-		int robotOriginalX = x;
-		int robotOriginalY = y;
-		RobotOrientation orientationOriginal = orientation;
-
-		Method[] methods = this.robot.getClass().getMethods();
-
-		for( int index =0; index < methods.length; index++){
-			if( methods[index].getName().contains("move")||methods[index].getName().contains("reverse")||methods[index].getName().contains("turn")){
-				try {
-					methods[index].invoke(this.robot);
-					robotCenter = calculateRobotCenter(this.robot.getX(), this.robot.getY(), this.robot.getOrientation());
-					new_distance = straightDistance(robotCenter, obstacleCenter);
-					//System.out.println(methods[index].getName());
-					//System.out.println(robotCenter[0]);
-					//System.out.println(robotCenter[1]);
-					//System.out.println(new_distance);
-					if(new_distance < distance) {
-						distance = new_distance;
-						methodname = methods[index].getName();
-					}
-
-					//set to original
-					this.robot.setX(robotOriginalX);
-					this.robot.setY(robotOriginalY);
-					//this.robot.setOrientation(orientationOriginal);
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-
-		System.out.println(methodname);
-		return methodname;
-	}*/
-
-	// Check if robot can travel straight to goal without any turns
-	// TODO: change robot orientation to robot angle, account for range of values
-	 public boolean isGoalAcrossRobot(Robot robot, int[] goalCoord, Direction imageDir) {
-		 Point2D.Double robotCoord = robot.getRobotCenter();
-		 int robotAngle = robot.getAngle();
-		 if (robotAngle == 0) {
-			 return imageDir == Direction.SOUTH && goalCoord[0] == (int) robotCoord.getX() && goalCoord[1] > robotCoord.getY();
-		 } else if (robotAngle == Math.PI) {
-			 return imageDir == Direction.NORTH && goalCoord[0] == (int) robotCoord.getX() && goalCoord[1] < robotCoord.getY();
-		 } else if (robotAngle == Math.PI / 2) {
-			 return imageDir == Direction.WEST && goalCoord[1] == (int) robotCoord.getY() && goalCoord[0] > robotCoord.getX();
-		 } else if (robotAngle == -Math.PI / 2) {
-			 return imageDir == Direction.EAST && goalCoord[1] == (int) robotCoord.getY() && goalCoord[0] < robotCoord.getX();
-		 }
-		 return false;
-	 }
-
-	// Center of obstacle
+	
 	public void setObstacleCenter() {
-		obstacleCenter[0] = (int) this.obs.getObstacleCenter().getX();
-		obstacleCenter[1] = (int) this.obs.getObstacleCenter().getY();
+		obstacleImageCenter[0] = round(this.obstacle.getImageCenter().getX());
+		obstacleImageCenter[1] = round(this.obstacle.getImageCenter().getY());
 	}
-
-	public int[] getObstacleCenter() {
-		return obstacleCenter;
+	
+	public double[] getObstacleCenter() {
+		return obstacleImageCenter;
 	}
 
 	public void setRobotCenter() {
-		robotCenter[0] = (int) this.robot.getRobotCenter().getX();
-		robotCenter[1] = (int) this.robot.getRobotCenter().getY();
+		robotCenter[0] = this.robot.getCenterFront().getX();
+		robotCenter[1] = this.robot.getCenterFront().getY();
 	}
-
-	public int[] getRobotCenter() {
+	
+	public double[] getRobotCenter() {
 		return robotCenter;
 	}
-
-	public class Path implements Comparable<Path> {
-		private double dist;
-		ArrayList<Instruction> instructions = new ArrayList<>();
-		private double[] pt1;
-		private double[] pt2;
-
-		public void setPt1(double[] pt1) {
-			this.pt1 = pt1;
-		}
-
-		public void setPt2(double[] pt2) {
-			this.pt2 = pt2;
-		}
-
-		public double[] getPt1() {
-			return pt1;
-		}
-
-		public double[] getPt2() {
-			return pt2;
-		}
-
-		public double getDist() {
-			return this.dist;
-		}
-
-		public void setDist(double dist) {
-			this.dist = dist;
-		}
-
-		public ArrayList<Instruction> getInstructions() {
-			return instructions;
-		}
-
-		public void setInstructions(ArrayList<Instruction> instructions) {
-			this.instructions = instructions;
-		}
-
-		@Override
-		public int compareTo(Path o) {
-			if (this.getDist() > o.getDist()) {
-				return 1;
-			} else if (this.getDist() < o.getDist()) {
-				return -1;
-			}
-			return 0;
-		}
-
-		public class Instruction {
-			int angle;
-			String turnDirection;
-
-			Instruction(int angle, String turnDirection) {
-				this.angle = angle;
-				this.turnDirection = turnDirection;
-			}
-
-			public int getAngle() {
-				return angle;
-			}
-
-			public void setAngle(int angle) {
-				this.angle = angle;
-			}
-
-			public String getTurnDirection() {
-				return turnDirection;
-			}
-
-			public void setTurnDirection(String turnDirection) {
-				this.turnDirection = turnDirection;
-			}
-		}
+	
+	public void setObstacle(Obstacle obstacle) {
+		this.obstacle = obstacle;
+		setObstacleCenter();
 	}
-
+	
+	public void setRobot(SimulatorRobot robot) {
+		this.robot = robot;
+		setRobotCenter();
+	}
+	
+	public boolean checkBoundariesPoints(double[] coordinates) {
+    	// check points are within grid
+    	if ((Math.max(15, coordinates[0]) == Math.min(coordinates[0], 185)) && (Math.max(-184, coordinates[1]) == Math.min(coordinates[0], -16))) {
+    		return true;
+    	}
+    	return false;
+    }
 }

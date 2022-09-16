@@ -15,12 +15,12 @@ public class RobotImage {
 	
 	private int x_coor;
 	private int y_coor;
-	private int angle;
+	private double angle;
 	
 	BufferedImage robotImage;
 	
 	
-	RobotImage(int x, int y, int angle){	
+	RobotImage(int x, int y, double angle){	
 		this.x_coor = x;
 		this.y_coor = y;
 		this.angle = angle;
@@ -41,12 +41,10 @@ public class RobotImage {
 	
 	
 	// Draw robot with center coordinates of robot
-	public void drawRobot(Graphics g, Point2D.Double c, int angle){
+	public void drawRobot(Graphics g, Point2D.Double c, double angle){
 		Graphics2D g2 = (Graphics2D) g;
         AffineTransform at = new AffineTransform();
         at.translate(round(c.getX()) * Arena.UNIT_SIZE,Arena.ARENA_HEIGHT + round(c.getY()) * Arena.UNIT_SIZE);
-        //System.out.println(round(c.getX()));
-        //System.out.println(round(c.getY()));
         setAngle(angle);
         at.rotate(Math.toRadians(getAngle()));
         at.translate(-RADIUS/2,-RADIUS/2);
@@ -73,11 +71,11 @@ public class RobotImage {
 		this.y_coor = y;
 	}
 	
-	public int getAngle() {
+	public double getAngle() {
 		return this.angle;
 	}
 	
-	public void setAngle(int angle) {
+	public void setAngle(double angle) {
 		this.angle = angle;
 	}
 	

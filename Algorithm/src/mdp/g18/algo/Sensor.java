@@ -1,95 +1,73 @@
 package mdp.g18.algo;
 
+import java.awt.geom.Point2D;
+import java.awt.Polygon;
+
 public class Sensor {
 
-    private int sensorX;
-    private int sensorY;
+	private static final double DEG_TO_RAD = Math.PI / 180;
+
+	private Point2D.Double center = new Point2D.Double(); // sensor Center
+	private double angle;
 	
-	Sensor(int x, int y){
-		setSensorX(x);
-		setSensorY(y);
+	private int[] xs = new int[4];
+	private int[] ys = new int[4];
+	
+	Polygon sensorArea;
+
+	Sensor(double[] robotCenter, double angle){
+		updateSensorCoordinates(robotCenter,angle);
 	}
 	
-	public int getSensorX() {
-		return this.sensorX;
+	public void updateSensorCoordinates(double[] c, double angle) {
+		updateX(c[0], angle);
+		updateY(c[1], angle);
+		sensorArea();
 	}
 	
-	public int getSensorY() {
-		return this.sensorY;
+	public void sensorArea() {
+		
+		sensorArea = new Polygon(xs, ys, 4);
 	}
 	
-	public void setSensorX(int x) {
-		this.sensorX = x;
+	public boolean scanObstacle(double[] target) {
+		if(this.sensorArea.contains(target[0],target[1])) {
+			return true;
+		}
+		return false;
 	}
 	
-	public void setSensorY(int y) {
-		this.sensorY = y;
+	public void updateX(double x, double angle) {
+		this.xs[0] = round(x + 15 * Math.sin(angle * DEG_TO_RAD) - 15 * Math.cos(angle * DEG_TO_RAD));
+		this.xs[1] = round(x + 15 * Math.sin(angle * DEG_TO_RAD) + 15 * Math.cos(angle * DEG_TO_RAD));
+		this.xs[2] = round(x + 35 * Math.sin(angle * DEG_TO_RAD) + 15 * Math.cos(angle * DEG_TO_RAD));
+		this.xs[3] = round(x + 35 * Math.sin(angle * DEG_TO_RAD) - 15 * Math.cos(angle * DEG_TO_RAD));
 	}
 	
-	public void updateSensorDirection(RobotOrientation orientation, int robotX, int robotY) {
-		switch(orientation) {
-			case N:
-				this.sensorY = robotY - Robot.ROBOT_SIZE;
-				break;
-			case S:
-				this.sensorY = robotY + Robot.ROBOT_SIZE;
-				break;
-			case E:
-				this.sensorX = robotX + Robot.ROBOT_SIZE;
-				break;
-			case W:
-				this.sensorX = robotX - Robot.ROBOT_SIZE;
-				break;
-			case NE1:
-				this.sensorX = robotX + 10;
-				this.sensorY = robotY - 28;
-				break;
-			case NE2:
-				this.sensorX = robotX + 18;
-				this.sensorY = robotY - 24;
-				break;
-			case NE3:
-				this.sensorX = robotX + 24;
-				this.sensorY = robotY - 18;
-				break;
-			case SE1:
-				this.sensorX = robotX + 18;
-				this.sensorY = robotY + 25;
-				break;
-			case SE2:
-				this.sensorX = robotX + 24;
-				this.sensorY = robotY + 18;
-				break;
-			case SE3:
-				this.sensorX = robotX + 28;
-				this.sensorY = robotY + 10;
-				break;
-			case NW1:
-				this.sensorX = robotX - 10;
-				this.sensorY = robotY - 28;
-				break;
-			case NW2:
-				this.sensorX = robotX - 18;
-				this.sensorY = robotY - 24;
-				break;
-			case NW3:
-				this.sensorX = robotX - 24;
-				this.sensorY = robotY - 18;
-				break;
-			case SW1:
-				this.sensorX = robotX - 19;
-				this.sensorY = robotY + 24;
-				break;
-			case SW2:
-				this.sensorX = robotX - 25;
-				this.sensorY = robotY + 18;
-				break;
-			case SW3:
-				this.sensorX = robotX - 18;
-				this.sensorY = robotY + 10;
-				break;
-			default:
-				break;
-		}	
+	public void updateY(double y, double angle) {
+		this.ys[0] = round(y - 15 * Math.cos(angle * DEG_TO_RAD) - 15 * Math.sin(angle * DEG_TO_RAD));
+		this.ys[1] = round(y - 15 * Math.cos(angle * DEG_TO_RAD) + 15 * Math.sin(angle * DEG_TO_RAD));
+		this.ys[2] = round(y - 35 * Math.cos(angle * DEG_TO_RAD) + 15 * Math.sin(angle * DEG_TO_RAD));
+		this.ys[3] = round(y - 35 * Math.cos(angle * DEG_TO_RAD) - 15 * Math.sin(angle * DEG_TO_RAD));
+	}
+	
+	private static int round(double val) {
+        return (int) Math.round(val);
+    }
+	
+	public Point2D.Double getSensorCenter(){
+        return this.center;
+    }
+    
+    public double getAngle() {
+		return this.angle;
+	}
+	
+	public void setAngle(double angle) {
+		this.angle = angle;
+	}
+	
+	public Polygon getSensorArea() {
+		return this.sensorArea;
 	}
 }

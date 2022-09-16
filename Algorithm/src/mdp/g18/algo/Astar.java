@@ -1,7 +1,5 @@
 package mdp.g18.algo;
 
-import java.awt.event.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -62,7 +60,7 @@ public class Astar {
 	public double calDistance(int[] current, int[] destination) {
 		int x = Math.abs(current[0] - destination[0]);
 		int y = Math.abs(current[1] - destination[1]);
-		return Math.sqrt(Math.abs(Math.pow(x, 2) - Math.pow(y, 2)));
+		return Math.sqrt(Math.abs(Math.pow(x, 2) + Math.pow(y, 2)));
 	}
 
 	// Creates an ArrayList of Nodes to be used for the A* algorithm
