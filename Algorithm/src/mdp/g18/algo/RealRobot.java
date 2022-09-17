@@ -7,10 +7,10 @@ public class RealRobot extends Robot{
 	RobotImage robotimage;
 	
 	// Constructor
-	RealRobot(int x, int y, int angle){
+	RealRobot(double x, double y, double angle){
 		super(x,y,angle);
 		robotimage = new RobotImage(x,y,getAngle());
-		createCircleLeft(new double[] {getCenterFront().getX(),getCenterFront().getY()}, "Forward");
+		//createCircleLeft(new double[] {getCenterFront().getX(),getCenterFront().getY()},"front");
 	}
 
 	public void turnLeft(){
@@ -21,7 +21,6 @@ public class RealRobot extends Robot{
         double[] oriRobot = new double[] {xCenter + rad,yCenter};
         getRobotCenter().setLocation(xCenter + rad * Math.cos(getTick() * DEG_TO_RAD),
                       yCenter + rad * Math.sin(getTick() * DEG_TO_RAD));
-        //setAngle((int) calculateAngle(getRobotCenter(),xCenter - rad, yCenter));
         setAngle(computeAngle(oriRobot,new double[] {getTurningRadius().getCenter().getX(),getTurningRadius().getCenter().getY()},new double[] {getRobotCenter().getX(),getRobotCenter().getY()},"L"));
         setCenterFront(getAngle());
         sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
@@ -35,7 +34,6 @@ public class RealRobot extends Robot{
         double[] oriRobot = new double[] {xCenter + rad,yCenter};
         getRobotCenter().setLocation(xCenter + rad * Math.cos(getTick()  * DEG_TO_RAD),
                       yCenter + rad * Math.sin(getTick() * DEG_TO_RAD));
-        //setAngle((int) calculateAngle(getRobotCenter(),xCenter - rad, yCenter));
         setAngle(computeAngle(oriRobot,new double[] {getTurningRadius().getCenter().getX(),getTurningRadius().getCenter().getY()},new double[] {getRobotCenter().getX(),getRobotCenter().getY()},"L"));
         sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
     }
@@ -73,6 +71,7 @@ public class RealRobot extends Robot{
 		double dy = getRobotCenter().getY() - speed * Math.sin(Math.PI/2 - getAngle() * DEG_TO_RAD);
 		getRobotCenter().setLocation(dx,dy);
 		setCenterFront(getAngle());
+		setCenterBack(getAngle());
 		sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
 	}
     
@@ -82,6 +81,7 @@ public class RealRobot extends Robot{
 		double dy = getRobotCenter().getY() + speed * Math.sin(getAngle() * DEG_TO_RAD + Math.PI/2);
 		getRobotCenter().setLocation(dx,dy);
 		setCenterFront(getAngle());
+		setCenterBack(getAngle());
 		sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
 	}
     

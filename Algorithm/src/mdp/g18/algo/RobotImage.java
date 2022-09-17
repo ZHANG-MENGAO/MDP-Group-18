@@ -9,24 +9,17 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class RobotImage {
+public class RobotImage extends Robot{
 	
 	private final static int RADIUS = Robot.ROBOT_SIZE * Arena.UNIT_SIZE;
 	
-	private int x_coor;
-	private int y_coor;
-	private double angle;
-	
 	BufferedImage robotImage;
 	
-	
-	RobotImage(int x, int y, double angle){	
-		this.x_coor = x;
-		this.y_coor = y;
-		this.angle = angle;
+	RobotImage(double x, double y, double angle){	
+		super(x,y,angle);
 		try{
 	        robotImage = ImageIO.read(getClass().getResource("/Resources/robot.png"));
-	        robotImage = resizeImage(robotImage, RADIUS + Arena.UNIT_SIZE, RADIUS + Arena.UNIT_SIZE);
+	        robotImage = resizeImage(robotImage, RADIUS, RADIUS);
 	    }catch(IOException e){e.printStackTrace();}
 	    catch(Exception e){e.printStackTrace();}
 	}
@@ -55,28 +48,37 @@ public class RobotImage {
         return (int) Math.round(val);
     }
 
-	public int getX() {
-		return this.x_coor;
+	@Override
+	public void turnLeft() {
+		// TODO Auto-generated method stub	
 	}
-	
-	public int getY() {
-		return this.y_coor;
+
+	@Override
+	public void reverseLeft() {
+		// TODO Auto-generated method stub
 	}
-	
-	public void setX(int x) {
-		this.x_coor = x;
+
+	@Override
+	public void turnRight() {
+		// TODO Auto-generated method stub
+		
 	}
-	
-	public void setY(int y) {
-		this.y_coor = y;
+
+	@Override
+	public void reverseRight() {
+		// TODO Auto-generated method stub
+		
 	}
-	
-	public double getAngle() {
-		return this.angle;
+
+	@Override
+	public void moveForward() {
+		// TODO Auto-generated method stub
+		
 	}
-	
-	public void setAngle(double angle) {
-		this.angle = angle;
+
+	@Override
+	public void reverseBackward() {
+		// TODO Auto-generated method stub
+		
 	}
-	
 }

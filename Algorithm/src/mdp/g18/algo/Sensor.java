@@ -1,13 +1,11 @@
 package mdp.g18.algo;
 
-import java.awt.geom.Point2D;
 import java.awt.Polygon;
 
 public class Sensor {
 
 	private static final double DEG_TO_RAD = Math.PI / 180;
-
-	private Point2D.Double center = new Point2D.Double(); // sensor Center
+	
 	private double angle;
 	
 	private int[] xs = new int[4];
@@ -53,10 +51,6 @@ public class Sensor {
 	
 	private static int round(double val) {
         return (int) Math.round(val);
-    }
-	
-	public Point2D.Double getSensorCenter(){
-        return this.center;
     }
     
     public double getAngle() {

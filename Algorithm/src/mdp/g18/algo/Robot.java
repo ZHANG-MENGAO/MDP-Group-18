@@ -6,6 +6,7 @@ public abstract class Robot {
 	
 	private Point2D.Double center = new Point2D.Double(); // robot Center
 	private Point2D.Double centerFront = new Point2D.Double(); // robot Front
+	private Point2D.Double centerBack = new Point2D.Double(); // robot Front
     protected final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
     public TurningRadius turningRadius;
 
@@ -17,10 +18,11 @@ public abstract class Robot {
 	protected Sensor sensor;
 	
 	// Constructor
-	Robot(int x, int y, int angle){
+	Robot(double x, double y, double angle){
 		this.center.setLocation(x, y); // set center location
 		setAngle(angle); // set angle
 		setCenterFront(angle);
+		setCenterBack(angle);
 		sensor = new Sensor(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
 	}
 	
@@ -58,7 +60,7 @@ public abstract class Robot {
     
     public boolean checkBoundaries() {
     	// center of robot within the grid
-    	if ((Math.max(15, this.center.getX()) == Math.min(this.center.getX(), 185)) && (Math.max(-184, this.center.getY()) == Math.min(this.center.getY(), -16))) {
+    	if ((Math.max(15, this.center.getX()) == Math.min(this.center.getX(), 185)) && (Math.max(-185, this.center.getY()) == Math.min(this.center.getY(), -15))) {
     		return false;
     	}
     	return true;
@@ -133,16 +135,6 @@ public abstract class Robot {
     	return false;
     }
 	
-    /*
-	public double calculateAngle(Point2D.Double p1, double centerX, double centerY){
-    	//p0(x,y) = (center.x, center.y - radius)
-    	//radius = 25
-    	//angle = atan2(p1.y - p0.y, p1.x - p0.x)
-    	Point2D.Double p0 = new Point2D.Double();
-    	p0.setLocation(centerX, centerY);
-    	return (2 * Math.atan2(p1.getY() - p0.getY(), p1.getX() - p0.getX())) / DEG_TO_RAD;
-    }*/
-	
 	public double computeAngle(double[] p, double[] p1, double[] pt1, String direction) {
 		
 		double[] v1 = new double[2];
@@ -208,6 +200,18 @@ public abstract class Robot {
 	
 	public Point2D.Double getCenterFront(){
         return this.centerFront;
+    }
+	
+	public void setCenterBack(double angle) {
+    	
+    	double dx = this.getRobotCenter().getX() + 30 * Math.sin(angle * DEG_TO_RAD);
+    	double dy = this.getRobotCenter().getY() + 30 * Math.cos(angle * DEG_TO_RAD);
+    	
+    	this.centerBack.setLocation(dx, dy);
+	}
+	
+	public Point2D.Double getCenterBack(){
+        return this.centerBack;
     }
     
     public abstract void turnLeft();
