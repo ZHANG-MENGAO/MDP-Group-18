@@ -39,7 +39,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	private Instruction currentInstruction;
 	private int sizeOfPath;
 	private int iteration = 0;
-	
+	private Astar astar;
 	Direction mouseDir = Direction.UNSET;
 	
 	Move move;
@@ -48,7 +48,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	SimulatorRobot simrobot;
 	Obstacle obstacle;
 	Arena arena;
-	Astar astar;
 	Simulate simulator;
 	Timer timer;
 	Timer timer2;
@@ -379,7 +378,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	
 	// from astar get node
 	public void getClosestObstacle() {
-		
+
 		for(Obstacle obstacle: this.obstacleObjects) {
 			if (!this.obstacleSimulator.contains(obstacle) && this.currentObstacle == null) {
 				this.currentObstacle  = obstacle;
@@ -398,10 +397,19 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	 }
 	
 	public void findBestPath() {
-		
-		if (this.currentObstacle == null)
-			getClosestObstacle();
-			
+		// Initialise A* (once per plan path)
+		if (astar == null) {
+			astar = new Astar(obstacleObjects, arena, robot);
+		}
+
+		// Get the robot's next destination
+		if (currentObstacle == null) {
+			currentObstacle = astar.getNextObstacle(null);
+		} else {
+			Obstacle prev = currentObstacle;
+			currentObstacle = astar.getNextObstacle(prev);
+		}
+
 		if (this.pathfinder == null) {
 			this.simrobot = new SimulatorRobot(25,-16,0); // create simulator robot --> no visualization
 			this.pathfinder = new PathFinder(ArenaFrame.obstacles); // input robot and nearest obstacle object
@@ -412,7 +420,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			this.pathfinder.setRobot(this.simrobot);
 			this.pathfinder.setObstacle(this.currentObstacle);
 	
-			Path bestPath = this.pathfinder.bestPath(); // found best path
+			Path bestPath = this.pathfinder.bestPath(currentObstacle); // found best path
 			pathList.add(bestPath);
 				
 			this.planDistance += bestPath.getDist();
@@ -432,6 +440,8 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			}
 		}
 	}
+
+
 	
 	private static int round(double val) {
         return (int) Math.round(val);
@@ -440,6 +450,12 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	// Add obstacle to array
 	public void addObstacle() {
 		// TODO: insert virtual obstacle into obstacles as -1
+		for (int i = -40; i <= 0; i++) {
+			for (int j = -40; j <= 0; j++) {
+				obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = -1;
+			}
+		}
+
 		for (int i = -10; i <= 0; i++) {
 			for (int j = -10; j <= 0; j++) {
 				obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = obstacle.getObstacleID(); // top right coordinate

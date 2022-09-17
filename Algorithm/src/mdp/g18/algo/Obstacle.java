@@ -122,7 +122,7 @@ public class Obstacle {
 		return this.imageCenter;
 	}
 	
-	private void setDirection(Direction dir) {
+	public void setDirection(Direction dir) {
 		this.direction = dir;
 	}
 	

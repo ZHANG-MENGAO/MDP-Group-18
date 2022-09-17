@@ -5,10 +5,7 @@ import java.awt.Graphics;
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class PathFinder {
 	
@@ -31,10 +28,17 @@ public class PathFinder {
 	PathFinder(int[][] obstacleCoordinates){
 		this.obstacleCoordinates = obstacleCoordinates;
 	}
-	
-	public Path bestPath() {
+
+	public Path bestPath(Obstacle o) {
+		// Get next obstacle the robot should go to
+//		Astar astar = new Astar(obstacles, new Arena(), robot);
+//		obstacle = astar.getNextObstacle();
+
+		obstacle = o;
+
+		// Calculate all possible paths
 		ArrayList <Path> possiblePaths = possiblePaths();
-		simulator = new Simulate(this.robot,possiblePaths,this.obstacle,this.obstacleCoordinates);
+		simulator = new Simulate(this.robot, possiblePaths, this.obstacle, this.obstacleCoordinates);
 		
 		bestPath = simulator.simulateMove();
 		pathCoordinates.addAll(simulator.getPathCoordinates());
@@ -46,7 +50,6 @@ public class PathFinder {
 		listOfPath();
 		// sort path by distance
 		Collections.sort(pathList);
-		
 		return pathList;
 	}
 	
@@ -364,7 +367,7 @@ public class PathFinder {
 			
 			path = new Path();
 			
-			if (direction == "R") {
+			if (Objects.equals(direction, "R")) {
 				this.robot.createCircleRight(robotCenter,"front");
 				this.obstacle.createCircleRight(obstacleImageCenter);
 			} else {
@@ -381,7 +384,7 @@ public class PathFinder {
 			double l = straightDistance(p1, p2);
 
 			v1 = this.vector1(p1,p2);
-			if (direction == "R") {
+			if (Objects.equals(direction, "R")) {
 				v2 = this.vector2(v1, (Math.PI/2));
 			} else {
 				v2 = this.vector2(v1, -(Math.PI/2));
@@ -693,6 +696,12 @@ public class PathFinder {
 			}
 		}
 	}*/
+
+	// If robot cannot find path
+	public void goAroundObstacle(Direction dir) {
+		obstacle.setDirection(dir);
+//		findCSDifferentC();
+	}
 	
 	public double[] vector1(double[] p1, double[] p2) {
 		double[] v1 = new double[2];
@@ -791,9 +800,9 @@ public class PathFinder {
 
 		arcLength[0] = Math.atan2(v2[1], v2[0]) - Math.atan2(v1[1], v1[0]);
 		
-		if (arcLength[0] < 0 && direction == "L") {
+		if (arcLength[0] < 0 && Objects.equals(direction, "L")) {
 			arcLength[0] += 2 * Math.PI;
-		} else if (arcLength[0] > 0 && direction == "R"){
+		} else if (arcLength[0] > 0 && Objects.equals(direction, "R")){
 			arcLength[0] -= 2 * Math.PI;
 		}
 		

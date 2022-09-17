@@ -11,6 +11,7 @@ public class Node implements Comparable<Node>{
 	public ArrayList<Edge> neighbour = new ArrayList<>();
 
 	private Node parent;
+	private boolean visited;
 
 	Node(int g, int h, int[] coord, Node parent, int id) {
 		this.g = g;
@@ -44,6 +45,10 @@ public class Node implements Comparable<Node>{
 	public int getCost() {
 		return cost;
 	}
+
+	public boolean isVisited() { return visited; }
+
+	public void setVisited(boolean visited) { this.visited = visited; }
 
 	public int[] getCoord() {
 		return this.coord;

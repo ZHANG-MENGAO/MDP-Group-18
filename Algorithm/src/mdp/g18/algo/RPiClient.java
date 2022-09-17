@@ -18,15 +18,15 @@ public class RPiClient {
 
 	public static void main (String[] args) throws IOException {
 		RPiClient client = new RPiClient();
-		client.startConnection(client.RPI_IP_ADDRESS, client.RPI_PORT);
+		client.startConnection();
 		System.out.println("RPi connected.");
-		while (true) {
+		while (true){
 			client.sendMsg("Read data");
 			System.out.println("Received message " + client.receiveMsg());
 		}
 	}
 
-	public void startConnection(String IPAddress, int port) throws IOException {
+	public void startConnection() throws IOException {
 		System.out.println("Starting connection to RPi...");
 		socket = new Socket(RPI_IP_ADDRESS, RPI_PORT);
 		toRPi = new PrintWriter(socket.getOutputStream());
