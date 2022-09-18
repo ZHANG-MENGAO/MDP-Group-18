@@ -9,57 +9,75 @@ import java.util.*;
 
 public class PathFinder {
 	
-	private static final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
+	private final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
 	private static List<String> bothDirection = Arrays.asList("R","L");
-	ArrayList<Path> pathList = new ArrayList<>();
-	ArrayList<Data> pathCoordinates = new ArrayList<Data>();
 	
-	public SimulatorRobot robot;
-	public Obstacle obstacle;
-	public TurningRadius turningRadius;
-	public Path path;
-	public Path bestPath;
-	public Simulate simulator;
+	private ArrayList<Path> pathList = new ArrayList<>();
+	private ArrayList<Data> pathCoordinates = new ArrayList<Data>();
+	
+	private ArrayList<Obstacle> obstacleList = new ArrayList<Obstacle>();
+
+	//ArrayList<Node> nodeList = new ArrayList<Node>();
+	
+	private Robot robot;
+	private Obstacle obstacle;
+	private TurningRadius turningRadius;
+	private Simulate simulator;
+	private Astar astar;
+	private Path path;
+	private Path newBestPath;
 	
 	private double[] obstacleImageCenter = new double[2];
 	private double[] robotCenter = new double[2];
 	private int[][] obstacleCoordinates;
 	
-	PathFinder(int[][] obstacleCoordinates){
+	PathFinder(Robot robot,ArrayList<Obstacle> obstacleList, int[][] obstacleCoordinates){
+		this.obstacleList = obstacleList;
 		this.obstacleCoordinates = obstacleCoordinates;
-	}
-
-	public Path bestPath(Obstacle o) {
-		// Get next obstacle the robot should go to
-//		Astar astar = new Astar(obstacles, new Arena(), robot);
-//		obstacle = astar.getNextObstacle();
-
-		obstacle = o;
-
-		// Calculate all possible paths
-		ArrayList <Path> possiblePaths = possiblePaths();
-		simulator = new Simulate(this.robot, possiblePaths, this.obstacle, this.obstacleCoordinates);
+		this.setRobot(robot);
 		
-		bestPath = simulator.simulateMove();
-		pathCoordinates.addAll(simulator.getPathCoordinates());
+		if (astar == null) {
+			astar = new Astar(this.obstacleList,this.robot);
+		}
 		
-		return bestPath;
 	}
 	
-	public ArrayList<Path> possiblePaths() {
-		listOfPath();
-		// sort path by distance
-		Collections.sort(pathList);
-		return pathList;
-	}
-	
-	public void paintPath(Graphics g) {
-		g.setColor(Color.red);
-		for(Data path: pathCoordinates) {
-			g.fillRect((path.getElement(0)) * Arena.UNIT_SIZE, (200 + path.getElement(1)) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+	public void getClosestObstacle() {
+
+		if (getCurrentObstacle() == null) {
+			setObstacle(astar.getNextObstacle(null));
+		}else {
+			Obstacle prev = getCurrentObstacle();
+			setObstacle(astar.getNextObstacle(prev));
 		}
 	}
 	
+	public Path bestPath() {
+		ArrayList <Path> possiblePaths = possiblePaths(); // all possible path
+		
+		if(simulator == null) {
+			simulator = new Simulate(this.obstacleCoordinates);
+		}
+		
+		simulator.setObstacle(this.obstacle);
+		simulator.setObstacleCenter();
+		simulator.setPossiblePath(possiblePaths);
+		simulator.updateRobot(this.robot);
+		
+		this.newBestPath = simulator.simulateMove();
+		pathCoordinates.addAll(simulator.getPathCoordinates());
+		setRobot(this.robot); // update robot position
+		
+		return this.newBestPath;
+	}
+	
+	public ArrayList<Path> possiblePaths() {
+		
+		listOfPath();
+		Collections.sort(this.pathList);
+		return this.pathList;
+	}
+
 	public void listOfPath(){
 		Method[] methods = this.getClass().getMethods(); // get all methods
 
@@ -82,8 +100,7 @@ public class PathFinder {
 			}
 		}
 	}
-	
-	/*
+
 	// S shortest path finding
 	public void findS() {
 		
@@ -128,8 +145,8 @@ public class PathFinder {
 			p1[0] = this.robot.turningRadius.getCenter().getX();
 			p1[1] = this.robot.turningRadius.getCenter().getY();
 						
-			p2[0] = this.obstacle.turningRadius.getCenter().getX();
-			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			p2[0] = this.obstacle.getTurningRadius().getCenter().getX();
+			p2[1] = this.obstacle.getTurningRadius().getCenter().getY();
 				
 			//robot can reach obstacle by turning
 			if (this.robot.canReachTurn(p2)) {
@@ -169,8 +186,8 @@ public class PathFinder {
 				this.obstacle.createCircleLeft(obstacleImageCenter);
 			}
 			
-			p2[0] = this.obstacle.turningRadius.getCenter().getX();
-			p2[1] = this.obstacle.turningRadius.getCenter().getY(); 
+			p2[0] = this.obstacle.getTurningRadius().getCenter().getX();
+			p2[1] = this.obstacle.getTurningRadius().getCenter().getY(); 
 				
 			if (direction == "R") {
 				if (this.robot.getAngle() == 0) {
@@ -310,8 +327,8 @@ public class PathFinder {
 			p1[0] = this.robot.turningRadius.getCenter().getX();
 			p1[1] = this.robot.turningRadius.getCenter().getY();
 					
-			p2[0] = this.obstacle.turningRadius.getCenter().getX();
-			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			p2[0] = this.obstacle.getTurningRadius().getCenter().getX();
+			p2[1] = this.obstacle.getTurningRadius().getCenter().getY();
 			
 			pt1 = midPoint(p1,p2);
 			double d = straightDistance(p1, p2);		
@@ -340,8 +357,7 @@ public class PathFinder {
 				this.pathList.add(path);
 			}
 		}
-	}*/
-	
+	}
 	
 	// LSL & RSR shortest path finding
 	public void findCSCsameC () {
@@ -378,8 +394,8 @@ public class PathFinder {
 			p1[0] = this.robot.turningRadius.getCenter().getX();
 			p1[1] = this.robot.turningRadius.getCenter().getY();
 				
-			p2[0] = this.obstacle.turningRadius.getCenter().getX();
-			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			p2[0] = this.obstacle.getTurningRadius().getCenter().getX();
+			p2[1] = this.obstacle.getTurningRadius().getCenter().getY();
 			
 			double l = straightDistance(p1, p2);
 
@@ -399,11 +415,6 @@ public class PathFinder {
 			instruction1 = new Instruction(robotArc[0],robotArc[1],direction);
 			instruction2 = new Instruction(robotArc[0],l,"S");
 			instruction3 = new Instruction(obstacleArc[0],obstacleArc[1],direction);
-			
-			//System.out.println(pt1[0]);
-			//System.out.println(pt1[1]);
-			//System.out.println(pt2[0]);
-			//System.out.println(pt2[1]);
 				
 			path.addInstructions(instruction1);
 			path.addInstructions(instruction2);
@@ -415,7 +426,6 @@ public class PathFinder {
 		}
 	}
 	
-	/*
 	// RSL & LSR shortest path finding
 	public void findCSCdiffC () {
 		double[] pt1 = new double[2];
@@ -451,8 +461,8 @@ public class PathFinder {
 			p1[0] = this.robot.turningRadius.getCenter().getX();
 			p1[1] = this.robot.turningRadius.getCenter().getY();
 			
-			p2[0] = this.obstacle.turningRadius.getCenter().getX();				
-			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			p2[0] = this.obstacle.getTurningRadius().getCenter().getX();				
+			p2[1] = this.obstacle.getTurningRadius().getCenter().getY();
 				
 			double d = straightDistance(p1, p2);
 			double l = straightTravel(d,2 * TurningRadius.getRadius());
@@ -465,26 +475,26 @@ public class PathFinder {
 			} else {
 				v2 = this.vector2_version2(v1, -theta);
 			}
-
-			pt1 = this.pt1(p1, v2, d);
+			
+			pt1 = this.pt1_version2(p1, v2, d);
 			v3 = this.vector3(v2);
-			pt2 = this.pt1(p2, v3, d);
+			pt2 = this.pt1_version2(p2, v3, d);
 				
 			if (direction == "R") {
 				robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-				obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,"left");
+				obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,"L");
 				
-				instruction3 = new Instruction(obstacleArc[0],"L");
+				instruction3 = new Instruction(obstacleArc[0],obstacleArc[1],"L");
 				
 			} else {
 				robotArc = computeArcLength(robotCenter,p1,pt1,direction);
-				obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,"right");
+				obstacleArc = computeArcLength(pt2,p2,obstacleImageCenter,"R");
 				
-				instruction3 = new Instruction(obstacleArc[0],"R");
+				instruction3 = new Instruction(obstacleArc[0],obstacleArc[1],"R");
 			}
 			
-			instruction1 = new Instruction(robotArc[0],direction);
-			instruction2 = new Instruction(robotArc[0],"S");
+			instruction1 = new Instruction(robotArc[0],robotArc[1],direction);
+			instruction2 = new Instruction(robotArc[0],l,"S");
 					
 			distance = robotArc[1] + l + obstacleArc[1];
 				
@@ -496,9 +506,8 @@ public class PathFinder {
 			path.setPt2(pt2);
 			this.pathList.add(path);
 		}
-	}*/
+	}
 	
-	/*
 	// RLR & LRL shortest path finding(case 1)
 	public void findCCCcase1 () {
 		double[] q =  new double [2];
@@ -536,8 +545,8 @@ public class PathFinder {
 			p1[0] = this.robot.turningRadius.getCenter().getX();
 			p1[1] = this.robot.turningRadius.getCenter().getY();
 				
-			p2[0] = this.obstacle.turningRadius.getCenter().getX();
-			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			p2[0] = this.obstacle.getTurningRadius().getCenter().getX();
+			p2[1] = this.obstacle.getTurningRadius().getCenter().getY();
 				
 			double d = straightDistance(p1, p2);
 			
@@ -555,13 +564,6 @@ public class PathFinder {
 				p3 = this.p3(q, v2, d1, d);
 				pt1 = this.midPoint(p1, p3);
 				pt2 = this.midPoint(p2, p3);
-				
-				System.out.println(pt1[0]);
-				System.out.println(pt1[1]);
-				System.out.println(pt2[0]);
-				System.out.println(pt2[1]);
-				System.out.println(p3[0]);
-				System.out.println(p3[1]);
 				
 				if (this.robot.canReachTurnTurn(Math.ceil(straightDistance(p1, p3))) && this.robot.canReachTurnTurn(Math.ceil(straightDistance(p2, p3)))) {
 					
@@ -600,8 +602,8 @@ public class PathFinder {
 				}
 			}
 		}
-	}*/
-	/*
+	}
+	
 	// RLR & LRL shortest path finding(case 2)
 	public void findCCCcase2 () {
 		double[] q = new double[2];
@@ -639,8 +641,8 @@ public class PathFinder {
 			p1[0] = this.robot.turningRadius.getCenter().getX();
 			p1[1] = this.robot.turningRadius.getCenter().getY();
 					
-			p2[0] = this.obstacle.turningRadius.getCenter().getX();
-			p2[1] = this.obstacle.turningRadius.getCenter().getY();
+			p2[0] = this.obstacle.getTurningRadius().getCenter().getX();
+			p2[1] = this.obstacle.getTurningRadius().getCenter().getY();
 					
 			double d = straightDistance(p1, p2);
 			
@@ -695,12 +697,6 @@ public class PathFinder {
 				}
 			}
 		}
-	}*/
-
-	// If robot cannot find path
-	public void goAroundObstacle(Direction dir) {
-		obstacle.setDirection(dir);
-//		findCSDifferentC();
 	}
 	
 	public double[] vector1(double[] p1, double[] p2) {
@@ -720,7 +716,7 @@ public class PathFinder {
 	public double[] vector2_version2(double[] v1, double theta) {
 		double[] v2 = new double[2];
 		v2[0] = v1[0] * Math.cos(theta) + v1[1] * Math.sin(theta);
-		v2[1] = v1[0] * Math.sin(theta) - v1[1] * Math.cos(theta);
+		v2[1] = -(v1[0] * Math.sin(theta) - v1[1] * Math.cos(theta));
 		return v2;
 	}
 	
@@ -749,6 +745,13 @@ public class PathFinder {
 		double[] pt1 = new double[2];
 		pt1[0] = p1[0] - (25.0/l * v2[0]);
 		pt1[1] = p1[1] - (25.0/l * v2[1]);
+		return pt1;
+	}
+	
+	public double[] pt1_version2(double[] p1, double[] v2, double l) {
+		double[] pt1 = new double[2];
+		pt1[0] = p1[0] + (25.0/l * v2[0]);
+		pt1[1] = p1[1] + (25.0/l * v2[1]);
 		return pt1;
 	}
 	
@@ -805,8 +808,7 @@ public class PathFinder {
 		} else if (arcLength[0] > 0 && Objects.equals(direction, "R")){
 			arcLength[0] -= 2 * Math.PI;
 		}
-		
-		System.out.println(arcLength[0]);
+
 		arcLength[1] = Math.abs(arcLength[0] * TurningRadius.getRadius());
 		return arcLength;
 	}
@@ -838,16 +840,20 @@ public class PathFinder {
 		setObstacleCenter();
 	}
 	
-	public void setRobot(SimulatorRobot robot) {
+	public Obstacle getCurrentObstacle() {
+		return this.obstacle;
+	}
+	
+	public void setRobot(Robot robot) {
 		this.robot = robot;
 		setRobotCenter();
 	}
 	
-	public boolean checkBoundariesPoints(double[] coordinates) {
-    	// check points are within grid
-    	if ((Math.max(15, coordinates[0]) == Math.min(coordinates[0], 185)) && (Math.max(-184, coordinates[1]) == Math.min(coordinates[0], -16))) {
-    		return true;
-    	}
-    	return false;
-    }
+	public void paintPath(Graphics g) {
+		g.setColor(Color.white);
+		for(Data path: pathCoordinates) {
+			g.fillRect((path.getElement(0)) * Arena.UNIT_SIZE, (200 + path.getElement(1)) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+		}
+	}
+
 }

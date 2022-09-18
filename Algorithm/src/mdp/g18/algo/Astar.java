@@ -2,19 +2,18 @@ package mdp.g18.algo;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
 
 public class Astar {
-	List<Obstacle> obstacles;
-	Arena arena;
+	ArrayList<Obstacle> obstacles;
 	Robot robot;
 
 	private ArrayList<Node> nodes;
 	
-	Astar(List<Obstacle> obstacleObjects, Arena arena, Robot robot){
+	Astar(ArrayList<Obstacle> obstacleObjects, Robot robot){
 		this.obstacles = obstacleObjects;
-		this.arena = arena;
 		this.robot = robot;
 		init();
 	}
@@ -22,7 +21,7 @@ public class Astar {
 	private void init() {
 		// Run A* to update parent of each node
 		nodes = createNodes();
-		runAStar(nodes);
+		nodes = runAStar(nodes);
 	}
 
 	public Obstacle getNextObstacle(Obstacle obs) {
@@ -64,44 +63,35 @@ public class Astar {
 		return null;
 	}
 	
-	private void runAStar(ArrayList<Node> nodes){
+	private ArrayList<Node> runAStar(ArrayList<Node> nodes){
 		Node start = nodes.get(0);
 		Node target = nodes.get(nodes.size() - 1);
-	    PriorityQueue<Node> closedList = new PriorityQueue<>(); // Visited
-	    PriorityQueue<Node> openList = new PriorityQueue<>(); // Frontier
+	    ArrayList<Node> closedList = new ArrayList<Node>(); // Visited
+	    ArrayList<Node> openList = new ArrayList<Node>(); // Frontier
 
-			// Calculate heuristics for each node
-		start.setCost(start.getG(), start.calculateH(start, target));
 
 		// Visiting start now
 		openList.add(start);
 
 		while (!openList.isEmpty()) {
-			Node current = openList.peek();
+			Node current = openList.get(0);
 
 			// Go through every neighbour of currently visiting node
 			for (Node.Edge edge : current.neighbour) {
 				Node child = edge.node;
-				double totalWeight = current.getG() + edge.weight;
+				double totalWeight = edge.weight;
 
 				// Child has not been visited
 				if (!openList.contains(child) && !closedList.contains(child)) {
 					child.setParent(current);
 					child.setG(totalWeight);
-					child.setCost(child.getG(), child.calculateH(child, target));
 					openList.add(child);
 				}
 				// Child has been visited
 				else {
-					if (totalWeight < child.getG()) {
+					if (totalWeight < child.getG() && !closedList.contains(child)) {
 						child.setParent(current);
 						child.setG(totalWeight);
-						child.setCost(child.getG(), child.calculateH(child, target));
-
-						if (closedList.contains(child)) {
-							closedList.remove(child);
-							openList.add(child);
-						}
 					}
 				}
 			}
@@ -109,27 +99,26 @@ public class Astar {
 			// Mark current as visited
 			openList.remove(current);
 			closedList.add(current);
-			if (openList.isEmpty()) {
-				return;
-			}
+			Collections.sort(openList);
 		}
+		return closedList;
 	}
 	
-	private double calDistance(int[] current, int[] destination) {
-		int x = Math.abs(current[0] - destination[0]);
-		int y = Math.abs(current[1] - destination[1]);
+	private double calDistance(double[] current, double[] destination) {
+		double x = Math.abs(current[0] - destination[0]);
+		double y = Math.abs(current[1] - destination[1]);
 		return Math.sqrt(Math.abs(Math.pow(x, 2) + Math.pow(y, 2)));
 	}
 
 	// Creates an ArrayList of Nodes to be used for the A* algorithm
 	private ArrayList<Node> createNodes() {
 		ArrayList<Node> nodes = new ArrayList<Node>();
-		Node robotPos = new Node(0, 0, new int[] {(int) robot.getRobotCenter().getX(), (int) robot.getRobotCenter().getX()}, null, -1);
+		Node robotPos = new Node(0, new double[] {this.robot.getRobotCenter().getX(), this.robot.getRobotCenter().getY()}, null, -1);
 		nodes.add(robotPos);
 
 		for (Obstacle obstacle: obstacles) {
-			int[] obstacleCoord = new int[] {obstacle.getxCoordinate() - 5, obstacle.getyCoordinate() + 5};
-			Node newNode = new Node((int) calDistance(obstacleCoord, robotPos.getCoord()), 0, obstacleCoord, null, obstacle.getObstacleID());
+			double[] obstacleCoord = new double[] {obstacle.getObstacleCenter().getX(), obstacle.getObstacleCenter().getY()};
+			Node newNode = new Node(calDistance(obstacleCoord, robotPos.getCoord()), obstacleCoord, null, obstacle.getObstacleID());
 			nodes.add(newNode);
 		}
 

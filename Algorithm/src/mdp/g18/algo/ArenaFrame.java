@@ -14,13 +14,13 @@ import java.util.List;
 public class ArenaFrame extends JPanel implements ActionListener{
 
 	// list of obstacles
-	public List<Obstacle> obstacleObjects = new ArrayList<Obstacle>();
-	public List<Obstacle> obstacleSimulator = new ArrayList<Obstacle>();
-	public List<Obstacle> obstacleCompleted = new ArrayList<Obstacle>();
-	public List<Path> pathList = new ArrayList<Path>();
-	public List<Path> pathComplete = new ArrayList<Path>();
-	public List<Instruction> instructionCompleted = new ArrayList<Instruction>();
-	public List<Node> nodes;
+	public ArrayList<Obstacle> obstacleObjects = new ArrayList<Obstacle>();
+	public ArrayList<Obstacle> obstacleSimulator = new ArrayList<Obstacle>();
+	public ArrayList<Obstacle> obstacleCompleted = new ArrayList<Obstacle>();
+	public ArrayList<Path> pathList = new ArrayList<Path>();
+	public ArrayList<Path> pathComplete = new ArrayList<Path>();
+	public ArrayList<Instruction> instructionCompleted = new ArrayList<Instruction>();
+	public ArrayList<Node> nodes;
 	
 	// get mouse coordinates 
 	public int mx = -100;
@@ -39,7 +39,10 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	private Instruction currentInstruction;
 	private int sizeOfPath;
 	private int iteration = 0;
-	private Astar astar;
+	private double distance = 0;
+	private double[] originalPosition;
+	private double originalAngle = 0;
+	
 	Direction mouseDir = Direction.UNSET;
 	
 	Move move;
@@ -66,7 +69,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		this.addMouseListener(click);
 		
 		arena = new Arena();
-		robot = new RealRobot(100,-16,0);
+		robot = new RealRobot(15,-15,0);
 		
 		// Initialize no obstacles
 		for(int i = 0; i < Arena.GRIDNO; i++) {
@@ -148,18 +151,16 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			mx = e.getX();
 			my = e.getY();
 			LabelFrame.xLabel.setText("X Coordinate : " + String.valueOf(coordinateX()));
-			//ControlFrame.yLabel.setText("Y Coordinate : " + String.valueOf(coordinateY()));
 			LabelFrame.yLabel.setText("Y Coordinate : " + String.valueOf(Arena.GRIDNO - coordinateY() - 1));
-			//System.out.println(obstacles[coordinateX()][coordinateY()]);
 			repaint();
 		}
 		
 		public Direction mouseDirection() {
-			if (coordinateY() <= obstacle.getyCoordinate() - obstacle.getLength() && coordinateX() >= obstacle.getxCoordinate()) {
+			if (coordinateY() <= obstacle.getyCoordinate() - obstacle.getLength() && coordinateX() >= obstacle.getxCoordinate() - obstacle.getLength()) {
 				return Direction.NORTH;
-			} else if (coordinateY() >= obstacle.getyCoordinate() && coordinateX() <= obstacle.getxCoordinate() + obstacle.getLength()) {
+			} else if (coordinateY() >= obstacle.getyCoordinate() && coordinateX() <= obstacle.getxCoordinate()) {
 				return Direction.SOUTH;
-			} else if (coordinateY() >= obstacle.getyCoordinate() - obstacle.getLength() && coordinateX() >= obstacle.getxCoordinate() - obstacle.getLength()) {
+			} else if (coordinateY() >= obstacle.getyCoordinate() - obstacle.getLength() && coordinateX() >= obstacle.getxCoordinate()) {
 				return Direction.EAST;
 			} else {
 				return Direction.WEST;
@@ -175,7 +176,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			// click add obstacle
 			if (obstacleObjects.size() < 5 && addObstacles && coordinateX() != -1 && coordinateY() != -1 && obstacles[coordinateX()][coordinateY()] == 0) {
 				obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
-				addObstacle();
+				addObstacle(obstacle);
 				obstacleObjects.add(obstacle);
 				repaint();
 			}
@@ -226,12 +227,10 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (running) {
-
 			findBestPath();
 		}
 		
 		if (start) {
-			
 			//move();
 			perform();
 		}
@@ -241,37 +240,108 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	public void perform() {
 		if (!this.robot.checkBoundaries()) {
 			this.robot.turnLeft();
-			System.out.println(round(this.robot.getAngle()));
+			//System.out.println(round(this.robot.getAngle()));
 			//System.out.println(round(this.robot.getRobotCenter().getX()));
     		//System.out.println(round(this.robot.getRobotCenter().getY()));
 		}
 	}
 	
-	public void performMovement(String movement, double[] target) {
+	public double straightDistance(double[] p1, double[] p2) {
+		double x = Math.abs(p2[0] - p1[0]);
+		double y = Math.abs(p2[1] - p1[1]);
+		return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+	}
+	
+	public void performMovement(String movement,double angle, double distance ,double[] target) {
 		//System.out.println(movement);
 		double tickNew = this.robot.getTick();
 		switch(movement){
 			case "S":
+				
+				if(this.originalPosition == null) {
+					this.originalPosition = new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()};
+				}
+				
 				if (!this.robot.checkBoundaries()) {
 					this.robot.moveForward();
 				}
+				
+				this.distance = straightDistance(this.originalPosition, new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()});
+				
+				if (Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()), round(this.robot.getRobotCenter().getY())},new double[] {round(target[0]),round(target[1])}) ||
+						this.distance >= this.currentInstruction.getDistance()) {
+					
+					// move forward to turn
+					if(this.currentInstruction.getDistance() != 15) {
+						this.iteration++;
+						instructionCompleted.add(this.currentInstruction);
+					}
+
+					this.currentInstruction = null;
+					this.originalPosition = null;
+					this.distance = 0;
+					System.out.println("h");
+				}
 				break;
 			case "R":
+				
+				if (this.originalAngle == 0) {
+					
+					this.originalAngle = this.robot.getAngle();
+					
+					if (this.robot.getAngle() < 0) {
+			    		this.originalAngle += 360;
+			    	}
+				}
+		    	
 				if (this.robot.turningRadius == null) {
 					this.robot.createCircleRight(new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()}, "Forward");
 				}
+				
 				if (!this.robot.checkBoundaries()) {
 					this.robot.turnRight();
 				}
+				
+				if ((Math.abs(this.robot.getRobotCenter().getX() - target[0]) <= 0.08 && Math.abs(this.robot.getRobotCenter().getY() + target[1]) <= 0.08) ||
+						(Math.abs((this.robot.getAngle() - this.originalAngle) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02)) {
+					
+					this.iteration++;
+					this.originalAngle = 0;
+					instructionCompleted.add(this.currentInstruction);
+					this.currentInstruction = null;
+				}
+				
 				this.robot.turningRadius = null;
 				break;
+				
 			case "L":
+				
+				if (this.originalAngle == 0) {
+					
+					this.originalAngle = this.robot.getAngle();
+					
+					if (this.robot.getAngle() > 0) {
+			    		this.originalAngle -= 360;
+			    	}
+				}
+				
 				if (this.robot.turningRadius == null) {
 					this.robot.createCircleLeft(new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()}, "Forward");
 				}
+				
 				if (!this.robot.checkBoundaries()) {
 					this.robot.turnLeft();
 				}
+				
+				if ((Math.abs(this.robot.getRobotCenter().getX() - target[0]) <= 0.08 && Math.abs(this.robot.getRobotCenter().getY() + target[1]) <= 0.08) ||
+						(Math.abs((this.originalAngle - this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02)) {
+					
+					this.iteration++;
+					this.originalAngle = 0;
+					instructionCompleted.add(this.currentInstruction);
+					this.currentInstruction = null;
+				}
+				
 				this.robot.turningRadius = null;
 				break;
 			default:
@@ -283,11 +353,11 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		//System.out.println(round(target[1]));
 		//System.out.println(this.currentInstruction.getTurnDirection());
 		// scan obstacle or reach target
-		if (Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()), round(this.robot.getRobotCenter().getY())},new double[] {round(target[0]),round(target[1])})) {
+		/*if (Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()), round(this.robot.getRobotCenter().getY())},new double[] {round(target[0]),round(target[1])})) {
 			this.iteration++;
 			instructionCompleted.add(this.currentInstruction);
 			this.currentInstruction = null;
-		}
+		}*/
 	}
 
 	public void move() {
@@ -312,27 +382,27 @@ public class ArenaFrame extends JPanel implements ActionListener{
 
 		if (this.currentInstruction != null || this.currentObstacle != null) {
 			if (this.sizeOfPath == 1) {
-				performMovement(this.currentInstruction.getTurnDirection(),new double[] {this.currentObstacle.getImageCenter().getX(),this.currentObstacle.getImageCenter().getY()});
+				performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),new double[] {this.currentObstacle.getObstacleCenter().getX(),this.currentObstacle.getObstacleCenter().getY()});
 			}
 			// two instructions
 			else if (this.sizeOfPath == 2) {
 				if (iteration == 0) {
-					performMovement(this.currentInstruction.getTurnDirection(),this.currentPath.getPt1());
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),this.currentPath.getPt1());
 				} 
 				else {
-					performMovement(this.currentInstruction.getTurnDirection(),new double[] {this.currentObstacle.getImageCenter().getX(),this.currentObstacle.getImageCenter().getY()});
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),new double[] {this.currentObstacle.getObstacleCenter().getX(),this.currentObstacle.getObstacleCenter().getY()});
 				}
 			} 
 			// three instructions
 			else {
 				if (iteration == 0) {
-					performMovement(this.currentInstruction.getTurnDirection(),this.currentPath.getPt1());
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),this.currentPath.getPt1());
 				} 
 				else if (iteration == 1) {
-					performMovement(this.currentInstruction.getTurnDirection(),this.currentPath.getPt2());
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),this.currentPath.getPt2());
 				} 
 				else {
-					performMovement(this.currentInstruction.getTurnDirection(),new double[] {this.currentObstacle.getImageCenter().getX(),this.currentObstacle.getImageCenter().getY()});
+					performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),new double[] {this.currentObstacle.getObstacleCenter().getX(),this.currentObstacle.getObstacleCenter().getY()});
 				}
 			}
 		}
@@ -363,6 +433,11 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		for(Instruction instruction: this.currentPath.getInstructions()) {
 			if (!this.instructionCompleted.contains(instruction) && this.currentInstruction == null) {
 				this.currentInstruction = instruction;
+				
+				// if need to turn, move forward by 15
+				if (this.currentInstruction.getTurnDirection() != "S") {
+					this.currentInstruction = new Instruction(this.robot.getAngle(),15,"S");
+				}
 			}
 		}
 	}
@@ -376,67 +451,32 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		}
 	}
 	
-	// from astar get node
-	public void getClosestObstacle() {
-
-		for(Obstacle obstacle: this.obstacleObjects) {
-			if (!this.obstacleSimulator.contains(obstacle) && this.currentObstacle == null) {
-				this.currentObstacle  = obstacle;
-			}
-		}
-	}
-	
-	@SuppressWarnings("unused")
-	private Obstacle getObstacle(Node node) {
-		 for (Obstacle obstacle : obstacleObjects) {
-			 if (obstacle.getObstacleID() == node.getObstacleID()) {
-				 return obstacle;
-			 }
-		 }
-		 return null;
-	 }
-	
 	public void findBestPath() {
-		// Initialise A* (once per plan path)
-		if (astar == null) {
-			astar = new Astar(obstacleObjects, arena, robot);
-		}
-
-		// Get the robot's next destination
-		if (currentObstacle == null) {
-			currentObstacle = astar.getNextObstacle(null);
-		} else {
-			Obstacle prev = currentObstacle;
-			currentObstacle = astar.getNextObstacle(prev);
-		}
-
+		
 		if (this.pathfinder == null) {
-			this.simrobot = new SimulatorRobot(25,-16,0); // create simulator robot --> no visualization
-			this.pathfinder = new PathFinder(ArenaFrame.obstacles); // input robot and nearest obstacle object
+			this.simrobot = new SimulatorRobot(this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY(),this.robot.getAngle()); // create simulator robot --> no visualization
+			this.pathfinder = new PathFinder(this.simrobot,this.obstacleObjects,ArenaFrame.obstacles);
 		}
 		
-		if(this.simrobot != null && this.currentObstacle != null) {
-			// Set robot and obstacle
-			this.pathfinder.setRobot(this.simrobot);
-			this.pathfinder.setObstacle(this.currentObstacle);
-	
-			Path bestPath = this.pathfinder.bestPath(currentObstacle); // found best path
+		if (this.pathfinder.getCurrentObstacle() == null)
+			this.pathfinder.getClosestObstacle();
+		
+		if(this.simrobot != null && this.pathfinder.getCurrentObstacle() != null) {
+			Path bestPath = this.pathfinder.bestPath(); // found best path
 			pathList.add(bestPath);
 				
 			this.planDistance += bestPath.getDist();
 			LabelFrame.distLabel.setText(String.format("Planned Distance : %.2f",this.planDistance));
 		
 			if (bestPath != null) {
-				obstacleSimulator.add(this.currentObstacle); // remove from obstacle
-				this.currentObstacle = null;
-				/*System.out.println(bestPath.getDist());
-				for (Instruction instruction: bestPath.getInstructions()) {
-					System.out.println(instruction.getTurnDirection());
-				}*/
-			}
-			
-			if (obstacleSimulator.size() == obstacleObjects.size()) {
-				running = false;
+				obstacleSimulator.add(this.pathfinder.getCurrentObstacle()); // remove from obstacle
+				
+				if (obstacleSimulator.size() == obstacleObjects.size()) {
+					this.running = false;
+				}
+				else {
+					this.pathfinder.getClosestObstacle();
+				}
 			}
 		}
 	}
@@ -448,17 +488,13 @@ public class ArenaFrame extends JPanel implements ActionListener{
     }
 	
 	// Add obstacle to array
-	public void addObstacle() {
-		// TODO: insert virtual obstacle into obstacles as -1
-		for (int i = -40; i <= 0; i++) {
-			for (int j = -40; j <= 0; j++) {
-				obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = -1;
-			}
-		}
+	public void addObstacle(Obstacle obstacle) {
 
-		for (int i = -10; i <= 0; i++) {
-			for (int j = -10; j <= 0; j++) {
-				obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = obstacle.getObstacleID(); // top right coordinate
+		for (int i = -9; i <= 0; i++) {
+			for (int j = -9; j <= 0; j++) {
+				if ((obstacle.getxCoordinate() + i > 0) && (obstacle.getyCoordinate() + j > 0) && (obstacle.getxCoordinate() + i < 200) && (obstacle.getyCoordinate() + j < 200)){
+					obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = obstacle.getObstacleID();
+				}
 			}
 		}
 	}
@@ -479,8 +515,8 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	public int getmaxID() {
 		int maxID = 0;
 		for( Obstacle obstacle: obstacleObjects) {
-			if (obstacle.obstacleID > maxID) {
-				maxID = obstacle.obstacleID;
+			if (obstacle.getObstacleID() > maxID) {
+				maxID = obstacle.getObstacleID();
 			}
 		}
 		return maxID;

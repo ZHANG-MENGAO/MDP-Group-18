@@ -25,8 +25,8 @@ public class Arena {
 		
 		// Start Zone
 		g.setColor(Color.green);
-		for(int i = 0; i <= 30; i++) {
-			for(int j = 0; j <= 30; j++) {
+		for(int i = 0; i < 40; i++) {
+			for(int j = 0; j < 40; j++) {
 				g.fillRect(i * UNIT_SIZE, ARENA_HEIGHT - UNIT_SIZE * j - UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
 			}
 		}

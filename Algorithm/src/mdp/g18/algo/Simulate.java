@@ -7,18 +7,15 @@ import java.util.Arrays;
 public class Simulate {
 	
 	private double[] originalCenter = new double[2]; // robot Original Center
-	private double[] frontCenter = new double[2]; // robot Original Center
+	private double[] frontCenter = new double[2];
+	private double[] backCenter = new double[2];
 	private double[] obstacleImageCenter = new double[2];
-    //private TurningRadius turningRadius;
-    private static final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
     
     private ArrayList<Path> possiblePaths;
     private ArrayList<Instruction> pathInstructions;
     Instruction currentInstruction;
     
     ArrayList<Data> coordinate = new ArrayList<>();
-   
-	public static final int ROBOT_SIZE = 30;
 	
 	private double tickOriginal;
 	private double angleOriginal;
@@ -27,29 +24,21 @@ public class Simulate {
 	private int [][] obstacles;
 	
 	Obstacle obstacle;
-	SimulatorRobot robot;
+	Robot robot;
 	
 	// Constructor
-	Simulate(SimulatorRobot robot, ArrayList<Path> possiblePaths, Obstacle obstacle, int[][] obstacles){	
-		
-		setPossiblePath(possiblePaths);
-		setObstacle(obstacle);
-		setObstacleCenter();
+	Simulate(int[][] obstacles){	
 		setAllObstacles(obstacles);
 		
+	}
+	
+	public void updateRobot(Robot robot) {
 		this.robot = robot;
-		setOriginalTick(robot.getTick());
-		setOriginalAngle(robot.getAngle());
-		setOriginalCenter(new double[] {robot.getRobotCenter().getX(),robot.getRobotCenter().getY()});
-		setFrontCenter(new double[] {robot.getCenterFront().getX(),robot.getCenterFront().getY()});
-		
-		for (Path path: getPossiblePath()) {
-			System.out.println(path.getDist());
-			for (Instruction instruction: path.getInstructions()) {
-				System.out.println(instruction.getTurnDirection());
-			}
-		}
-
+		setOriginalTick(this.robot.getTick());
+		setOriginalAngle(this.robot.getAngle());
+		setOriginalCenter(new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()});
+		setFrontCenter(new double[] {this.robot.getCenterFront().getX(),this.robot.getCenterFront().getY()});
+		setBackCenter(new double[] {this.robot.getCenterBack().getX(),this.robot.getCenterBack().getY()});
 	}
 
 	public Path simulateMove() {
@@ -61,11 +50,6 @@ public class Simulate {
 			int sizeOfPath = pathInstructions.size();  // get size of instructions
 			iteration = 0;
 			this.oneRound = false;
-			
-			/*System.out.println(path.getPt1()[0]);
-			System.out.println(path.getPt1()[1]);
-			System.out.println(path.getPt2()[0]);
-			System.out.println(path.getPt2()[1]);*/
 
 			for (Instruction instruction: pathInstructions) {
 				// one instruction
@@ -73,7 +57,6 @@ public class Simulate {
 					if (instruction.getTurnDirection() != "S") {
 						moveForward(this.frontCenter,15);
 					}
-					
 					performMovement(instruction.getTurnDirection(),instruction.getAngle(),instruction.getDistance(),new double[] {getObstacle().getImageCenter().getX(),getObstacle().getImageCenter().getY()});
 				}
 				// two instructions
@@ -92,10 +75,8 @@ public class Simulate {
 				} 
 				// three instructions
 				else {
-					//System.out.println(instruction.getTurnDirection());
 					if (iteration == 0) {
 						if (instruction.getTurnDirection() != "S") {
-							//System.out.println(instruction.getTurnDirection());
 							moveForward(this.frontCenter,15);
 						}
 						performMovement(instruction.getTurnDirection(),instruction.getAngle(),instruction.getDistance(),path.getPt1());
@@ -114,6 +95,7 @@ public class Simulate {
 			
 			// reach destination
 			if (this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
+				reverseBackward(this.backCenter,40);
 				bestPath = path;
 				break;
 			}
@@ -129,32 +111,17 @@ public class Simulate {
 	}
 
 	public void performMovement(String movement, double angle, double distance, double[] target) {
-		//System.out.println(round(this.robot.getCenterFront().getX()));
-		//System.out.println(round(this.robot.getCenterFront().getY()));
-		//System.out.println(round(target[0]));
-		//System.out.println(round(target[1]));
 		switch(movement){
 			case "S":
 				moveForward(target,distance);
 				break;
 			case "R":
-
 				this.robot.createCircleRight(new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()}, "Forward");
-				//System.out.println("R");
-				//System.out.println(this.robot.turningRadius.getCenter().getX());
-				//System.out.println(this.robot.turningRadius.getCenter().getY());
-				
 				turnRight(target,angle);
 				this.robot.turningRadius = null;
 				break;
 			case "L":
-
 				this.robot.createCircleLeft(new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()}, "Forward");
-				/*
-				System.out.println("L");
-				System.out.println(this.robot.turningRadius.getCenter().getX());
-				System.out.println(this.robot.turningRadius.getCenter().getY());*/
-				
 				turnLeft(target,angle);
 				this.robot.turningRadius = null;
 				break;
@@ -163,26 +130,22 @@ public class Simulate {
 		}
 	}
 
-	/*public boolean checkValid() {
-		if (this.obstacles[(int) getCurrentCenter()[0]][(int) getCurrentCenter()[1]] != 0) {
-			return false;
+	public boolean checkValid(Point2D.Double left, Point2D.Double right, Point2D.Double center) {
+		if (this.obstacles[(int) left.getX()][200 + ((int) left.getY()) - 1] != 0 && this.obstacles[(int) right.getX()][200 + ((int) right.getY()) - 1] != 0 &&
+				this.obstacles[(int) center.getX()][200 + ((int) center.getY()) - 1] != 0) {
+			return true;
 		}
-		return true;
-	}*/
+		return false;
+	}
     
     public void turnRight(double[] target, double angle){
-    	System.out.println((int)(target[0]));
-		System.out.println((int)(target[1]));
-		System.out.println(round(this.robot.getRobotCenter().getX()));
-		System.out.println(round(this.robot.getRobotCenter().getY()));
     	double tickNew = this.robot.getTick();
     	
     	double originalAngle = this.robot.getAngle();
     	if (this.robot.getAngle() < 0) {
     		originalAngle += 360;
     	}
-    		
-    	//while(!Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())},new double[] {(int)(target[0]),(int)(target[1])})) {
+    	
     	while((Math.abs(this.robot.getRobotCenter().getX() - target[0]) > 0.08 || Math.abs(this.robot.getRobotCenter().getY() - target[1]) > 0.08)) {
 
     		if (this.robot.getTick() - tickNew == 360) {
@@ -190,31 +153,19 @@ public class Simulate {
     			break;
     		}
     		
-    		if (this.robot.checkBoundaries()  || 
-        			(Math.abs((this.robot.getAngle() - originalAngle) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) || 
+    		if (this.robot.checkBoundaries()  || checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter()) ||
+        			(Math.abs((this.robot.getAngle() - originalAngle) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
+        			(Math.abs((360 - originalAngle + this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
     				this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
 				break;
 			}
     		
     		this.robot.turnRight();
     		this.coordinate.add(new Data(round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())));
-    		//System.out.println(this.robot.getAngle());
-    		System.out.println(angle);
-    		System.out.println(this.robot.getAngle());
-    		//System.out.println(round(this.robot.getRobotCenter().getX()));
-    		//System.out.println(round(this.robot.getRobotCenter().getY()));
     	}
-    	System.out.println("R");
-    	System.out.println(this.robot.getAngle());
-    	//System.out.println(round(this.robot.getRobotCenter().getX()));
-		//System.out.println(round(this.robot.getRobotCenter().getY()));
     }
     
     public void turnLeft(double[] target, double angle){
-    	System.out.println((int)(target[0]));
-		System.out.println((int)(target[1]));
-		System.out.println(round(this.robot.getRobotCenter().getX()));
-		System.out.println(round(this.robot.getRobotCenter().getY()));
     	double tickNew = this.robot.getTick();
     	
     	double originalAngle = this.robot.getAngle();
@@ -222,7 +173,6 @@ public class Simulate {
     		originalAngle -= 360;
     	}
     	
-    	//while(!Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())},new double[] {(int)(target[0]),(int)(target[1])})) {
     	while((Math.abs(this.robot.getRobotCenter().getX() - target[0]) > 0.08 || Math.abs(this.robot.getRobotCenter().getY() + target[1]) > 0.08)) {
     		
     		if (this.robot.getTick() - tickNew == 360) {
@@ -230,23 +180,19 @@ public class Simulate {
     			break;
     		}
     		
-    		if (this.robot.checkBoundaries() || (Math.abs((originalAngle - this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
+    		if (this.robot.checkBoundaries() || checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter()) ||
+    				(Math.abs((originalAngle - this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
+    				(Math.abs((originalAngle + 360 - this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
     				this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
 				break;
 			}
     		this.robot.turnLeft();
     		this.coordinate.add(new Data(round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())));
-    		System.out.println(this.robot.getAngle());
-    		System.out.println(angle);
-    		System.out.println(originalAngle);
-    		//System.out.println(round(this.robot.getRobotCenter().getX()));
-    		//System.out.println(round(this.robot.getRobotCenter().getY()));
     	}
-    	System.out.println("L");
-    	System.out.println(this.robot.getAngle());
     }
 
     public void moveForward(double[] target, double distance) {
+		
     	double dist = 0;
     	
     	double[] p1 = new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()};
@@ -254,31 +200,39 @@ public class Simulate {
     	while(!Arrays.equals(new double[] {round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())},new double[] {round(target[0]),round(target[1])})) {
     		
     		
-			if (this.robot.checkBoundaries() || (dist >= distance)
+			if (this.robot.checkBoundaries() || (dist >= distance) 
+					|| checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter())  
 					|| this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
 				break;
 			}
 			
 			this.robot.moveForward();
+			setFrontCenter(new double[] {this.robot.getCenterFront().getX(),this.robot.getCenterFront().getY()});
+			setBackCenter(new double[] {this.robot.getCenterBack().getX(),this.robot.getCenterBack().getY()});
 			dist = straightDistance(p1, new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()});
 			this.coordinate.add(new Data(round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())));
-			
-	    	//System.out.println(round(this.robot.getRobotCenter().getX()));
-			//System.out.println(round(this.robot.getRobotCenter().getY()));
 		}
 	}
     
-    public void reverseBackward(double[] target, double angle) {
-
+    public void reverseBackward(double[] target, double distance) {
+    	
+    	double dist = 0;
+    	
+    	double[] p1 = new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()};
+    	
 		while(!Arrays.equals(new int[] {round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())},new int[] {round(target[0]),round(target[1])})) {
-
-			if (this.robot.checkBoundaries() || this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
+			
+			if ((this.robot.checkBoundaries()) || (dist >= distance) || checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter())) {
 				break;
 			}
 			
 			this.robot.reverseBackward();
+			setFrontCenter(new double[] {this.robot.getCenterFront().getX(),this.robot.getCenterFront().getY()});
+			setBackCenter(new double[] {this.robot.getCenterBack().getX(),this.robot.getCenterBack().getY()});
+			dist = straightDistance(p1, new double[] {this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY()});
 			this.coordinate.add(new Data(round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())));
 		}
+
 	}
     
     public double straightDistance(double[] p1, double[] p2) {
@@ -322,7 +276,15 @@ public class Simulate {
     public double[] getFrontCenter(){
         return this.frontCenter;
     }
-	
+    
+    public void setBackCenter(double[] c){
+    	backCenter = c;
+    }
+    
+    public double[] getBackCenter(){
+        return this.backCenter;
+    }
+    
 	public void setObstacleCenter() {
 		obstacleImageCenter[0] = round(this.obstacle.getImageCenter().getX());
 		obstacleImageCenter[1] = round(this.obstacle.getImageCenter().getY());

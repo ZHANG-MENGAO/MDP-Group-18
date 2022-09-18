@@ -4,26 +4,18 @@ import java.util.ArrayList;
 
 public class Node implements Comparable<Node>{
 	private double g;
-	private int h;
-	private int cost;
-	private int[] coord;
+	private double[] coord;
 	private int obstacleID; // -1 if robot
 	public ArrayList<Edge> neighbour = new ArrayList<>();
 
 	private Node parent;
 	private boolean visited;
 
-	Node(int g, int h, int[] coord, Node parent, int id) {
+	Node(double g, double[] coord, Node parent, int id) {
 		this.g = g;
-		this.h = h;
-		this.cost = g + h;
 		this.coord = coord;
 		this.parent = parent;
 		this.obstacleID = id;
-	}
-
-	public void setCost(double g, int h) {
-		this.cost = (int) g + h;
 	}
 
 	public double getG() {
@@ -33,28 +25,16 @@ public class Node implements Comparable<Node>{
 	public void setG (double g){
 		this.g = g;
 	}
-	
-	public int getH() {
-		return h;
-	}
-
-	public void setH(int h) {
-		this.h = h;
-	}
-
-	public int getCost() {
-		return cost;
-	}
 
 	public boolean isVisited() { return visited; }
 
 	public void setVisited(boolean visited) { this.visited = visited; }
 
-	public int[] getCoord() {
+	public double[] getCoord() {
 		return this.coord;
 	}
 
-	public void setCoord(int[] coord) {
+	public void setCoord(double[] coord) {
 		this.coord = coord;
 	}
 
@@ -74,9 +54,9 @@ public class Node implements Comparable<Node>{
 		this.neighbour = neighbour;
 	}
 
-	public int calculateH(Node current, Node target) {
-		int x = Math.abs(current.getCoord()[0] - target.getCoord()[0]);
-        int y = Math.abs(current.getCoord()[1] - target.getCoord()[1]);
+	public double calculateH(Node current, Node target) {
+		double x = Math.abs(current.getCoord()[0] - target.getCoord()[0]);
+		double y = Math.abs(current.getCoord()[1] - target.getCoord()[1]);
 
 //        if (current.getParent().coord[0] == current.coord[0] && x == 0) return y;
 //        else if (current.getParent().coord[1] == current.coord[1] && y == 0) return x;
@@ -86,7 +66,11 @@ public class Node implements Comparable<Node>{
 
 	@Override
 	public int compareTo(Node o) {
-		// TODO Auto-generated method stub
+		if (this.getG() > o.getG()) {
+			return 1;
+		} else if (this.getG() < o.getG()) {
+			return -1;
+		}
 		return 0;
 	}
 	
