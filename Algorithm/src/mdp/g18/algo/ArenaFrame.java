@@ -52,7 +52,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	SimulatorRobot simrobot;
 	Obstacle obstacle;
 	Arena arena;
-	Astar astar;
 	Simulate simulator;
 	Timer timer;
 	Timer timer2;
@@ -452,46 +451,18 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			}
 		}
 	}
-	/*
-	// from astar get node
-	public void getClosestObstacle() {
-		
-		for(Obstacle obstacle: this.obstacleObjects) {
-			if (!this.obstacleSimulator.contains(obstacle) && this.currentObstacle == null) {
-				this.currentObstacle  = obstacle;
-			}
-		}
-	}
-	
-	@SuppressWarnings("unused")
-	private Obstacle getObstacle(Node node) {
-		 for (Obstacle obstacle : obstacleObjects) {
-			 if (obstacle.getObstacleID() == node.getObstacleID()) {
-				 return obstacle;
-			 }
-		 }
-		 return null;
-	}*/
 	
 	public void findBestPath() {
 		
-		//pathfinder
-		/*
-		if (this.currentObstacle == null)
-			getClosestObstacle();
-			*/
 		if (this.pathfinder == null) {
 			this.simrobot = new SimulatorRobot(this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY(),this.robot.getAngle()); // create simulator robot --> no visualization
 			this.pathfinder = new PathFinder(this.simrobot,this.obstacleObjects,ArenaFrame.obstacles);
 		}
 		
-		this.pathList = this.pathfinder.getBestPath();
+		if (this.pathfinder.getCurrentObstacle() == null)
+			this.pathfinder.getClosestObstacle();
 		
-		/*
-		if(this.simrobot != null && this.currentObstacle != null) {
-			// Set robot and obstacle
-			this.pathfinder.setObstacle(this.currentObstacle);
-	
+		if(this.simrobot != null && this.pathfinder.getCurrentObstacle() != null) {
 			Path bestPath = this.pathfinder.bestPath(); // found best path
 			pathList.add(bestPath);
 				
@@ -499,18 +470,16 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			LabelFrame.distLabel.setText(String.format("Planned Distance : %.2f",this.planDistance));
 		
 			if (bestPath != null) {
-				obstacleSimulator.add(this.currentObstacle); // remove from obstacle
-				this.currentObstacle = null;
-				System.out.println(bestPath.getDist());
-				for (Instruction instruction: bestPath.getInstructions()) {
-					System.out.println(instruction.getTurnDirection());
+				obstacleSimulator.add(this.pathfinder.getCurrentObstacle()); // remove from obstacle
+				
+				if (obstacleSimulator.size() == obstacleObjects.size()) {
+					this.running = false;
+				}
+				else {
+					this.pathfinder.getClosestObstacle();
 				}
 			}
-			
-			if (obstacleSimulator.size() == obstacleObjects.size()) {
-				running = false;
-			}
-		}*/
+		}
 	}
 	
 	private static int round(double val) {
@@ -520,10 +489,10 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	// Add obstacle to array
 	public void addObstacle(Obstacle obstacle) {
 
-		for (int i = -39; i <= 0; i++) {
-			for (int j = -39; j <= 0; j++) {
-				if ((obstacle.getxVirtual() + i > 0) && (obstacle.getyVirtual() + j > 0)){
-					obstacles[obstacle.getxVirtual() + i][obstacle.getyVirtual() + j] = obstacle.getObstacleID();
+		for (int i = -9; i <= 0; i++) {
+			for (int j = -9; j <= 0; j++) {
+				if ((obstacle.getxCoordinate() + i > 0) && (obstacle.getyCoordinate() + j > 0) && (obstacle.getxCoordinate() + i < 200) && (obstacle.getyCoordinate() + j < 200)){
+					obstacles[obstacle.getxCoordinate() + i][obstacle.getyCoordinate() + j] = obstacle.getObstacleID();
 				}
 			}
 		}

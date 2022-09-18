@@ -15,26 +15,26 @@ public class PathFinder {
 	private final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
 	private static List<String> bothDirection = Arrays.asList("R","L");
 	
-	ArrayList<Path> pathList = new ArrayList<>();
-	public ArrayList<Path> bestPath = new ArrayList<Path>();
-	ArrayList<Data> pathCoordinates = new ArrayList<Data>();
+	private ArrayList<Path> pathList = new ArrayList<>();
+	private ArrayList<Data> pathCoordinates = new ArrayList<Data>();
 	
-	ArrayList<Obstacle> obstacleList = new ArrayList<Obstacle>();
-	ArrayList<Node> nodeList = new ArrayList<Node>();
+	private ArrayList<Obstacle> obstacleList = new ArrayList<Obstacle>();
+
+	//ArrayList<Node> nodeList = new ArrayList<Node>();
 	
-	public SimulatorRobot robot;
-	public Obstacle obstacle;
-	public TurningRadius turningRadius;
-	public Simulate simulator;
-	public Astar astar;
-	public Path path;
-	public Path newBestPath;
+	private Robot robot;
+	private Obstacle obstacle;
+	private TurningRadius turningRadius;
+	private Simulate simulator;
+	private Astar astar;
+	private Path path;
+	private Path newBestPath;
 	
 	private double[] obstacleImageCenter = new double[2];
 	private double[] robotCenter = new double[2];
 	private int[][] obstacleCoordinates;
 	
-	PathFinder(SimulatorRobot robot,ArrayList<Obstacle> obstacleList, int[][] obstacleCoordinates){
+	PathFinder(Robot robot,ArrayList<Obstacle> obstacleList, int[][] obstacleCoordinates){
 		this.obstacleList = obstacleList;
 		this.obstacleCoordinates = obstacleCoordinates;
 		this.setRobot(robot);
@@ -43,44 +43,19 @@ public class PathFinder {
 			astar = new Astar(this.obstacleList,this.robot);
 		}
 		
-		if(nodeList.isEmpty()) {
-			this.nodeList = astar.createNodes();
-		}
 	}
-
+	
 	public void getClosestObstacle() {
 
 		if (getCurrentObstacle() == null) {
-			Node currentObstacle = astar.runAStar(this.nodeList.get(0),this.nodeList.get(this.nodeList.size() - 1)); // get closest obstacle
-			
-			// set new obstacle
-			setObstacle(getObstacle(currentObstacle));
-			setObstacleCenter();
-			this.nodeList.remove(currentObstacle);
+			setObstacle(astar.getNextObstacle(null));
+		}else {
+			Obstacle prev = getCurrentObstacle();
+			setObstacle(astar.getNextObstacle(prev));
 		}
-	}
-		
-	private Obstacle getObstacle(Node node) {
-		for (Obstacle obstacle : this.obstacleList) {
-			if (obstacle.getObstacleID() == node.getObstacleID()) {
-				return obstacle;
-			}
-		}
-		return null;
 	}
 	
-	public ArrayList<Path> getBestPath(){
-		
-		while(this.nodeList.size() > 1) {
-			getClosestObstacle();
-			bestPath();
-			this.bestPath.add(this.newBestPath);
-		}
-		
-		return this.bestPath;
-	}
-	
-	public void bestPath() {
+	public Path bestPath() {
 		ArrayList <Path> possiblePaths = possiblePaths(); // all possible path
 		
 		if(simulator == null) {
@@ -94,9 +69,9 @@ public class PathFinder {
 		
 		this.newBestPath = simulator.simulateMove();
 		pathCoordinates.addAll(simulator.getPathCoordinates());
-		setObstacle(null);
-		pathList.clear();
-		this.nodeList = astar.updateNodes(this.nodeList); // update nodes
+		setRobot(this.robot); // update robot position
+		
+		return this.newBestPath;
 	}
 	
 	public ArrayList<Path> possiblePaths() {
@@ -836,8 +811,7 @@ public class PathFinder {
 		} else if (arcLength[0] > 0 && direction == "R"){
 			arcLength[0] -= 2 * Math.PI;
 		}
-		
-		//System.out.println(arcLength[0]);
+
 		arcLength[1] = Math.abs(arcLength[0] * TurningRadius.getRadius());
 		return arcLength;
 	}
@@ -866,19 +840,20 @@ public class PathFinder {
 	
 	public void setObstacle(Obstacle obstacle) {
 		this.obstacle = obstacle;
+		setObstacleCenter();
 	}
 	
 	public Obstacle getCurrentObstacle() {
 		return this.obstacle;
 	}
 	
-	public void setRobot(SimulatorRobot robot) {
+	public void setRobot(Robot robot) {
 		this.robot = robot;
 		setRobotCenter();
 	}
 	
 	public void paintPath(Graphics g) {
-		g.setColor(Color.red);
+		g.setColor(Color.white);
 		for(Data path: pathCoordinates) {
 			g.fillRect((path.getElement(0)) * Arena.UNIT_SIZE, (200 + path.getElement(1)) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}

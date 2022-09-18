@@ -24,7 +24,7 @@ public class Simulate {
 	private int [][] obstacles;
 	
 	Obstacle obstacle;
-	SimulatorRobot robot;
+	Robot robot;
 	
 	// Constructor
 	Simulate(int[][] obstacles){	
@@ -32,7 +32,7 @@ public class Simulate {
 		
 	}
 	
-	public void updateRobot(SimulatorRobot robot) {
+	public void updateRobot(Robot robot) {
 		this.robot = robot;
 		setOriginalTick(this.robot.getTick());
 		setOriginalAngle(this.robot.getAngle());
@@ -95,7 +95,7 @@ public class Simulate {
 			
 			// reach destination
 			if (this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
-				reverseBackward(this.backCenter,30);
+				reverseBackward(this.backCenter,40);
 				bestPath = path;
 				break;
 			}
@@ -130,8 +130,9 @@ public class Simulate {
 		}
 	}
 
-	public boolean checkValid(Point2D.Double d) {
-		if (this.obstacles[(int) d.getX()][200 + ((int) d.getY()) - 1] != 0 && this.obstacle.getObstacleID() != this.obstacles[(int) d.getX()][200 + ((int) d.getY()) - 1]) {
+	public boolean checkValid(Point2D.Double left, Point2D.Double right, Point2D.Double center) {
+		if (this.obstacles[(int) left.getX()][200 + ((int) left.getY()) - 1] != 0 && this.obstacles[(int) right.getX()][200 + ((int) right.getY()) - 1] != 0 &&
+				this.obstacles[(int) center.getX()][200 + ((int) center.getY()) - 1] != 0) {
 			return true;
 		}
 		return false;
@@ -152,7 +153,7 @@ public class Simulate {
     			break;
     		}
     		
-    		if (this.robot.checkBoundaries()  || checkValid(this.robot.getRobotCenter()) ||
+    		if (this.robot.checkBoundaries()  || checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter()) ||
         			(Math.abs((this.robot.getAngle() - originalAngle) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
         			(Math.abs((360 - originalAngle + this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
     				this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
@@ -179,7 +180,7 @@ public class Simulate {
     			break;
     		}
     		
-    		if (this.robot.checkBoundaries() || checkValid(this.robot.getRobotCenter()) ||
+    		if (this.robot.checkBoundaries() || checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter()) ||
     				(Math.abs((originalAngle - this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
     				(Math.abs((originalAngle + 360 - this.robot.getAngle()) * this.robot.DEG_TO_RAD - Math.abs(angle)) <= 0.02) ||
     				this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
@@ -200,7 +201,7 @@ public class Simulate {
     		
     		
 			if (this.robot.checkBoundaries() || (dist >= distance) 
-					|| checkValid(this.robot.getRobotCenter()) 
+					|| checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter())  
 					|| this.robot.sensor.scanObstacle(new double[] {this.obstacle.getObstacleCenter().getX(),this.obstacle.getObstacleCenter().getY()})) {
 				break;
 			}
@@ -221,7 +222,7 @@ public class Simulate {
     	
 		while(!Arrays.equals(new int[] {round(this.robot.getRobotCenter().getX()),round(this.robot.getRobotCenter().getY())},new int[] {round(target[0]),round(target[1])})) {
 			
-			if ((this.robot.checkBoundaries()) || (dist >= distance) || checkValid(this.robot.getRobotCenter())) {
+			if ((this.robot.checkBoundaries()) || (dist >= distance) || checkValid(this.robot.getCenterLeft(),this.robot.getCenterRight(),this.robot.getRobotCenter())) {
 				break;
 			}
 			
@@ -283,7 +284,7 @@ public class Simulate {
     public double[] getBackCenter(){
         return this.backCenter;
     }
-	
+    
 	public void setObstacleCenter() {
 		obstacleImageCenter[0] = round(this.obstacle.getImageCenter().getX());
 		obstacleImageCenter[1] = round(this.obstacle.getImageCenter().getY());
