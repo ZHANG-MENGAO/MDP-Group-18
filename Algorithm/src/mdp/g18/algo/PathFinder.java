@@ -48,10 +48,25 @@ public class PathFinder {
 	public void getClosestObstacle() {
 
 		if (getCurrentObstacle() == null) {
-			setObstacle(astar.getNextObstacle(null));
+			Obstacle newObstacle = astar.getNextObstacle(null);
+			if (newObstacle != null) {
+				setObstacle(newObstacle);
+			}
 		}else {
 			Obstacle prev = getCurrentObstacle();
-			setObstacle(astar.getNextObstacle(prev));
+			Obstacle newObstacle = astar.getNextObstacle(prev);
+			if (newObstacle != null) {
+				setObstacle(newObstacle);
+			}
+		}
+	}
+	
+	public void getNextClosestObstacle() {
+		if (getCurrentObstacle() != null) {
+			Obstacle newObstacle = astar.getNextObstacle(getCurrentObstacle());
+			if (newObstacle != null) {
+				setObstacle(newObstacle);
+			}
 		}
 	}
 	
