@@ -14,7 +14,7 @@ public class RPiClient {
 
 	// TODO: find out RPi IP address and port
 	public final String RPI_IP_ADDRESS = "";
-	public final int RPI_PORT = 0;
+	public final int RPI_PORT = 2763;
 
 	public static void main (String[] args) throws IOException {
 		RPiClient client = new RPiClient();

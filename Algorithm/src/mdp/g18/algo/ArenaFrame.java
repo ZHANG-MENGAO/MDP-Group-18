@@ -7,9 +7,11 @@ import javax.swing.Timer;
 
 import java.awt.event.*;
 import java.awt.geom.Point2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class ArenaFrame extends JPanel implements ActionListener{
 
@@ -21,7 +23,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	public ArrayList<Path> pathComplete = new ArrayList<Path>();
 	public ArrayList<Instruction> instructionCompleted = new ArrayList<Instruction>();
 	public ArrayList<Node> nodes;
-	
+
 	// get mouse coordinates 
 	public int mx = -100;
 	public int my = -100;
@@ -33,6 +35,8 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	public boolean clearObstacles = false;
 	public boolean running = false;
 	public boolean start = false;
+
+	private RPiClient client;
 	
 	private Obstacle currentObstacle;
 	private Path currentPath;
@@ -235,6 +239,13 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		}
 		
 		if (start) {
+			client = new RPiClient();
+			try {
+				client.startConnection();
+			} catch (IOException ex) {
+				throw new RuntimeException(ex);
+			}
+			client.receiveMsg();
 			move();
 			//perform();
 		}
@@ -390,14 +401,23 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		}
 
 		if (this.currentInstruction != null || this.currentObstacle != null) {
-			
+			String msg = "";
 			if (this.currentInstruction.getTurnDirection() == "S" && this.currentInstruction.getDistance() == 15) {
+				// For RPi
+				msg = Message.MOVE_FORWARD + this.currentInstruction.getDistance();
 				performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),this.frontCenter);
 			}
 			else if (this.currentPath == null && this.currentInstruction.getTurnDirection() == "Re"){
+				// TODO: check for reverse distance
+				msg = Message.MOVE_BACKWARD + "10";
 				performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),this.backCenter);
 			}
 			else if (this.currentPath != null){
+				msg = this.currentInstruction.turnDirection;
+				if (!Objects.equals(this.currentInstruction.turnDirection, "S")) {
+					msg += this.currentInstruction.getAngle();
+				}
+
 				if (this.sizeOfPath == 1) {
 					performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),new double[] {this.currentObstacle.getObstacleCenter().getX(),this.currentObstacle.getObstacleCenter().getY()});
 				}
@@ -442,8 +462,8 @@ public class ArenaFrame extends JPanel implements ActionListener{
 						this.currentInstruction = new Instruction(this.robot.getAngle(),40,"Re");
 					}
 				}
-				
 			}
+			client.sendMsg(msg);
 		}
 	}
 	
@@ -510,7 +530,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			} else {
 				this.pathfinder.getNextClosestObstacle();
 			}
-			
 		}
 	}
 
