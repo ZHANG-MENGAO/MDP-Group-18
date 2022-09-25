@@ -6,6 +6,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
@@ -18,7 +19,7 @@ public class RobotImage extends Robot{
 	RobotImage(double x, double y, double angle){	
 		super(x,y,angle);
 		try{
-	        robotImage = ImageIO.read(getClass().getResource("/Resources/robot.png"));
+	        robotImage = ImageIO.read(Objects.requireNonNull(getClass().getResource("robot.png")));
 	        robotImage = resizeImage(robotImage, RADIUS, RADIUS);
 	    }catch(IOException e){e.printStackTrace();}
 	    catch(Exception e){e.printStackTrace();}

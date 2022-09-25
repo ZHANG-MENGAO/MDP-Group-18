@@ -1,10 +1,6 @@
 package mdp.g18.algo;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.PriorityQueue;
 
 public class Astar {
 	ArrayList<Obstacle> obstacles;
@@ -15,13 +11,7 @@ public class Astar {
 	Astar(ArrayList<Obstacle> obstacleObjects, Robot robot){
 		this.obstacles = obstacleObjects;
 		this.robot = robot;
-		init();
-	}
-
-	private void init() {
-		// Run A* to update parent of each node
-		nodes = createNodes();
-		nodes = runAStar(nodes);
+		nodes = runAlgo();
 	}
 
 	public Obstacle getNextObstacle(Obstacle obs) {
@@ -62,46 +52,73 @@ public class Astar {
 		}
 		return null;
 	}
-	
-	private ArrayList<Node> runAStar(ArrayList<Node> nodes){
-		Node start = nodes.get(0);
-		Node target = nodes.get(nodes.size() - 1);
-	    ArrayList<Node> closedList = new ArrayList<Node>(); // Visited
-	    ArrayList<Node> openList = new ArrayList<Node>(); // Frontier
 
+	private ArrayList<Node> runAlgo(){
+		// Create nodes of robot and obstacles
+		nodes = createNodes();
 
-		// Visiting start now
-		openList.add(start);
+		// Create another ArrayList to contain order of visiting
+		ArrayList<Node> orderOfNodes = new ArrayList<>();
+		orderOfNodes.add(nodes.get(0));
 
-		while (!openList.isEmpty()) {
-			Node current = openList.get(0);
-
-			// Go through every neighbour of currently visiting node
-			for (Node.Edge edge : current.neighbour) {
-				Node child = edge.node;
-				double totalWeight = edge.weight;
-
-				// Child has not been visited
-				if (!openList.contains(child) && !closedList.contains(child)) {
-					child.setParent(current);
-					child.setG(totalWeight);
-					openList.add(child);
-				}
-				// Child has been visited
-				else {
-					if (totalWeight < child.getG() && !closedList.contains(child)) {
-						child.setParent(current);
-						child.setG(totalWeight);
-					}
+		// Loop through every neighbour of n to find nearest node of n
+		for (Node n : nodes) {
+			double minDist = 99999999;
+			Node shortestNeighbour = null;
+			for (Node.Edge e : n.neighbour) {
+				if (e.weight < minDist && !orderOfNodes.contains(e.node)) {
+					minDist = e.weight;
+					shortestNeighbour = e.node;
 				}
 			}
 
-			// Mark current as visited
-			openList.remove(current);
-			closedList.add(current);
-			Collections.sort(openList);
+			// Add nearest node to orderOfNodes
+			if (shortestNeighbour != null) {
+				orderOfNodes.add(shortestNeighbour);
+				shortestNeighbour.setParent(n);
+			}
 		}
-		return closedList;
+
+		return orderOfNodes;
+
+//		Node start = nodes.get(0);
+//		Node target = new Node(0, new double[] {0, 0}, null, -1);
+//	    ArrayList<Node> closedList = new ArrayList<Node>(); // Visited
+//	    ArrayList<Node> openList = new ArrayList<Node>(); // Frontier
+//
+//
+//		// Visiting start now
+//		openList.add(start);
+//
+//		while (!openList.isEmpty()) {
+//			Node current = openList.get(0);
+//
+//			// Go through every neighbour of currently visiting node
+//			for (Node.Edge edge : current.neighbour) {
+//				Node child = edge.node;
+//				double totalWeight = edge.weight;
+//
+//				// Child has not been visited
+//				if (!openList.contains(child) && !closedList.contains(child)) {
+//					child.setParent(current);
+//					child.setG(totalWeight);
+//					openList.add(child);
+//				}
+//				// Child has been visited
+//				else {
+//					if (totalWeight < child.getG() && !closedList.contains(child)) {
+//						child.setParent(current);
+//						child.setG(totalWeight);
+//					}
+//				}
+//			}
+//
+//			// Mark current as visited
+//			openList.remove(current);
+//			closedList.add(current);
+//			Collections.sort(openList);
+//		}
+//		return closedList;
 	}
 	
 	private double calDistance(double[] current, double[] destination) {
@@ -110,7 +127,7 @@ public class Astar {
 		return Math.sqrt(Math.abs(Math.pow(x, 2) + Math.pow(y, 2)));
 	}
 
-	// Creates an ArrayList of Nodes to be used for the A* algorithm
+	// Creates an ArrayList of Nodes to be used for the algorithm
 	private ArrayList<Node> createNodes() {
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		Node robotPos = new Node(0, new double[] {this.robot.getRobotCenter().getX(), this.robot.getRobotCenter().getY()}, null, -1);

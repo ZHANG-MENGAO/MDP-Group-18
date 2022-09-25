@@ -239,13 +239,14 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		}
 		
 		if (start) {
-			client = new RPiClient();
-			try {
-				client.startConnection();
-			} catch (IOException ex) {
-				throw new RuntimeException(ex);
-			}
-			client.receiveMsg();
+			// TODO: test connection
+//			client = new RPiClient();
+//			try {
+//				client.startConnection();
+//			} catch (IOException ex) {
+//				throw new RuntimeException(ex);
+//			}
+//			client.receiveMsg();
 			move();
 			//perform();
 		}
@@ -463,7 +464,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 					}
 				}
 			}
-			client.sendMsg(msg);
+//			client.sendMsg(msg);
 		}
 	}
 	
@@ -513,7 +514,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			this.pathfinder.getClosestObstacle();
 		
 		if(this.simrobot != null && this.pathfinder.getCurrentObstacle() != null) {
-			Path bestPath = this.pathfinder.bestPath(); // found best path
+			Path bestPath = this.pathfinder.bestPath(pathfinder.getCurrentObstacle()); // found best path
 			if(bestPath != null) {
 				pathList.add(bestPath);
 					

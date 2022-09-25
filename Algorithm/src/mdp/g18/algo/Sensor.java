@@ -36,17 +36,17 @@ public class Sensor {
 	}
 	
 	public void updateX(double x, double angle) {
-		this.xs[0] = round(x + 15 * Math.sin(angle * DEG_TO_RAD) - 15 * Math.cos(angle * DEG_TO_RAD));
-		this.xs[1] = round(x + 15 * Math.sin(angle * DEG_TO_RAD) + 15 * Math.cos(angle * DEG_TO_RAD));
-		this.xs[2] = round(x + 35 * Math.sin(angle * DEG_TO_RAD) + 15 * Math.cos(angle * DEG_TO_RAD));
-		this.xs[3] = round(x + 35 * Math.sin(angle * DEG_TO_RAD) - 15 * Math.cos(angle * DEG_TO_RAD));
+		this.xs[0] = round(x + 10 * Math.sin(angle * DEG_TO_RAD) - 10 * Math.cos(angle * DEG_TO_RAD));
+		this.xs[1] = round(x + 10 * Math.sin(angle * DEG_TO_RAD) + 10 * Math.cos(angle * DEG_TO_RAD));
+		this.xs[2] = round(x + 30 * Math.sin(angle * DEG_TO_RAD) + 10 * Math.cos(angle * DEG_TO_RAD));
+		this.xs[3] = round(x + 30 * Math.sin(angle * DEG_TO_RAD) - 10 * Math.cos(angle * DEG_TO_RAD));
 	}
 	
 	public void updateY(double y, double angle) {
-		this.ys[0] = round(y - 15 * Math.cos(angle * DEG_TO_RAD) - 15 * Math.sin(angle * DEG_TO_RAD));
-		this.ys[1] = round(y - 15 * Math.cos(angle * DEG_TO_RAD) + 15 * Math.sin(angle * DEG_TO_RAD));
-		this.ys[2] = round(y - 35 * Math.cos(angle * DEG_TO_RAD) + 15 * Math.sin(angle * DEG_TO_RAD));
-		this.ys[3] = round(y - 35 * Math.cos(angle * DEG_TO_RAD) - 15 * Math.sin(angle * DEG_TO_RAD));
+		this.ys[0] = round(y - 10 * Math.cos(angle * DEG_TO_RAD) - 10 * Math.sin(angle * DEG_TO_RAD));
+		this.ys[1] = round(y - 10 * Math.cos(angle * DEG_TO_RAD) + 10 * Math.sin(angle * DEG_TO_RAD));
+		this.ys[2] = round(y - 30 * Math.cos(angle * DEG_TO_RAD) + 10 * Math.sin(angle * DEG_TO_RAD));
+		this.ys[3] = round(y - 30 * Math.cos(angle * DEG_TO_RAD) - 10 * Math.sin(angle * DEG_TO_RAD));
 	}
 	
 	private static int round(double val) {

@@ -67,12 +67,14 @@ public class PathFinder {
 		}
 	}
 	
-	public Path bestPath() {
+	public Path bestPath(Obstacle obs) {
 		ArrayList <Path> possiblePaths = possiblePaths(); // all possible path
 		
 		if(simulator == null) {
 			simulator = new Simulate(this.obstacleCoordinates);
 		}
+
+		this.obstacle = obs;
 		
 		simulator.setObstacle(this.obstacle);
 		simulator.setObstacleCenter();
