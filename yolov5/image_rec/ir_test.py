@@ -12,7 +12,7 @@ from PIL import Image
 import sys
 
 # adding Folder_2 to the system path
-sys.path.insert(0, 'C:/Users/guanl/yolov5/image_rec/model') # the path to /model
+sys.path.insert(0, 'C:/Users/guanl/yolov5/image_rec/model')
 # sys.path.insert(0, '/yolov5/image_rec')
 
 from detect import main, parse_opt
@@ -92,9 +92,9 @@ if str(recvMsg) == 'g':
         #print('frame_read: ', frame_read)
         image = Image.fromarray(frame_read, 'RGB')
 
-        # path to /model/images, to save images
         cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num), frame_read)
-
+        # cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num), frame_read)
+    # cv2.imwrite('test_image', frame_read)
         cv2.imshow("image", frame_read)
         cv2.waitKey()
 
@@ -104,7 +104,6 @@ if str(recvMsg) == 'g':
         print('this is the returned label ', label)
 
         try:
-            # path to /model/images, to delete images
             os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num))
         except:
             pass
