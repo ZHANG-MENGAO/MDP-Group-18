@@ -1,5 +1,7 @@
 package mdp.g18.algo;
 
+import java.util.ArrayList;
+
 public class Message {
 	public final static String MOVE_FORWARD = "F";
 	public final static String MOVE_BACKWARD = "B";

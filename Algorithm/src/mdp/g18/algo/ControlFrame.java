@@ -8,17 +8,18 @@ import javax.swing.JButton;
 
 @SuppressWarnings("serial")
 public class ControlFrame extends JPanel{
+	int NUM_OF_BUTTONS = 5;
 	
 	JButton resetButton;
 	JButton obstacleButton;
-	JButton clearButton;
+	JButton loadButton;
 	JButton planButton;
 	JButton startButton;
 	
 	ControlFrame(){
-		this.setLayout(new GridLayout(1, 5, 10, 0));
+		this.setLayout(new GridLayout(1, NUM_OF_BUTTONS, 10, 0));
 		
-		// Reset Button
+		// Reset paths and obstacles
 		resetButton = new JButton("Reset");
 		this.add(resetButton);
 		
@@ -26,15 +27,15 @@ public class ControlFrame extends JPanel{
 		obstacleButton = new JButton("Add Obstacle");
 		this.add(obstacleButton);
 		
-		// Add obstacle
-		clearButton = new JButton("Clear");
-		this.add(clearButton);
+		// Load obstacles from Android
+		loadButton = new JButton("Load Obstacles");
+		this.add(loadButton);
 		
-		// Add obstacle
+		// Display planned path
 		planButton = new JButton("Plan Path");
 		this.add(planButton);
 		
-		// Add obstacle
+		// Robot executes planned path
 		startButton = new JButton("Execute");
 		this.add(startButton);
 	}

@@ -8,12 +8,11 @@ import javax.swing.Timer;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class ArenaFrame extends JPanel implements ActionListener{
+	public final int NUM_OF_OBSTACLES = 5;
 
 	// list of obstacles
 	public ArrayList<Obstacle> obstacleObjects = new ArrayList<Obstacle>();
@@ -33,6 +32,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	public boolean addObstacles = false;
 	public boolean setImage = true;
 	public boolean clearObstacles = false;
+	public boolean loadObstacles = true;
 	public boolean running = false;
 	public boolean start = false;
 
@@ -78,7 +78,10 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		
 		arena = new Arena();
 		robot = new RealRobot(15,-15,0);
-		
+
+		client = new RPiClient();
+
+
 		// Initialize no obstacles
 		for(int i = 0; i < Arena.GRIDNO; i++) {
 			for(int j = 0; j < Arena.GRIDNO; j++) {
@@ -97,33 +100,47 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
 			obstacle.paintObstacle(g, true);
 		}
-		
-		// Draw Obstacles
-		for( Obstacle obstacle: obstacleObjects) {
-			obstacle.paintObstacle(g, false);
-			mouseDir = move.mouseDirection();
-			
-			// Enables selection of the side the image
-			if (obstacle.getDirection() == Direction.UNSET) {
-				if (setImage) {
-					// Remove outline of adding obstacles
-					addObstacles = false;
 
-					// Paint image selection animation on frame
-					obstacle.selectImage(g, true, mouseDir);
-				}
-				else {
-					// Paint image location in correct color and set direction of image
-					obstacle.selectImage(g, false, mouseDir);
-								// Allow image selection on next obstacle
-					setImage = true;
-					if (obstacleObjects.size() < 5) {
+		if (loadObstacles && obstacle != null) {
+			obstacle.paintObstacle(g, false);
+		}
+
+		// Draw Obstacles
+		for (Obstacle obstacle: obstacleObjects) {
+//			obstacle.paintObstacle(g, false);
+//			mouseDir = move.mouseDirection();
+
+			if (loadObstacles) {
+				obstacle.paintObstacle(g, false);
+				obstacle.selectImage(g, false, obstacle.getDirection());
+			}
+			else{
+				obstacle.paintObstacle(g, false);
+				mouseDir = move.mouseDirection();
+
+				// Enables selection of the side the image
+				if (obstacle.getDirection() == Direction.UNSET) {
+					if (setImage) {
+						// Remove outline of adding obstacles
+						addObstacles = false;
+
+						// Paint image selection animation on frame
+						obstacle.selectImage(g, true, mouseDir);
+					}
+					else {
+						// Paint image location in correct color and set direction of image
+						obstacle.selectImage(g, false, mouseDir);
+
+						// Allow image selection on next obstacle
+						setImage = true;
+						if (obstacleObjects.size() < NUM_OF_OBSTACLES) {
 							addObstacles = true;
+						}
 					}
 				}
-			}
-			else {
-				obstacle.selectImage(g, false, obstacle.getDirection());
+				else {
+					obstacle.selectImage(g, false, obstacle.getDirection());
+				}
 			}
 		}
 		
@@ -177,21 +194,20 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	}
 	
 	public class Click implements MouseListener{
-
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			
 			// click add obstacle
-			if (obstacleObjects.size() < 5 && addObstacles && coordinateX() != -1 && coordinateY() != -1 && obstacles[coordinateX()][coordinateY()] == 0) {
+			if (obstacleObjects.size() < NUM_OF_OBSTACLES && addObstacles && coordinateX() != -1 && coordinateY() != -1 && obstacles[coordinateX()][coordinateY()] == 0) {
 				obstacle = new Obstacle(getmaxID() + 1,coordinateX(),coordinateY(),Direction.UNSET);
 				addObstacle(obstacle);
 				obstacleObjects.add(obstacle);
 				repaint();
 			}
-			
+
 			// click clear obstacle
-			if (obstacleObjects.size() > 0  && clearObstacles && coordinateX() != -1 && coordinateY() != -1 && obstacles[coordinateX()][coordinateY()] != 0) {
-				for( Obstacle obstacle: obstacleObjects) {
+			if (obstacleObjects.size() < NUM_OF_OBSTACLES  && clearObstacles && coordinateX() != -1 && coordinateY() != -1 && obstacles[coordinateX()][coordinateY()] != 0) {
+				for (Obstacle obstacle: obstacleObjects) {
 					if (obstacle.getObstacleID() == obstacles[coordinateX()][coordinateY()]) {
 						removeObstacle(obstacle.getObstacleID());
 						obstacleObjects.remove(obstacle);
@@ -200,13 +216,29 @@ public class ArenaFrame extends JPanel implements ActionListener{
 					}
 				}
 			}
-			
-			// click image direction on obstacle
-			if (setImage && !addObstacles) {
+
+			// Click load obstacles
+			if (obstacleObjects.size() <= 1 && loadObstacles && obstacles[coordinateX()][coordinateY()] == 0) {
+				// Manual data for testing
+				String raw = "153,50,-90,1:52,118,180,2:170,117,180,3:99,172,-90,4:69,69,0,5";
+				ArrayList<Object[]> msg = client.processString(raw);
+
+//				ArrayList<Object[]> msg = client.processString(client.receiveMsg());
+
+				for (Object[] o : msg) {
+					Obstacle obstacle = new Obstacle((Integer) o[0], (Integer)o[1], (Integer)o[2], (Direction) o[3]);
+					addObstacle(obstacle);
+					obstacleObjects.add(obstacle);
+				}
+
+				repaint();
+			}
+
+			// Click image direction on obstacle
+			if (setImage && !addObstacles && !loadObstacles) {
 				setImage = false;
 				repaint();
 			}
-			
 		}
 
 		@Override
@@ -237,10 +269,9 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		if (running) {
 			findBestPath();
 		}
-		
+
 		if (start) {
 			// TODO: test connection
-//			client = new RPiClient();
 //			try {
 //				client.startConnection();
 //			} catch (IOException ex) {
@@ -495,7 +526,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	}
 
 	public void getTargetObstacle() {
-		
 		for(Obstacle obstacle: this.obstacleSimulator) {
 			if (!this.obstacleCompleted.contains(obstacle) && this.currentObstacle == null) {
 				this.currentObstacle  = obstacle;
@@ -504,7 +534,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	}
 	
 	public void findBestPath() {
-		
 		if (this.pathfinder == null) {
 			this.simrobot = new SimulatorRobot(this.robot.getRobotCenter().getX(),this.robot.getRobotCenter().getY(),this.robot.getAngle()); // create simulator robot --> no visualization
 			this.pathfinder = new PathFinder(this.simrobot,this.obstacleObjects,ArenaFrame.obstacles);
@@ -533,8 +562,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 			}
 		}
 	}
-
-
 	
 	private static int round(double val) {
         return (int) Math.round(val);
