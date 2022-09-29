@@ -29,7 +29,8 @@ public class MainFrame extends JFrame implements ActionListener{
 		label = new LabelFrame();
 		control.resetButton.addActionListener(this);
 		control.obstacleButton.addActionListener(this);
-		control.clearButton.addActionListener(this);
+		control.loadButton.addActionListener(this);
+		control.connectButton.addActionListener(this);
 		control.planButton.addActionListener(this);
 		control.startButton.addActionListener(this);
 		
@@ -42,7 +43,6 @@ public class MainFrame extends JFrame implements ActionListener{
 		this.setResizable(false);
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);
-
 	}
 	
 	@Override
@@ -56,26 +56,29 @@ public class MainFrame extends JFrame implements ActionListener{
 			SwingUtilities.updateComponentTreeUI(this);
 		}
 		
+		// connect to rpi
+		if (e.getSource() == control.connectButton) {
+			arena.connectToRPI();
+		}
+
+		// Load obstacles
+		if (e.getSource() == control.loadButton) {
+			arena.drawObstacles();
+			arena.loadObstacles = true;
+		}
+
 		// Add Obstacles
 		if (e.getSource() == control.obstacleButton) {
-			arena.clearObstacles = false;
 			arena.running = false;
 			arena.setImage = true;
 			arena.addObstacles = !arena.addObstacles;
+			arena.loadObstacles = false;
 			SwingUtilities.updateComponentTreeUI(this);
-		}
-		
-		// Clear Obstacles
-		if (e.getSource() == control.clearButton) {
-			arena.addObstacles = false;
-			arena.running = false;
-			arena.clearObstacles = !arena.clearObstacles;
 		}
 		
 		// start simulation
 		if (e.getSource() == control.planButton) {
 			arena.addObstacles = false;
-			arena.clearObstacles = false;
 			arena.running = !arena.running;
 			SwingUtilities.updateComponentTreeUI(this);
 		}
@@ -83,10 +86,8 @@ public class MainFrame extends JFrame implements ActionListener{
 		// start execute path
 		if (e.getSource() == control.startButton) {
 			arena.addObstacles = false;
-			arena.clearObstacles = false;
 			arena.start = !arena.start;
 			SwingUtilities.updateComponentTreeUI(this);
 		}
 	}
-
 }

@@ -5,7 +5,7 @@ import java.awt.geom.Point2D;
 public class TurningRadius {
 	
 	private Point2D.Double center;
-    private static int radius = 25;
+    private static int radius = 16;
 
     public TurningRadius(Point2D.Double c){
         this.center = c;

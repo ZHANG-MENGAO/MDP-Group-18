@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class Node implements Comparable<Node>{
 	private double g;
+	private double f;
+	private double h;
 	private double[] coord;
 	private int obstacleID; // -1 if robot
 	public ArrayList<Edge> neighbour = new ArrayList<>();
@@ -24,6 +26,22 @@ public class Node implements Comparable<Node>{
 
 	public void setG (double g){
 		this.g = g;
+	}
+	
+	public double getF() {
+		return f;
+	}
+
+	public void setF (double f){
+		this.f = f;
+	}
+	
+	public double getH() {
+		return h;
+	}
+
+	public void setH (double h){
+		this.h = h;
 	}
 
 	public boolean isVisited() { return visited; }

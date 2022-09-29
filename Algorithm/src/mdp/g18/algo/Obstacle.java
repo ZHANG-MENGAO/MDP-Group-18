@@ -2,7 +2,9 @@ package mdp.g18.algo;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Polygon;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 public class Obstacle {
 	
@@ -22,6 +24,8 @@ public class Obstacle {
 	private static final int LENGTH = 10;
 	private static final int VIRTUAL_LENGTH = 40;
 	
+	Rectangle2D obstacleArea;
+	
 	Obstacle(int id,int xCoordinate,int yCoordinate, Direction direction){
 		this.obstacleID = id;
 		this.xCoordinate = xCoordinate;
@@ -31,6 +35,15 @@ public class Obstacle {
 		this.virtualy = yCoordinate + 15;
 		
 		this.center.setLocation(this.xCoordinate - 5, -(200 - this.yCoordinate + 4));
+	}
+	
+	public void updateObstacleArea(double[] c) {
+		obstacleArea();
+	}
+	
+	public void obstacleArea() {
+		this.obstacleArea = new Rectangle2D.Double();
+		this.obstacleArea.setRect(this.getObstacleCenter().getX() - 5, this.getObstacleCenter().getY() - 5, LENGTH, LENGTH);
 	}
 	
 	public void createCircleLeft(double[] coordinates) {
@@ -82,16 +95,16 @@ public class Obstacle {
     	
     	switch(dir) {
 		case NORTH:
-			this.imageCenter.setLocation(this.center.getX(), this.center.getY() - 20);
+			this.imageCenter.setLocation(this.center.getX(), this.center.getY() - 25);
 			break;
 		case EAST:
-			this.imageCenter.setLocation(this.center.getX() + 20, this.center.getY());
+			this.imageCenter.setLocation(this.center.getX() + 25, this.center.getY());
 			break;
 		case WEST:
-			this.imageCenter.setLocation(this.center.getX() - 20, this.center.getY());
+			this.imageCenter.setLocation(this.center.getX() - 25, this.center.getY());
 			break;
 		case SOUTH:
-			this.imageCenter.setLocation(this.center.getX(), this.center.getY() + 20);
+			this.imageCenter.setLocation(this.center.getX(), this.center.getY() + 25);
 			break;
 		default:
 			break;
@@ -144,6 +157,10 @@ public class Obstacle {
 
 	public int getLength() { return LENGTH; }
 	
+	public Rectangle2D getObstacleArea() {
+    	return this.obstacleArea;
+    }
+	
 	public void paintObstacle(Graphics g, boolean selector) {
 		
 		// Obstacle body
@@ -184,9 +201,7 @@ public class Obstacle {
 			g.setColor(Color.pink);
 		}
 		else {
-			g.setColor(Color.magenta);
-			setDirection(dir);
-			setImageCenter(dir);
+			setImage(g, dir);
 		}
 
 		switch (dir) {
@@ -224,6 +239,16 @@ public class Obstacle {
 				break;
 			case UNSET:
 				break;
+		}
+	}
+	
+	// Set image given coordinates
+	public void setImage(Graphics g, Direction dir) {
+		g.setColor(Color.magenta);
+		setDirection(dir);
+		setImageCenter(dir);
+		if (this.getObstacleArea() == null) {
+			this.updateObstacleArea(new double[] {this.getObstacleCenter().getX(),this.getObstacleCenter().getY()});
 		}
 	}
 }

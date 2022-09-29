@@ -6,9 +6,6 @@ public abstract class Robot {
 	
 	private Point2D.Double center = new Point2D.Double(); // robot Center
 	private Point2D.Double centerFront = new Point2D.Double(); // robot Front
-	private Point2D.Double centerBack = new Point2D.Double(); // robot Front
-	private Point2D.Double centerLeft = new Point2D.Double(); // robot Front
-	private Point2D.Double centerRight = new Point2D.Double(); // robot Front
     protected final double DEG_TO_RAD = Math.PI / 180; // conversion to degree
     public TurningRadius turningRadius;
 
@@ -24,17 +21,37 @@ public abstract class Robot {
 		this.center.setLocation(x, y); // set center location
 		setAngle(angle); // set angle
 		setCenterFront(angle);
-		setCenterBack(angle);
-		setCenterLeft(angle);
-		setCenterRight(angle);
 		sensor = new Sensor(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
 	}
 	
 	// Create only when turning left
-    public void createCircleLeft(double[] coordinates, String movement) {
+    public void createCircleLeft(double[] coordinates) {
     	
     	double angle = getAngle();
-    	if (movement == "front") {
+    	setTick(angle);
+    	
+    	double x = coordinates[0] - TurningRadius.getRadius() * Math.cos(angle * DEG_TO_RAD);
+    	double y = coordinates[1] - TurningRadius.getRadius() * Math.sin(angle * DEG_TO_RAD);
+    	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
+	}
+    
+    // create only when turning right
+    public void createCircleRight(double[] coordinates) {
+    	
+    	double angle = getAngle();
+    	setTick(angle);
+    	
+    	double x = coordinates[0] + TurningRadius.getRadius() * Math.cos(angle * DEG_TO_RAD);
+    	double y = coordinates[1] + TurningRadius.getRadius() * Math.sin(angle * DEG_TO_RAD);
+    	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
+	}
+	
+	// Create only when turning left
+    /*public void createCircleLeft(double[] coordinates, String movement) {
+    	
+    	double angle = getAngle();
+    	setTick(angle);
+    	if (movement == "forward") {
     		setTick(-angle);
     	}
     	else {
@@ -50,6 +67,7 @@ public abstract class Robot {
     public void createCircleRight(double[] coordinates, String movement) {
     	
     	double angle = getAngle();
+    	setTick(angle);
     	if (movement == "reverse") {
     		setTick(-angle);
     	}
@@ -57,10 +75,16 @@ public abstract class Robot {
     		setTick(angle);
     	}
     	
+    	System.out.println(coordinates[0]);
+		System.out.println(coordinates[1]);
+    	
     	double x = coordinates[0] + TurningRadius.getRadius() * Math.cos(angle * DEG_TO_RAD);
     	double y = coordinates[1] + TurningRadius.getRadius() * Math.sin(angle * DEG_TO_RAD);
     	this.turningRadius = new TurningRadius(new Point2D.Double(x, y));
-	}
+    	
+    	//System.out.println(this.turningRadius.getCenter().getX());
+		//System.out.println(this.turningRadius.getCenter().getY());
+	}*/
     
     public void turnLeft(){
 		setTick(getTick() - 1);
@@ -72,9 +96,6 @@ public abstract class Robot {
                       yCenter + rad * Math.sin(getTick() * DEG_TO_RAD));
         setAngle(computeAngle(oriRobot,new double[] {getTurningRadius().getCenter().getX(),getTurningRadius().getCenter().getY()},new double[] {getRobotCenter().getX(),getRobotCenter().getY()},"L"));
 		setCenterFront(getAngle());
-		setCenterLeft(getAngle());
-		setCenterRight(getAngle());
-		setCenterBack(getAngle());
         sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
     }
 
@@ -88,9 +109,6 @@ public abstract class Robot {
                       yCenter + rad * Math.sin(getTick() * DEG_TO_RAD));
         setAngle(computeAngle(oriRobot,new double[] {getTurningRadius().getCenter().getX(),getTurningRadius().getCenter().getY()},new double[] {getRobotCenter().getX(),getRobotCenter().getY()},"L"));
 		setCenterFront(getAngle());
-		setCenterLeft(getAngle());
-		setCenterRight(getAngle());
-		setCenterBack(getAngle());
         sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
     }
 
@@ -105,9 +123,6 @@ public abstract class Robot {
                       yCenter - rad * Math.sin(getTick() * DEG_TO_RAD));
         setAngle(computeAngle(oriRobot,new double[] {getTurningRadius().getCenter().getX(),getTurningRadius().getCenter().getY()},new double[] {getRobotCenter().getX(),getRobotCenter().getY()},"R"));
 		setCenterFront(getAngle());
-		setCenterLeft(getAngle());
-		setCenterRight(getAngle());
-		setCenterBack(getAngle());
         sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
     }
 	
@@ -121,9 +136,6 @@ public abstract class Robot {
                       yCenter - rad * Math.sin(getTick() * DEG_TO_RAD));
         setAngle(computeAngle(oriRobot,new double[] {getTurningRadius().getCenter().getX(),getTurningRadius().getCenter().getY()},new double[] {getRobotCenter().getX(),getRobotCenter().getY()},"R"));
 		setCenterFront(getAngle());
-		setCenterLeft(getAngle());
-		setCenterRight(getAngle());
-		setCenterBack(getAngle());
         sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
     }
     
@@ -133,9 +145,6 @@ public abstract class Robot {
 		double dy = getRobotCenter().getY() - speed * Math.sin(Math.PI/2 - getAngle() * DEG_TO_RAD);
 		getRobotCenter().setLocation(dx,dy);
 		setCenterFront(getAngle());
-		setCenterLeft(getAngle());
-		setCenterRight(getAngle());
-		setCenterBack(getAngle());
 		sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
 	}
     
@@ -145,9 +154,6 @@ public abstract class Robot {
 		double dy = getRobotCenter().getY() + speed * Math.sin(getAngle() * DEG_TO_RAD + Math.PI/2);
 		getRobotCenter().setLocation(dx,dy);
 		setCenterFront(getAngle());
-		setCenterLeft(getAngle());
-		setCenterRight(getAngle());
-		setCenterBack(getAngle());
 		sensor.updateSensorCoordinates(new double[] {getRobotCenter().getX(),getRobotCenter().getY()}, getAngle());
 	}
     
@@ -293,41 +299,5 @@ public abstract class Robot {
 	
 	public Point2D.Double getCenterFront(){
         return this.centerFront;
-    }
-	
-	public void setCenterBack(double angle) {
-    	
-    	double dx = this.getRobotCenter().getX() + 40 * Math.sin(angle * DEG_TO_RAD);
-    	double dy = this.getRobotCenter().getY() + 40 * Math.cos(angle * DEG_TO_RAD);
-    	
-    	this.centerBack.setLocation(dx, dy);
-	}
-	
-	public Point2D.Double getCenterBack(){
-        return this.centerBack;
-    }
-	
-	public void setCenterLeft(double angle) {
-    	
-		double dx = this.getRobotCenter().getX() - 10 * Math.cos(angle * DEG_TO_RAD);
-    	double dy = this.getRobotCenter().getY() - 10 * Math.sin(angle * DEG_TO_RAD);
-    	
-    	this.centerLeft.setLocation(dx, dy);
-	}
-	
-	public Point2D.Double getCenterLeft(){
-        return this.centerLeft;
-    }
-	
-	public void setCenterRight(double angle) {
-    	
-    	double dx = this.getRobotCenter().getX() + 10 * Math.cos(angle * DEG_TO_RAD);
-    	double dy = this.getRobotCenter().getY() + 10 * Math.sin(angle * DEG_TO_RAD);
-    	
-    	this.centerRight.setLocation(dx, dy);
-	}
-	
-	public Point2D.Double getCenterRight(){
-        return this.centerRight;
     }
 }

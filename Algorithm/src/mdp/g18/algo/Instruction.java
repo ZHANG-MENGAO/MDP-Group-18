@@ -4,11 +4,13 @@ public class Instruction {
 	double angle;
 	double distance;
 	String turnDirection;
+	String delimiter;
 
-	Instruction(double angle, double distance, String turnDirection) {
+	Instruction(double angle, double distance, String turnDirection, String delimiter) {
 		this.angle = angle;
 		this.distance = distance;
 		this.turnDirection = turnDirection;
+		this.delimiter = delimiter;
 	}
 
 	public double getAngle() {
@@ -33,5 +35,13 @@ public class Instruction {
 
 	public void setTurnDirection(String turnDirection) {
 		this.turnDirection = turnDirection;
+	}
+	
+	public String getDelimiter() {
+		return delimiter;
+	}
+
+	public void setDelimiter(String delimiter) {
+		this.delimiter = delimiter;
 	}
 }

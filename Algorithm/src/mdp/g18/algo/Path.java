@@ -50,6 +50,10 @@ public class Path implements Comparable<Path> {
 		this.instructions.add(instruction);
 	}
 	
+	public void addInstructions(int index, Instruction instruction) {
+		this.instructions.add(index, instruction);
+	}
+	
 	@Override
 	public int compareTo(Path o) {
 		if (this.getDist() > o.getDist()) {
