@@ -459,6 +459,7 @@ def robot_instruct(tempI):
     f_instruct = r_instruct[:len(r_instruct) - 1]
     return f_instruct
 
+#   instruct_trial = 'SIMI, f010, l090, f010, r090, b010, l090, b010, r090, obs,'
 
 def rpi_obs_seq(fp):
     rpi_seq = "IMAGE|"
@@ -653,6 +654,39 @@ while True:
         break
     except:
         continue
+# trial GROUP 18
+instruct_trial_stm = 'STMI,f050'
+instruct_trial = 'STMI,f010,a090,f020'
+instruct_trial1 = 'STMI,f010,a085,obs,1'
+#instruct_trial2 = 'STMI,b020,a085,obs,5'
+instruct_trial_coor = 'ANDROID|ROBOT,12,13,N:ROBOT,11,14,W:ROBOT,9,14,W'
+instruct_trial_coor1 = 'ANDROID|ROBOT,8,14,W:ROBOT,7,13,S'
+#instruct_trial_obsID = 'IMAGE|6'
+
+s.send(instruct_trial_stm.encode("UTF-8"))
+time.sleep(2)
+s.send(instruct_trial_coor.encode("UTF-8"))
+num = 1
+# while True:
+#     recvMsg = s.recv(1024).decode("UTF-8")
+#     print('msg received: ', recvMsg)
+#     if recvMsg == 'g':
+#
+#         if num == 1:
+#         # print('everything is gd')
+#         # instruct_trial1 = 'STMI,a090,d090'
+#             s.send(instruct_trial1.encode("UTF-8"))
+#             time.sleep(2)
+#             s.send(instruct_trial_coor1.encode("UTF-8"))
+#
+#         if num == 2:
+#             pass
+#             #s.send(instruct_trial2.encode("UTF-8"))
+#     num += 1
+
+#s.send(instruct_trial1.encode("UTF-8"))
+# trial GROUp 18
+
 # s.connect(("192.168.3.1",2763))
 
 # 1. read from android
@@ -768,6 +802,9 @@ print(robI, "robI")
 # 4. send data
 # send to rpi image rec
 s.send(rpi_seq.encode("UTF-8"))
+
+
+
 # send to robot
 s.send(robI.encode("UTF-8"))
 # send to android

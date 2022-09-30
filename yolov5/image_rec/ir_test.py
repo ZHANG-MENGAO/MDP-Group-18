@@ -61,57 +61,52 @@ while True:
 
 
 # url = "http://192.168.18.1:8000"
-url = 'http://192.168.18.1:8000/stream.mjpg'
-# video = pafy.new(url)
-# best = video.getbest(preftype="mp4")
 
-cap = cv2.VideoCapture(url)
 
-# cap = cv2.VideoCapture("http://192.168.18.1:8000")
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-#print('cap: ', cap.read())
-    # Get livevideo from PC Webcam
-    # cap = cv2.VideoCapture(0)
-    # Get video from path
-    # cap = cv2.VideoCapture(r"C:\Users\Raj\Downloads\vi_0008_20220215_195024.mp4")
-frame_width = int(cap.get(3))
-frame_height = int(cap.get(4))
 print("waiting for android go")
-recvMsg = s.recv(1024).decode("UTF-8")
-#print('recvMsg: ', recvMsg)
 image_num = 1
-recvMsg = 'g'
-if str(recvMsg) == 'g':
-    print("Starting the YOLO loop...")
-    keep_going = True
-    while keep_going:
-        #try:
-        ret, frame_read = cap.read()
-        #print('ret: ', ret)
-        #print('frame_read: ', frame_read)
-        image = Image.fromarray(frame_read, 'RGB')
+while True:
+    recvMsg = s.recv(1024).decode("UTF-8")
+#print('recvMsg: ', recvMsg)
 
-        cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num), frame_read)
-        # cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num), frame_read)
-    # cv2.imwrite('test_image', frame_read)
-        cv2.imshow("image", frame_read)
-        cv2.waitKey()
+# recvMsg = 'g'
+    if str(recvMsg) == 'g':
+        print("Starting the YOLO loop...")
+        keep_going = True
+        while keep_going:
+            # try:
+            url = 'http://192.168.18.1:8000/stream.mjpg'
 
-    # run()
-        print('identifying')
-        label = main(parse_opt())
-        print('this is the returned label ', label)
+            cap = cv2.VideoCapture(url)
+            ret, frame_read = cap.read()
+            # print('ret: ', ret)
+            # print('frame_read: ', frame_read)
+            # image = Image.fromarray(frame_read, 'RGB')
 
-        try:
-            os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num))
-        except:
-            pass
+            cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num), frame_read)
+            cv2.imwrite('C:/Users/guanl/yolov5/image_rec/imageFolder/test_image{0}.jpg'.format(image_num), frame_read)
 
-        send_android_string(label)
+            # cv2.imshow("image", frame_read)
+            # cv2.waitKey()
 
-        #if label == 'Left':
-        s.send("l".encode("UTF-8"))
+        # run()
+            print('identifying')
+            label = main(parse_opt())
+            print('this is the returned label ', label)
+
+            try:
+                os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num))
+            except:
+                pass
+            if label:
+                send_android_string(label)
+                print('label is: ', label)
+
+            else:
+                print('None detected')
+            break
+            #if label == 'Left':
+            # s.send("l".encode("UTF-8"))
 
 
         #except:

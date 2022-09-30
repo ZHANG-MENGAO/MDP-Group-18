@@ -137,8 +137,8 @@ def YOLO():
     # netMain = cv2.dnn.readNet(weightPath, configPath)
     # netMain.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
     # netMain.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
-    url = 'http://192.168.18.1:8000/stream.mjpg'
-    cap = cv2.VideoCapture(url)
+    # url = 'http://192.168.18.1:8000/stream.mjpg'
+    # cap = cv2.VideoCapture(url)
     # cap = cv2.VideoCapture(0)
     # cap = cv2.VideoCapture(r"C:\Users\Raj\Downloads\vi_0008_20220215_195024.mp4")
     # frame_width = int(cap.get(3))  # Returns the width and height of capture video
@@ -150,27 +150,26 @@ def YOLO():
     # Create an image we reuse for each detect
     # image_num = 1
     while True:  # Load the input frame and write output frame.
-
-            # s.send("p".encode("UTF-8"))
-            # time.sleep(2)
-            # image_list = []
+        try:
+            s.send("p".encode("UTF-8"))
+            time.sleep(2)
+            image_list = []
             # for filename in glob.glob('imageFolder/*.gif'):  # assuming gif
             #     im = Image.open(filename)
             # url = 'http://192.168.18.1:8000/stream.mjpg'
-        cap = cv2.VideoCapture(url)
+            # cap = cv2.VideoCapture(url)
 
-        ret, frame_read = cap.read()
+            # ret, frame_read = cap.read()
 
-        cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image.jpg', frame_read)
+            # cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image.jpg', frame_read)
 
-        cv2.imshow("image", frame_read)
-        cv2.waitKey()
+            # cv2.imshow("image", frame_read)
+            # cv2.waitKey()
 
             #time.sleep(2)
             #run()
-        print('identifying')
-        label = main(parse_opt())
-        print('the label is: ', label)
+            print('identifying')
+            label = main(parse_opt())
             # if label != 'Left' and label != 'U':
             #     label = 'Bullseye'
             # print('this is the returned label ', label)if label != 'Left' and label != 'U':
@@ -194,25 +193,26 @@ def YOLO():
 
 
 
-        if label != 'Y':
-            #if detections[0][2][0] < detections[1][2][0]:
-            s.send("l".encode("UTF-8"))
-            #s.send("r".encode("UTF-8"))
+            if label != 'Left' and label != 'U':
+                #if detections[0][2][0] < detections[1][2][0]:
+                s.send("l".encode("UTF-8"))
+                #s.send("r".encode("UTF-8"))
 
-            print('l is sent')
-            # continue
-        else:
-             s.send("c".encode("UTF-8"))
+                print('l is sent')
+                # continue
+                break
+            else:
+                 s.send("c".encode("UTF-8"))
+                 continue
 
-
-        try:
-            os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image.jpg')
-        except:
-            pass
-
-        # except KeyboardInterrupt:
-        #     print('End of image recognition.')
-        #     break
+            try:
+                os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image.jpg')
+            except:
+                pass
+            break
+        except KeyboardInterrupt:
+            print('End of image recognition.')
+            break
     #cap.release()  # For releasing cap and out.
 
 
