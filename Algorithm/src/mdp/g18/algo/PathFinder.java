@@ -5,10 +5,7 @@ import java.awt.Graphics;
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class PathFinder {
 	
@@ -69,12 +66,14 @@ public class PathFinder {
 		}
 	}
 	
-	public Path bestPath() {
+	public Path bestPath(Obstacle obs) {
 		ArrayList <Path> possiblePaths = possiblePaths(); // all possible path
 		
 		if(simulator == null) {
 			simulator = new Simulate(this.obstacleList,this.astar);
 		}
+
+		this.obstacle = obs;
 		
 		simulator.setObstacle(this.obstacle);
 		simulator.setObstacleCenter();
@@ -418,9 +417,9 @@ public class PathFinder {
 			p2[1] = this.obstacle.getTurningRadius().getCenter().getY();
 			
 			double l = straightDistance(p1, p2);
-			
+
 			v1 = this.vector1(p1,p2);
-			if (direction == "R") {
+			if (Objects.equals(direction, "R")) {
 				v2 = this.vector2(v1, (Math.PI/2));
 			} else {
 				v2 = this.vector2(v1, -(Math.PI/2));
@@ -486,7 +485,7 @@ public class PathFinder {
 				
 			double d = straightDistance(p1, p2);
 			double l = straightTravel(d,2 * TurningRadius.getRadius());
-				
+
 			theta = Math.acos(2 * TurningRadius.getRadius() / d);
 			v1 = this.vector1(p1,p2);
 				
@@ -787,7 +786,7 @@ public class PathFinder {
 		double y = Math.abs(p2[1] - p1[1]);
 		return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
 	}
-	
+
 	public double straightTravel(double d, double r) {
 		return Math.sqrt(Math.pow(d,2) - Math.pow(r,2));
 	}
@@ -798,7 +797,7 @@ public class PathFinder {
 		mid[1] = (v1[1] + v2[1]) / 2;
 		return mid;
 	}
-	
+
 	public double d1(double r, double d) {
 		return Math.sqrt(Math.pow(2 * r,2) - Math.pow(d / 2,2));
 	}
@@ -823,16 +822,16 @@ public class PathFinder {
 
 		arcLength[0] = Math.atan2(v2[1], v2[0]) - Math.atan2(v1[1], v1[0]);
 		
-		if (arcLength[0] < 0 && direction == "L") {
+		if (arcLength[0] < 0 && Objects.equals(direction, "L")) {
 			arcLength[0] += 2 * Math.PI;
-		} else if (arcLength[0] > 0 && direction == "R"){
+		} else if (arcLength[0] > 0 && Objects.equals(direction, "R")){
 			arcLength[0] -= 2 * Math.PI;
 		}
 
 		arcLength[1] = Math.abs(arcLength[0] * TurningRadius.getRadius());
 		return arcLength;
 	}
-	
+
 	private static int round(double val) {
         return (int) Math.round(val);
     }
@@ -845,7 +844,7 @@ public class PathFinder {
 	public double[] getObstacleCenter() {
 		return obstacleImageCenter;
 	}
-	
+
 	public void setRobotCenter() {
 		robotCenter[0] = this.robot.getCenterFront().getX();
 		robotCenter[1] = this.robot.getCenterFront().getY();

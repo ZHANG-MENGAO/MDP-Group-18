@@ -9,9 +9,9 @@ public class ControlFrame extends JPanel{
 	int NUM_OF_BUTTONS = 6;
 	
 	JButton resetButton;
-	JButton loadButton;
-	JButton connectButton;
 	JButton obstacleButton;
+	JButton connectButton;
+	JButton loadButton;
 	JButton planButton;
 	JButton startButton;
 	

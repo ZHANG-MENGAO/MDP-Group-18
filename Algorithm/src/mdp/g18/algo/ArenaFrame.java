@@ -40,7 +40,7 @@ public class ArenaFrame extends JPanel implements ActionListener{
 
 	// list of obstacles
 	public ArrayList<Node> nodes;
-	
+
 	// get mouse coordinates 
 	public int mx = -100;
 	public int my = -100;
@@ -160,21 +160,46 @@ public class ArenaFrame extends JPanel implements ActionListener{
 					// Remove outline of adding obstacles
 					addObstacles = false;
 
-					// Paint image selection animation on frame
-					obstacle.selectImage(g, true, mouseDir);
-				}
-				else {
-					// Paint image location in correct color and set direction of image
-					obstacle.selectImage(g, false, mouseDir);
-								// Allow image selection on next obstacle
-					setImage = true;
-					if (obstacleObjects.size() < 5) {
+		if (loadObstacles && obstacle != null) {
+			obstacle.paintObstacle(g, false);
+		}
+
+		// Draw Obstacles
+		for (Obstacle obstacle: obstacleObjects) {
+//			obstacle.paintObstacle(g, false);
+//			mouseDir = move.mouseDirection();
+
+			if (loadObstacles) {
+				obstacle.paintObstacle(g, false);
+				obstacle.selectImage(g, false, obstacle.getDirection());
+			}
+			else{
+				obstacle.paintObstacle(g, false);
+				mouseDir = move.mouseDirection();
+
+				// Enables selection of the side the image
+				if (obstacle.getDirection() == Direction.UNSET) {
+					if (setImage) {
+						// Remove outline of adding obstacles
+						addObstacles = false;
+
+						// Paint image selection animation on frame
+						obstacle.selectImage(g, true, mouseDir);
+					}
+					else {
+						// Paint image location in correct color and set direction of image
+						obstacle.selectImage(g, false, mouseDir);
+
+						// Allow image selection on next obstacle
+						setImage = true;
+						if (obstacleObjects.size() < NUM_OF_OBSTACLES) {
 							addObstacles = true;
+						}
 					}
 				}
-			}
-			else {
-				obstacle.selectImage(g, false, obstacle.getDirection());
+				else {
+					obstacle.selectImage(g, false, obstacle.getDirection());
+				}
 			}
 		}
 		
@@ -227,7 +252,6 @@ public class ArenaFrame extends JPanel implements ActionListener{
 	}
 	
 	public class Click implements MouseListener{
-
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			
@@ -238,13 +262,41 @@ public class ArenaFrame extends JPanel implements ActionListener{
 				obstacleObjects.add(obstacle);
 				repaint();
 			}
-			
-			// click image direction on obstacle
-			if (setImage && !addObstacles) {
+
+			// click clear obstacle
+			if (obstacleObjects.size() < NUM_OF_OBSTACLES  && clearObstacles && coordinateX() != -1 && coordinateY() != -1 && obstacles[coordinateX()][coordinateY()] != 0) {
+				for (Obstacle obstacle: obstacleObjects) {
+					if (obstacle.getObstacleID() == obstacles[coordinateX()][coordinateY()]) {
+						removeObstacle(obstacle.getObstacleID());
+						obstacleObjects.remove(obstacle);
+						repaint();
+						break;
+					}
+				}
+			}
+
+			// Click load obstacles
+			if (obstacleObjects.size() <= 1 && loadObstacles && obstacles[coordinateX()][coordinateY()] == 0) {
+				// Manual data for testing
+				String raw = "153,50,-90,1:52,118,180,2:170,117,180,3:99,172,-90,4:69,69,0,5";
+				ArrayList<Object[]> msg = client.processString(raw);
+
+//				ArrayList<Object[]> msg = client.processString(client.receiveMsg());
+
+				for (Object[] o : msg) {
+					Obstacle obstacle = new Obstacle((Integer) o[0], (Integer)o[1], (Integer)o[2], (Direction) o[3]);
+					addObstacle(obstacle);
+					obstacleObjects.add(obstacle);
+				}
+
+				repaint();
+			}
+
+			// Click image direction on obstacle
+			if (setImage && !addObstacles && !loadObstacles) {
 				setImage = false;
 				repaint();
 			}
-			
 		}
 
 		@Override
@@ -276,8 +328,15 @@ public class ArenaFrame extends JPanel implements ActionListener{
 		if (running) {
 			findBestPath();
 		}
-		
+
 		if (start) {
+			// TODO: test connection
+//			try {
+//				client.startConnection();
+//			} catch (IOException ex) {
+//				throw new RuntimeException(ex);
+//			}
+//			client.receiveMsg();
 			move();
 			//perform();
 		}
@@ -707,6 +766,11 @@ public class ArenaFrame extends JPanel implements ActionListener{
 				performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),this.backCenter);
 			}
 			else if (this.currentPath != null){
+				msg = this.currentInstruction.turnDirection;
+				if (!Objects.equals(this.currentInstruction.turnDirection, "S")) {
+					msg += this.currentInstruction.getAngle();
+				}
+
 				if (this.sizeOfPath == 1) {
 					performMovement(this.currentInstruction.getTurnDirection(),this.currentInstruction.getAngle(),this.currentInstruction.getDistance(),new double[] {this.currentObstacle.getObstacleCenter().getX(),this.currentObstacle.getObstacleCenter().getY()});
 				}

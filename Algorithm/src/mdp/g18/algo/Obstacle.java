@@ -71,7 +71,7 @@ public class Obstacle {
     
     public void createCircleRight(double[] coordinates) {
     	int angle = 0;
-		
+
 		switch(getDirection()) {
 		case NORTH:
 			angle = 180;
@@ -143,7 +143,7 @@ public class Obstacle {
 		return this.imageCenter;
 	}
 	
-	private void setDirection(Direction dir) {
+	public void setDirection(Direction dir) {
 		this.direction = dir;
 	}
 	
@@ -162,7 +162,6 @@ public class Obstacle {
     }
 	
 	public void paintObstacle(Graphics g, boolean selector) {
-		
 		// Obstacle body
 		if (selector) {
 			g.setColor(Color.lightGray);
@@ -183,17 +182,41 @@ public class Obstacle {
 		else {
 			g.setColor(Color.red);
 		}
-		
+
 		for (int i = -VIRTUAL_LENGTH + 1; i <= 0; i += 2) {
 			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, virtualy * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - VIRTUAL_LENGTH + 1) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
-				
+
 		for (int j = -VIRTUAL_LENGTH + 1; j <= 0; j += 2) {
 			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 			g.fillRect((virtualx - VIRTUAL_LENGTH + 1) * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
 		}
 	}
+
+	// Paint obstacles directly (no selection)
+//	public void paintObstacle(Graphics g) {
+//		// Obstacle body
+//		g.setColor(Color.blue);
+//
+//		for (int i = -LENGTH + 1; i <= 0; i++) {
+//			for (int j = -LENGTH + 1; j <= 0; j++) {
+//				g.fillRect((xCoordinate + i) * Arena.UNIT_SIZE, (yCoordinate + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+//			}
+//		}
+//		// Obstacle Outline
+//		g.setColor(Color.red);
+//
+//		for (int i = -VIRTUAL_LENGTH + 1; i <= 0; i += 2) {
+//			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, virtualy * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+//			g.fillRect((virtualx + i) * Arena.UNIT_SIZE, (virtualy - VIRTUAL_LENGTH + 1) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+//		}
+//
+//		for (int j = -VIRTUAL_LENGTH + 1; j <= 0; j += 2) {
+//			g.fillRect(virtualx * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+//			g.fillRect((virtualx - VIRTUAL_LENGTH + 1) * Arena.UNIT_SIZE, (virtualy + j) * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.UNIT_SIZE, Arena.UNIT_SIZE);
+//		}
+//	}
 	
 	// Set image direction of an obstacle
 	public void selectImage(Graphics g, boolean selector, Direction dir) {

@@ -76,6 +76,16 @@ public class MainFrame extends JFrame implements ActionListener{
 			SwingUtilities.updateComponentTreeUI(this);
 		}
 		
+		// Load obstacles
+		if (e.getSource() == control.loadButton) {
+			arena.addObstacles = false;
+			arena.clearObstacles = false;
+			arena.loadObstacles = true;
+			arena.running = false;
+			arena.setImage = false;
+			SwingUtilities.updateComponentTreeUI(this);
+		}
+
 		// start simulation
 		if (e.getSource() == control.planButton) {
 			arena.addObstacles = false;
