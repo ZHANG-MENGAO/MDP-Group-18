@@ -25,6 +25,11 @@ public class Server {
 
 		// Print any received messages
 		while (true){
+			if (server.receiveMsg() == "Start") {
+				String raw = "153,50,-90,1:52,118,180,2:170,117,180,3:99,172,-90,4:69,69,0,5";
+				server.sendMsg(raw);
+			}
+
 			server.sendMsg("Read data");
 			System.out.println("Received message " + server.receiveMsg());
 		}
