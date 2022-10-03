@@ -1,4 +1,4 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
 import java.util.ArrayList;
 
@@ -6,14 +6,15 @@ public class Node implements Comparable<Node>{
 	private double g;
 	private double f;
 	private double h;
-	private double[] coord;
+	private char direction;
+	private int[] coord;
 	private int obstacleID; // -1 if robot
 	public ArrayList<Edge> neighbour = new ArrayList<>();
 
 	private Node parent;
 	private boolean visited;
 
-	Node(double g, double[] coord, Node parent, int id) {
+	Node(double g, int[] coord, Node parent, int id) {
 		this.g = g;
 		this.coord = coord;
 		this.parent = parent;
@@ -43,16 +44,24 @@ public class Node implements Comparable<Node>{
 	public void setH (double h){
 		this.h = h;
 	}
+	
+	public char getDirection() {
+		return direction;
+	}
+
+	public void setDirection (char dir){
+		this.direction = dir;
+	}
 
 	public boolean isVisited() { return visited; }
 
 	public void setVisited(boolean visited) { this.visited = visited; }
 
-	public double[] getCoord() {
+	public int[] getCoord() {
 		return this.coord;
 	}
 
-	public void setCoord(double[] coord) {
+	public void setCoord(int[] coord) {
 		this.coord = coord;
 	}
 
@@ -75,10 +84,6 @@ public class Node implements Comparable<Node>{
 	public double calculateH(Node current, Node target) {
 		double x = Math.abs(current.getCoord()[0] - target.getCoord()[0]);
 		double y = Math.abs(current.getCoord()[1] - target.getCoord()[1]);
-
-//        if (current.getParent().coord[0] == current.coord[0] && x == 0) return y;
-//        else if (current.getParent().coord[1] == current.coord[1] && y == 0) return x;
-//        else return x + y;
 		return x + y;
 	}
 

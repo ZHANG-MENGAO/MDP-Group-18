@@ -1,4 +1,4 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
 public class MainFrame extends JFrame implements ActionListener{
 
@@ -69,25 +70,22 @@ public class MainFrame extends JFrame implements ActionListener{
 
 		// Add Obstacles
 		if (e.getSource() == control.obstacleButton) {
-			arena.running = false;
-			arena.setImage = true;
-			arena.addObstacles = !arena.addObstacles;
-			arena.loadObstacles = false;
+			//arena.running = false;
+			//arena.setImage = true;
+			//arena.addObstacles = !arena.addObstacles;
+			//arena.loadObstacles = false;
 			SwingUtilities.updateComponentTreeUI(this);
 		}
 		
 		// start simulation
 		if (e.getSource() == control.planButton) {
-			arena.addObstacles = false;
-			arena.running = !arena.running;
+			arena.findPath = true;
 			SwingUtilities.updateComponentTreeUI(this);
 		}
 		
 		// start execute path
 		if (e.getSource() == control.startButton) {
-			arena.addObstacles = false;
-			arena.start = !arena.start;
-			SwingUtilities.updateComponentTreeUI(this);
+			arena.sendRPIMessage();
 		}
 	}
 }

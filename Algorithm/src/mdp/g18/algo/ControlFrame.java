@@ -1,4 +1,4 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
 import javax.swing.JPanel;
 import java.awt.GridLayout;

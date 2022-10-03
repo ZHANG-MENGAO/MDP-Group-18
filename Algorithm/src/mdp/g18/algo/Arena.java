@@ -1,10 +1,12 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class Arena {
 	
-	public static final int GRIDNO = 200;
+	public static final int GRIDNO = 20;
+	public static final int STARTZONE = 4;
 	public static final int UNIT_SIZE = 600 / GRIDNO;
 	public static final int ARENA_WIDTH = 600;
 	public static final int ARENA_HEIGHT = 600 + UNIT_SIZE;
@@ -27,8 +29,8 @@ public class Arena {
 		
 		// Start Zone
 		g.setColor(Color.green);
-		for(int i = 0; i < 40; i++) {
-			for(int j = 0; j < 40; j++) {
+		for(int i = 0; i < STARTZONE; i++) {
+			for(int j = 0; j < STARTZONE; j++) {
 				g.fillRect(i * UNIT_SIZE, ARENA_HEIGHT - UNIT_SIZE * j - UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
 			}
 		}

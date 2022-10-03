@@ -1,6 +1,5 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
-import java.awt.Font;
 import java.awt.GridLayout;
 
 import javax.swing.JLabel;

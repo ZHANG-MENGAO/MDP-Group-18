@@ -1,4 +1,4 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -15,16 +15,6 @@ public class RPiClient {
 	// TODO: find out RPi IP address and port
 	public final String RPI_IP_ADDRESS = "192.168.18.1";
 	public final int RPI_PORT = 2763;
-
-	public static void main (String[] args) throws IOException {
-		RPiClient client = new RPiClient();
-		client.startConnection();
-		System.out.println("RPi connected.");
-		while (true){
-			client.sendMsg("STMI,f010");
-			System.out.println("Received message " + client.receiveMsg());
-		}
-	}
 
 	public void startConnection() throws IOException {
 		System.out.println("Starting connection to RPi...");
@@ -59,8 +49,8 @@ public class RPiClient {
 		// Split rawObsInfo into individual variable of obstacle
 		for (String s : rawObsInfo) {
 			String[] obsVars = s.split(",");
-			int x = Integer.parseInt(obsVars[0]);
-			int y = 200 - Integer.parseInt(obsVars[1]);
+			int x = (int) (Integer.parseInt(obsVars[0]) / 10);
+			int y = Arena.GRIDNO - (int) (Integer.parseInt(obsVars[1]) / 10) - 1;
 			int obsID = Integer.parseInt(obsVars[3]);
 
 			// Convert direction from String to Direction

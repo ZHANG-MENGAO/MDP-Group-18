@@ -1,4 +1,4 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
 public class Main {
 	

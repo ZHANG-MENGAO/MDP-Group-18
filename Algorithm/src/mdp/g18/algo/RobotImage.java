@@ -1,22 +1,20 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class RobotImage extends Robot{
+public class RobotImage {
 	
 	private final static int RADIUS = Robot.ROBOT_SIZE * Arena.UNIT_SIZE;
 	
 	BufferedImage robotImage;
 	
-	RobotImage(double x, double y, double angle){	
-		super(x,y,angle);
+	RobotImage(int x, int y, Direction direction){	
 		try{
 	        robotImage = ImageIO.read(getClass().getResource("/Resources/robot.png"));
 	        robotImage = resizeImage(robotImage, RADIUS, RADIUS);
@@ -32,53 +30,22 @@ public class RobotImage extends Robot{
 	    return resizedImage;
 	}
 	
-	
 	// Draw robot with center coordinates of robot
-	public void drawRobot(Graphics g, Point2D.Double c, double angle){
+	public void drawRobot(Graphics g, int x, int y, Direction direction){
+		
+		int angle = switch (direction) {
+		case NORTH -> angle = 0;
+		case SOUTH -> angle = 180;
+		case EAST -> angle = 90;
+		case WEST -> angle = -90;
+		default -> angle = 0;
+		};
+		
 		Graphics2D g2 = (Graphics2D) g;
         AffineTransform at = new AffineTransform();
-        at.translate(round(c.getX()) * Arena.UNIT_SIZE,Arena.ARENA_HEIGHT + round(c.getY()) * Arena.UNIT_SIZE);
-        setAngle(angle);
-        at.rotate(Math.toRadians(getAngle()));
+        at.translate( x * Arena.UNIT_SIZE + Arena.UNIT_SIZE, Arena.ARENA_HEIGHT + y * Arena.UNIT_SIZE - Arena.UNIT_SIZE);
+        at.rotate(Math.toRadians(angle));
         at.translate(-RADIUS/2,-RADIUS/2);
         g2.drawImage(robotImage, at, null);
-	}
-	
-	private static int round(double val) {
-        return (int) Math.round(val);
-    }
-
-	@Override
-	public void turnLeft() {
-		// TODO Auto-generated method stub	
-	}
-
-	@Override
-	public void reverseLeft() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void turnRight() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void reverseRight() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void moveForward() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void reverseBackward() {
-		// TODO Auto-generated method stub
-		
 	}
 }

@@ -1,19 +1,18 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
 import java.awt.Graphics;
 
 public class RealRobot extends Robot{
-
-	RobotImage robotimage;
 	
-	// Constructor
-	RealRobot(double x, double y, double angle){
-		super(x,y,angle);
-		robotimage = new RobotImage(x,y,getAngle());
+	private RobotImage robotImage;
+
+	RealRobot(int x, int y, Direction direction) {
+		super(x, y, direction);
+		robotImage = new RobotImage(x,y, direction);
 	}
-    
-    public void drawRobot(Graphics g){
-    	robotimage.drawRobot(g, getRobotCenter(), getAngle());
+	
+	public void drawRobot(Graphics g){
+    	this.robotImage.drawRobot(g, this.getxCoordinate(), this.getyCoordinate(), this.getDirection());
 	}
-   
+
 }

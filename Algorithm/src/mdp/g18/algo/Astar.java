@@ -1,10 +1,14 @@
-package mdp.g18.algo;
+package mdp.g18.sim;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
+
+import mdp.g18.sim.Node.Edge;
 
 public class Astar {
 	ArrayList<Obstacle> obstacles;
@@ -23,10 +27,12 @@ public class Astar {
 		// Run A* to update parent of each node
 		//nodes = createNodes();
 		//nodes = runAStar(nodes);
-		nodes = runAlgo();
+		this.nodes = runAlgo();
 		
 		/*for (Node node: nodes) {
 			System.out.println(node.getObstacleID());
+			if (node.getParent() != null)
+				System.out.println(node.getParent().getObstacleID());
 		}*/
 	}
 
@@ -69,7 +75,7 @@ public class Astar {
 		return null;
 	}
 	
-	private ArrayList<Node> runAlgo(){
+	/*private ArrayList<Node> runAlgo(){
 		// Create nodes of robot and obstacles
 		nodes = createNodes();
 
@@ -81,21 +87,66 @@ public class Astar {
 		for (Node n : nodes) {
 			double minDist = 99999999;
 			Node shortestNeighbour = null;
+			Node parent = null;
 			for (Node.Edge e : n.neighbour) {
 				if (e.weight < minDist && !orderOfNodes.contains(e.node)) {
 					minDist = e.weight;
 					shortestNeighbour = e.node;
+					parent = n;
 				}
 			}
 
 			// Add nearest node to orderOfNodes
 			if (shortestNeighbour != null) {
 				orderOfNodes.add(shortestNeighbour);
-				shortestNeighbour.setParent(n);
+				shortestNeighbour.setParent(parent);
 			}
 		}
 
 		return orderOfNodes;
+	}*/
+	
+	private ArrayList<Node> runAlgo(){ 
+		nodes = createNodes();
+		
+		Node start = nodes.get(0);
+		
+		 ArrayList<Node> closedList = new ArrayList<Node>(); // Visited
+		 ArrayList<Node> openList = new ArrayList<Node>(); // Frontier
+		 
+		// Visiting start now
+		openList.add(start);
+		
+		while (!openList.isEmpty()) {
+			
+			Node n = openList.get(0);
+			
+			double minDist = 99999999;
+			Node parent = null;
+			Node shortestNeighbour = null;
+			
+			for (Node.Edge e : n.neighbour) {
+				
+				Node child = e.node;
+				double totalWeight = e.weight;
+				
+				if(totalWeight < minDist && !closedList.contains(child)) {
+					minDist = totalWeight;
+					shortestNeighbour = child;
+					parent = n;
+				}
+			}
+			
+			openList.remove(n);
+			closedList.add(n);
+			
+			if (shortestNeighbour != null) {
+				openList.add(shortestNeighbour);
+				shortestNeighbour.setParent(parent);
+			}
+		}
+		
+		return closedList;
 	}
 	
 	private ArrayList<Node> runAStar(ArrayList<Node> nodes){
@@ -139,7 +190,7 @@ public class Astar {
 		return closedList;
 	}
 	
-	private double calDistance(double[] current, double[] destination) {
+	private double calDistance(int[] current, int[] destination) {
 		double x = Math.abs(current[0] - destination[0]);
 		double y = Math.abs(current[1] - destination[1]);
 		return Math.sqrt(Math.abs(Math.pow(x, 2) + Math.pow(y, 2)));
@@ -148,11 +199,11 @@ public class Astar {
 	// Creates an ArrayList of Nodes to be used for the A* algorithm
 	private ArrayList<Node> createNodes() {
 		ArrayList<Node> nodes = new ArrayList<Node>();
-		Node robotPos = new Node(0, new double[] {this.robot.getRobotCenter().getX(), this.robot.getRobotCenter().getY()}, null, -1);
+		Node robotPos = new Node(0, new int[] {this.robot.getxCoordinate(), this.robot.getyCoordinate()}, null, -1);
 		nodes.add(robotPos);
 
 		for (Obstacle obstacle: obstacles) {
-			double[] obstacleCoord = new double[] {obstacle.getObstacleCenter().getX(), obstacle.getObstacleCenter().getY()};
+			int[] obstacleCoord = new int[] {obstacle.getxCoordinate(), -(Arena.GRIDNO - obstacle.getyCoordinate() - 1)};
 			Node newNode = new Node(calDistance(obstacleCoord, robotPos.getCoord()), obstacleCoord, null, obstacle.getObstacleID());
 			nodes.add(newNode);
 		}
@@ -182,30 +233,30 @@ public class Astar {
 	// create all nodes
 	public ArrayList<Node> createAllNodes() {
 		
-		ArrayList<Node> nodes = new ArrayList<Node>();
+		ArrayList<Node> nodesAll = new ArrayList<Node>();
 		for(int i = 0; i < Arena.GRIDNO; i++) {
 			for(int j = 0; j < Arena.GRIDNO; j++) {
-				if (ArenaFrame.obstacles[i][j] == 0) {
-					Node newNode = new Node(0, new double[] {i, -(Arena.GRIDNO - j - 1)}, null, -1);
-					nodes.add(newNode);
+				if (ArenaFrame.obstacles[i][j] == -1) {
+					Node newNode = new Node(0, new int[] {i, -(Arena.GRIDNO - j - 1)}, null, -1);
+					nodesAll.add(newNode);
 				}
 			}
 		}
 		
-		for (Node start : nodes) {
-			ArrayList<Node.Edge> neighbours = createNeighbourNSEW(start, nodes);
+		for (Node start : nodesAll) {
+			ArrayList<Node.Edge> neighbours = createNeighbourNSEW(start, nodesAll);
+			
 			start.setNeighbour(neighbours);
 		}
 		
-		return nodes;
+		return nodesAll;
 	}
 	
 	// neighbours nsew
-	private ArrayList<Node.Edge> createNeighbourNSEW(Node n, ArrayList<Node> nodes) {
+	private ArrayList<Node.Edge> createNeighbourNSEW(Node n, ArrayList<Node> nodesAll) {
 		// Add neighbours
 		ArrayList<Node.Edge> neighbours = new ArrayList<>();
-		for (Node end : nodes) {
-			
+		for (Node end : nodesAll) {
 			//left
 			if ((n.getCoord()[0] - end.getCoord()[0] == 1) && (n.getCoord()[1] - end.getCoord()[1] == 0)) {
 				double dist = calDistance(n.getCoord(), end.getCoord());
@@ -237,7 +288,99 @@ public class Astar {
 		return neighbours;
 	} 
 	
+	public static ArrayList<Data> printPath(Node target){
+		ArrayList<Data> path = new ArrayList<Data>();
+
+		for(Node node = target; node!=null; node = node.getParent()){
+			path.add(new Data(node.getCoord()[0], node.getCoord()[1], Direction.NORTH));
+		    //path.add(node);
+		}
+		
+		Collections.reverse(path);
+		
+		return path;
+		}
+	
+	public static Node AstarSearch(Node source, Node goal){
+
+        Set<Node> explored = new HashSet<Node>();
+
+        PriorityQueue<Node> queue = new PriorityQueue<Node>(20, 
+                new Comparator<Node>(){
+                         //override compare method
+         public int compare(Node i, Node j){
+            if(i.getF() > j.getF()){
+                return 1;
+            }
+            else if (i.getF() < j.getF()){
+                return -1;
+            }
+            else{
+                return 0;
+            }
+         }
+                }
+                );
+
+        //cost from start
+        source.setG(0);
+
+        queue.add(source);
+
+        boolean found = false;
+
+        while((!queue.isEmpty())&&(!found)){
+
+                //the node in having the lowest f_score value
+                Node current = queue.poll();
+
+                explored.add(current);
+
+                //goal found
+                if(current == goal){
+                    return current;
+                }
+
+                //check every child of current node
+                for(Node.Edge e : current.neighbour){
+                        Node child = e.node;
+                        double cost = e.weight;
+                        double temp_g_scores = current.getG() + cost;
+                        double temp_f_scores = temp_g_scores + child.getH();
+
+
+                        /*if child node has been evaluated and 
+                        the newer f_score is higher, skip*/
+                        
+                        if((explored.contains(child)) && 
+                                (temp_f_scores >= child.getF())){
+                                continue;
+                        }
+
+                        /*else if child node is not in queue or 
+                        newer f_score is lower*/
+                        
+                        else if((!queue.contains(child)) || 
+                                (temp_f_scores < child.getF())){
+
+                                child.setParent(current);
+                                child.setG(temp_g_scores);
+                                child.setF(temp_f_scores);
+
+                                if(queue.contains(child)){
+                                        queue.remove(child);
+                                }
+
+                                queue.add(child);
+
+                        }
+                }
+        	}
+        	return null;
+		}
+	
 	public Node aStar(Node start, Node target){
+		
 	    PriorityQueue<Node> closedList = new PriorityQueue<>(); // frontier
 	    PriorityQueue<Node> openList = new PriorityQueue<>();  // visited
 
@@ -254,12 +397,14 @@ public class Astar {
 	        
 	        // for all neighbour
 	        for(Node.Edge edge : n.neighbour){
+	        	double totalWeight;
 	        	
 	            Node m = edge.node;
-	            double totalWeight = n.getG() + edge.weight;
+	            totalWeight = n.getG() + edge.weight;
+	            
 
 	            if(!openList.contains(m) && !closedList.contains(m)){
-	                m.setParent(n);;
+	                m.setParent(n);
 	                m.setG(totalWeight);
 	                m.setF(m.getG() + m.calculateH(m,target));
 	                openList.add(m);
@@ -283,24 +428,26 @@ public class Astar {
 	    return null;
 	}
 	
-	
 	public ArrayList<Data> findPath(Node target){
 	    Node n = target;
-
 	    if(n==null)
 	        return null;
 
 	    ArrayList<Data> ids = new ArrayList<>();
 
 	    while(n.getParent() != null){
-	        ids.add(new Data((int) n.getCoord()[0],(int) n.getCoord()[1],0));
+	        ids.add(new Data(n.getCoord()[0], n.getCoord()[1], Direction.NORTH));
 	        n = n.getParent();
 	    }
 	    
-	    ids.add(new Data((int) n.getCoord()[0],(int) n.getCoord()[1],0));
+	    ids.add(new Data(n.getCoord()[0], n.getCoord()[1], Direction.NORTH));
+	    
+	    Collections.reverse(ids);
 	    
 	    return ids;
 	}
+	
+}
 	
 //	public ArrayList<Node> updateNodes(ArrayList<Node> nodes) {
 //		Node robotPos = new Node(0, 0, new int[] {(int) robot.getRobotCenter().getX(), (int) robot.getRobotCenter().getX()}, null, -1);
@@ -317,4 +464,3 @@ public class Astar {
 //
 //		return nodes;
 //	}
-}
