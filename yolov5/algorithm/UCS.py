@@ -655,20 +655,30 @@ while True:
     except:
         continue
 # trial GROUP 18
-instruct_trial_stm = 'STMI,f050'
-instruct_trial = 'STMI,f010,a090,f020'
-instruct_trial1 = 'STMI,f010,a085,obs,1'
-#instruct_trial2 = 'STMI,b020,a085,obs,5'
-instruct_trial_coor = 'ANDROID|ROBOT,12,13,N:ROBOT,11,14,W:ROBOT,9,14,W'
-instruct_trial_coor1 = 'ANDROID|ROBOT,8,14,W:ROBOT,7,13,S'
+#instruct_trial_stm = 'STMI,d088,d088,d088,d088,d088,d088,d088,d088|ANDROID|ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N'
+instruct_trial_stm = 'STMI,r000,f010,l000,f010|ANDROID|ROBOT,1,10,E:ROBOT,10,10,E:ROBOT,10,10,N:ROBOT,10,12,N'
+instruct_trial_stm1 = 'STMI,q090|ANDROID|ROBOT,1,10,E'
+instruct_trial_stm2 = 'STMI,e090|ANDROID|ROBOT,2,10,E'
+
+instruct_trial_coor1 = 'ANDROID|ROBOT,12,13,N:ROBOT,11,14,W'
+instruct_trial_coor = 'ANDROID|ROBOT,8,14,W:ROBOT,7,13,S'
 #instruct_trial_obsID = 'IMAGE|6'
 
-s.send(instruct_trial_stm.encode("UTF-8"))
-time.sleep(2)
-s.send(instruct_trial_coor.encode("UTF-8"))
+s.send(instruct_trial_stm1.encode("UTF-8"))
+
 num = 1
+while True:
+    recvMsg = s.recv(1024).decode("UTF-8")
+    print('msg: ', recvMsg)
+    if recvMsg == 'g':
+        s.send(instruct_trial_stm2.encode("UTF-8"))
+    num += 1
+    if num == 2:
+        break
+
+
 # while True:
-#     recvMsg = s.recv(1024).decode("UTF-8")
+     #recvMsg = s.rec   v(1024).decode("UTF-8")
 #     print('msg received: ', recvMsg)
 #     if recvMsg == 'g':
 #
