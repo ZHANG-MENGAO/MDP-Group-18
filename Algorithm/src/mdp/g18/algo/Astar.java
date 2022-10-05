@@ -328,16 +328,16 @@ public class Astar {
 				int[] childCoord = child.getCoord();
 
 				// Get parent's coordinate to check for turns
-//				if (current.getParent() != null) {
-//					Node parent = current.getParent();
-//					int[] parentCoord = parent.getCoord();
-//
-//					// Increase f_score if there are turns
-//					if (childCoord[0] != parentCoord[0] && childCoord[1] != parentCoord[1]) {
-////						child.setF(child.getF() + 0.1);
-//						child.setH(child.getH() + 0.1);
-//					}
-//				}
+				if (current.getParent() != null) {
+					Node parent = current.getParent();
+					int[] parentCoord = parent.getCoord();
+
+					// Increase f_score if there are turns
+					if (childCoord[0] != parentCoord[0] && childCoord[1] != parentCoord[1]) {
+//						child.setF(child.getF() + 0.1);
+						child.setH(child.getH() + 0.1);
+					}
+				}
 
 				double cost = e.weight;
 				double temp_g_scores = current.getG() + cost;
