@@ -1,4 +1,4 @@
-package mdp.g18.sim;
+package mdp.g18.algo;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -48,10 +48,9 @@ public class ArenaFrame extends JPanel implements ActionListener {
 	private Timer timer;
 	
 	ArenaFrame(){
-		
 		arena = new Arena();
 		client = new RPiClient();
-		robot = new RealRobot(0,-1, Direction.NORTH);
+		robot = new RealRobot(0,-1, Direction.NORTH);       // Robot coordinate
 		
 		move = new Move();
 		this.addMouseMotionListener(move);
@@ -100,62 +99,59 @@ public class ArenaFrame extends JPanel implements ActionListener {
 			client.startConnection();
 			System.out.println("RPi connected.");
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		this.waitForRPIMessage();
 	}
 	
 	// Wait for RPI to send message
-		public void waitForRPIMessage() {
-			this.connectToRpi = true;
-			String newString = "";
-			while(this.connectToRpi) {
-				System.out.println("h");
-				//System.out.println(client.receiveMsg());
-				newString = client.receiveMsg();
-				System.out.println(newString);
-				if (!newString.isEmpty()) {
-					if(newString.compareTo("g") != 0) {
-						this.stringOfObstacles = newString;
-						System.out.println(this.stringOfObstacles);
-					}
-					this.connectToRpi = false;
+	public void waitForRPIMessage() {
+		this.connectToRpi = true;
+		String newString = "";
+		while(this.connectToRpi) {
+			System.out.println("h");
+			//System.out.println(client.receiveMsg());
+			newString = client.receiveMsg();
+			System.out.println(newString);
+			if (!newString.isEmpty()) {
+				if(newString.compareTo("g") != 0) {
+					this.stringOfObstacles = newString;
+					System.out.println(this.stringOfObstacles);
 				}
+				this.connectToRpi = false;
 			}
+		}
 		//this.stringOfObstacles = "115,145,90,0:125,55,90,1";
 		//this.stringOfObstacles = "150,10,180,0";
 		//this.stringOfObstacles = "50,90,-90,1:70,140,180,2:120,90,0,3:150,150,-90,4:150,40,180,5";
-		// TODO comment out
-		//this.connectToRpi = false;
-		}
+	}
 		
-		public void sendRPIMessage() {
-			
-			String newString = "";
-			
-			for(int i = 0;i < this.combineString.size();i++) {
-				this.client.sendMsg(this.combineString.get(i));
-				System.out.println(this.combineString.get(i));
-				newString = client.receiveMsg();
-				System.out.println(newString);
-				if (!newString.isEmpty()) {
-					if(newString.compareTo("g") == 0) {
-						continue;
-					}
+	public void sendRPIMessage() {
+
+		String newString = "";
+
+		for(int i = 0;i < this.combineString.size();i++) {
+			this.client.sendMsg(this.combineString.get(i));
+			System.out.println(this.combineString.get(i));
+			newString = client.receiveMsg();
+			System.out.println(newString);
+			if (!newString.isEmpty()) {
+				if(newString.compareTo("g") == 0) {
+					continue;
 				}
-				//client.sendMsg(this.listOfPaths.get(i));
-				//client.sendMsg("STMI,l000,f020,r000,f100,r000,f010,r000,b010,obs,1");
-				/*try {
-					TimeUnit.SECONDS.sleep(1);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}*/
-				//client.sendMsg("ANDROID|ROBOT,12,2,W:ROBOT,10,2,W:ROBOT,10,2,N:ROBOT,10,12,N:ROBOT,10,12,E:ROBOT,11,12,E:ROBOT,11,12,S:ROBOT,11,11,S:ROBOT,11,11,N:ROBOT,11,12,S:ROBOT,11,11,N");
-				//client.sendMsg(this.listOfCoords.get(i));
 			}
+			//client.sendMsg(this.listOfPaths.get(i));
+			//client.sendMsg("STMI,l000,f020,r000,f100,r000,f010,r000,b010,obs,1");
+			/*try {
+				TimeUnit.SECONDS.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			//client.sendMsg("ANDROID|ROBOT,12,2,W:ROBOT,10,2,W:ROBOT,10,2,N:ROBOT,10,12,N:ROBOT,10,12,E:ROBOT,11,12,E:ROBOT,11,12,S:ROBOT,11,11,S:ROBOT,11,11,N:ROBOT,11,12,S:ROBOT,11,11,N");
+			//client.sendMsg(this.listOfCoords.get(i));
 		}
+	}
 	
 	public class Move implements MouseMotionListener{
 		@Override
@@ -234,11 +230,13 @@ public class ArenaFrame extends JPanel implements ActionListener {
 			this.simRobot = new SimulatorRobot(this.robot.getxCoordinate(),this.robot.getyCoordinate(),this.robot.getDirection());
 			this.pathfinder = new PathFinder(this.simRobot, this.obstacleObjects);
 		}
-		
+
+		// Skip curr obstacle and get next closest obstacle
 		if (this.pathfinder.getCurrentObstacle() == null) {
 			this.pathfinder.getClosestObstacle();
 		}
-		
+
+		// Get best path to obstacle
 		if(this.simRobot != null && this.pathfinder.getCurrentObstacle() != null) {
 			this.newPathString = this.pathfinder.findBestPath();
 			this.splitPathCoord = new ArrayList<String>(Arrays.asList(this.newPathString.split(";")));
@@ -286,7 +284,6 @@ public class ArenaFrame extends JPanel implements ActionListener {
 	}
 	
 	public void addObstacle(Obstacle obstacle) {
-		
 		switch(obstacle.getDirection()) {
 		case NORTH:
 			for (int i = -1; i < 2; i++ ) {

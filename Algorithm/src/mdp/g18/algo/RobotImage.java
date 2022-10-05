@@ -1,4 +1,4 @@
-package mdp.g18.sim;
+package mdp.g18.algo;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -16,7 +16,7 @@ public class RobotImage {
 	
 	RobotImage(int x, int y, Direction direction){	
 		try{
-	        robotImage = ImageIO.read(getClass().getResource("/Resources/robot.png"));
+	        robotImage = ImageIO.read(getClass().getResource("robot.png"));
 	        robotImage = resizeImage(robotImage, RADIUS, RADIUS);
 	    }catch(IOException e){e.printStackTrace();}
 	    catch(Exception e){e.printStackTrace();}

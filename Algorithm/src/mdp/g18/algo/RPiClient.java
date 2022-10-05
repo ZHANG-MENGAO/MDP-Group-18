@@ -1,4 +1,4 @@
-package mdp.g18.sim;
+package mdp.g18.algo;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -13,7 +13,8 @@ public class RPiClient {
 	private Scanner fromRPi;
 
 	// TODO: find out RPi IP address and port
-	public final String RPI_IP_ADDRESS = "192.168.18.1";
+//	public final String RPI_IP_ADDRESS = "192.168.18.1";
+	public final String RPI_IP_ADDRESS = "";
 	public final int RPI_PORT = 2763;
 
 	public void startConnection() throws IOException {

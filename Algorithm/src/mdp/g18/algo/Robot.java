@@ -1,4 +1,4 @@
-package mdp.g18.sim;
+package mdp.g18.algo;
 
 public class Robot {
 	
