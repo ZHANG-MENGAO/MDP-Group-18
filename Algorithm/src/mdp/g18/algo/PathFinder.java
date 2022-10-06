@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class PathFinder {
 	
@@ -39,8 +38,7 @@ public class PathFinder {
 			astar = new Astar(this.obstacleList,this.robot);
 		}
 	}
-
-	// Get obstacle depending on whether astar generates one
+	
 	public void getClosestObstacle() {
 		if (getCurrentObstacle() == null) {
 			Obstacle newObstacle = astar.getNextObstacle(null);
@@ -57,23 +55,16 @@ public class PathFinder {
 	}
 	
 	public String findBestPath() {
+		
 		char originalDir = this.robot.enumToChar(this.robot.getDirection());
 		this.STMmovement = "";
 		
-		this.nodes = astar.createAllNodes();                // create all nodes
-		this.start = this.findNode(this.robotPosition);     // robot's starting position
+		this.nodes = astar.createAllNodes(); // create all nodes
+		this.start = this.findNode(this.robotPosition);
 		this.target = this.findNode(new int[] {this.obstacle.getxImageCoordinate(), -(Arena.GRIDNO - this.obstacle.getyImageCoordinate() - 1)});
-		this.result = Astar.AstarSearch(this.start, this.target);
+		this.result = Astar.AstarSearch(this.start, this.target, originalDir);
 		this.newData = astar.findPath(this.result); // in order
-
-		if (newData != null) {
-			this.pathCoordinates.addAll(this.newData);
-		}
-		else {
-			System.out.println("No path");
-		}
-
-		// Reverse path data to send to STM
+		this.pathCoordinates.addAll(this.newData);
 		this.setRobotPosition(this.pathCoordinates.get(this.pathCoordinates.size() - 1).getCoordinates(), this.obstacle.getDirection());
 		this.reverseData = new Data(this.robotPosition[0], this.robotPosition[1], this.reverseDir);
 		this.newData.add(this.reverseData);
@@ -88,6 +79,87 @@ public class PathFinder {
 	}
 	
 	private String combineStringSTM() {
+		String combineString = "";
+		ArrayList<String> stringOfCommands = new ArrayList<String>(Arrays.asList(this.STMmovement.split(",")));
+		String[] stringArray = new String[stringOfCommands.size()];
+		int i = 0;
+		String newString = "STMI,";
+		
+		for (String s: stringOfCommands) {
+			stringArray[i] = s;
+			i++;
+		}
+		
+		String nextString = "";
+		String nextNextString = "";
+		String prevString = "";
+		i = 0;
+		
+		while (i < stringArray.length) {
+			
+			if(i <= stringArray.length - 2) { // not second last
+				nextString = stringArray[i + 1];
+				nextNextString = stringArray[i + 2];
+				
+				if (stringArray[i].contains("f") && (nextString.contains("l") || nextString.contains("r")) && nextNextString.contains("f")) {
+					
+					if (!combineString.isEmpty()) {
+						newString += String.format("%s,",combineString);
+						combineString = "";
+					}
+					
+					if (nextString.contains("l")) {
+						newString += "a088,";
+					}
+					else if (nextString.contains("r")) {
+						newString += "d088,";
+					}
+					i += 3;
+				} 
+				else if(stringArray[i].compareTo(nextString) == 0) {
+					
+					if (combineString.isEmpty()) {
+						combineString = stringArray[i];
+					}
+					else
+						combineString = combineString.substring(0, 1) + String.format("%03d",(Integer.parseInt(combineString.substring(1, 4)) + Integer.parseInt(stringArray[i].substring(1, 4))));
+					i++;
+				}
+				else {
+					if (!combineString.isEmpty()) {
+						if(i != 0) {
+							prevString = stringArray[i - 1];
+							//System.out.println(String.format("%d,%s", i,combineString));
+							if(stringArray[i].compareTo(prevString) == 0) {
+								combineString = combineString.substring(0, 1) + String.format("%03d",(Integer.parseInt(combineString.substring(1, 4)) + Integer.parseInt(stringArray[i].substring(1, 4))));
+							}
+						}
+						newString += String.format("%s,",combineString);
+						combineString = "";
+					}
+					else 
+						newString += String.format("%s,",stringArray[i]);
+					i++;
+				}
+			}
+			
+			// if second last and last
+			if (i >= stringArray.length - 2) {
+				if (!combineString.isEmpty()) 
+					newString += String.format("%s,",combineString);
+				if (i ==  stringArray.length - 2) {
+					newString += String.format("%s",stringArray[i]);
+					i++;
+				}
+				newString += String.format("%s",stringArray[i]);
+				break;
+			}
+		}
+		
+		return newString;
+	}
+	
+	/*private String combineStringSTM() {
 		String newString = "STMI,";
 		String combineString = "";
 		ArrayList<String> stringOfCommands = new ArrayList<String>(Arrays.asList(this.STMmovement.split(",")));
@@ -140,9 +212,89 @@ public class PathFinder {
 		}
 		
 		return newString;
-	}
+	}*/
 	
 	private String pathToString(char originalDir, ArrayList <Data> dataPoints) {
+		Direction currentDir = this.robot.getDirection();
+		int[] xCoordinate = new int[dataPoints.size()]; 
+		int[] yCoordinate = new int[dataPoints.size()]; 
+		char[] directionArray = new char[dataPoints.size()];
+		char currentMovement ='\0';
+		int i = 0;
+		
+		char nextMovement;
+		int[] nextNextCoord = new int[2];
+		String prevString = "";
+		String android = "ANDROID|";
+		
+		
+		for (Data d : dataPoints) {
+			
+			if(dataPoints.indexOf(d) != dataPoints.size() - 1) { //while not last
+				currentDir = this.movement(currentDir, new int[] {dataPoints.get(dataPoints.indexOf(d) + 1).getElement(0),dataPoints.get(dataPoints.indexOf(d) + 1).getElement(1)});
+				d.setOrientation(currentDir);
+			}
+			
+			xCoordinate[i] = d.getElement(0);
+			yCoordinate[i] = d.getElement(1);
+			directionArray[i] = d.getOrientation(); 
+			i++;
+		}
+		
+		i = 0;
+		
+		if(this.prevPosition == null && dataPoints.get(0).getOrientation() != originalDir) {
+			android += String.format("ROBOT,%d,%d,%c:", dataPoints.get(0).getElement(0), -dataPoints.get(0).getElement(1), dataPoints.get(0).getOrientation());
+		}
+		
+		if (this.prevPosition != null) {
+			android += String.format("ROBOT,%d,%d,%c:", this.prevPosition[0], -this.prevPosition[1], dataPoints.get(0).getOrientation());
+		}
+				
+		
+		while (i < xCoordinate.length) {
+			
+			if(i <= xCoordinate.length - 2) {
+				currentMovement = directionArray[i];
+				nextMovement = directionArray[i + 1];
+				
+				if (currentMovement != nextMovement) {
+					
+					// get coord of i + 2
+					nextNextCoord = new int[] {xCoordinate[i + 2],yCoordinate[i + 2]};
+					
+					//if diagonal
+					if(Math.abs(nextNextCoord[0] - xCoordinate[i]) == 1 && Math.abs(nextNextCoord[1] - yCoordinate[i]) == 1) {
+						if (i != 0 && prevString.compareTo(String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i])) != 0)
+							android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i]);
+						android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 2], - yCoordinate[i + 2], directionArray[i + 2]);
+						prevString = String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 2], - yCoordinate[i + 2], directionArray[i + 2]);
+						i += 2;
+					} else{
+						android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 1], - yCoordinate[i + 1], directionArray[i]);
+						android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 1], - yCoordinate[i + 1], directionArray[i + 1]);
+						prevString = String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 1], - yCoordinate[i + 1], directionArray[i + 1]);
+						i += 1;
+					}
+				} else {
+					i++;
+				}
+			}
+				
+			if (i >= xCoordinate.length - 2) {
+				if (i ==  xCoordinate.length - 2 && prevString.compareTo(String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i])) != 0) {
+					android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i]);
+				}
+				i++;
+				android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i]);
+				break;
+			}	
+		}
+
+		return android;
+	}
+	
+	/*private String pathToString(char originalDir, ArrayList <Data> dataPoints) {
 		Direction currentDir = this.robot.getDirection();
 		char currentMovement ='\0';
 		char nextMovement; 
@@ -186,85 +338,85 @@ public class PathFinder {
 		
 		return andriod;
 		
-		}
+		}*/
 		
 	private Direction movement(Direction currentDir, int[] point) {
 		
 		switch(currentDir) {
 		
-			case NORTH:
-				if (point[0] == robot.getxCoordinate() && point[1] < robot.getyCoordinate()) {
-					robot.forward(currentDir);
-					STMmovement += "f010,";
-				} else if (point[0] == robot.getxCoordinate() && point[1] > robot.getyCoordinate()) {
-					robot.reverse(currentDir);
-					STMmovement += "b010,";
-				} else if (point[0] > robot.getxCoordinate() && point[1] == robot.getyCoordinate()) {
-					robot.turnRight(currentDir);
-					robot.forward(robot.getDirection());
-					STMmovement += "r000,f010,";
-				} else if (point[0] < robot.getxCoordinate() && point[1] == robot.getyCoordinate()) {
-					robot.turnLeft(currentDir);
-					robot.forward(robot.getDirection());
-					STMmovement += "l000,f010,";
-				}
-				break;
-
-			case SOUTH:
-				if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
-					this.robot.reverse(currentDir);
-					this.STMmovement += "b010,";
-				} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
-					this.robot.forward(currentDir);
-					this.STMmovement += "f010,";
-				} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
-					this.robot.turnRight(currentDir);
-					this.robot.forward(this.robot.getDirection());
-					this.STMmovement += "r000,f010,";
-				} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
-					this.robot.turnLeft(currentDir);
-					this.robot.forward(this.robot.getDirection());
-					this.STMmovement += "l000,f010,";
-				}
-				break;
-
-			case EAST:
-				if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
-					this.robot.turnLeft(currentDir);
-					this.robot.forward(this.robot.getDirection());
-					this.STMmovement += "l000,f010,";
-				} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
-					this.robot.turnRight(currentDir);
-					this.robot.forward(this.robot.getDirection());
-					this.STMmovement += "r000,f010,";
-				} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
-					this.robot.reverse(currentDir);
-					this.STMmovement += "b010,";
-				} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
-					this.robot.forward(currentDir);
-					this.STMmovement += "f010,";
-				}
-				break;
-
-			case WEST:
-				if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
-					this.robot.turnRight(currentDir);
-					this.robot.forward(this.robot.getDirection());
-					this.STMmovement += "r000,f010,";
-				} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
-					this.robot.turnLeft(currentDir);
-					this.robot.forward(this.robot.getDirection());
-					this.STMmovement += "l000,f010,";
-				} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
-					this.robot.forward(currentDir);
-					this.STMmovement += "f010,";
-				} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
-					this.robot.reverse(currentDir);
-					this.STMmovement += "b010,";
-				}
-				break;
-			default:
-				break;
+		case NORTH:
+			if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
+				this.robot.forward(currentDir);
+				this.STMmovement += "f010,";
+			} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
+				this.robot.reverse(currentDir);
+				this.STMmovement += "b010,";
+			} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.turnRight(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "r000,f010,";
+			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.turnLeft(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "l000,f010,";
+			}
+			break;
+			
+		case SOUTH:
+			if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
+				this.robot.reverse(currentDir);
+				this.STMmovement += "b010,";
+			} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
+				this.robot.forward(currentDir);
+				this.STMmovement += "f010,";
+			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.turnRight(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "r000,f010,";
+			} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.turnLeft(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "l000,f010,";
+			}
+			break;
+			
+		case EAST:
+			if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
+				this.robot.turnLeft(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "l000,f010,";
+			} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
+				this.robot.turnRight(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "r000,f010,";
+			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.reverse(currentDir);
+				this.STMmovement += "b010,";
+			} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.forward(currentDir);
+				this.STMmovement += "f010,";
+			}
+			break;
+			
+		case WEST:
+			if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
+				this.robot.turnRight(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "r000,f010,";
+			} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
+				this.robot.turnLeft(currentDir);
+				this.robot.forward(this.robot.getDirection());
+				this.STMmovement += "l000,f010,";
+			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.forward(currentDir);
+				this.STMmovement += "f010,";
+			} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
+				this.robot.reverse(currentDir);
+				this.STMmovement += "b010,";
+			}
+			break;
+		default:
+			break;
 		}
 		
 		return this.robot.getDirection();
