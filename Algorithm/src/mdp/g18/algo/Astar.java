@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import mdp.g18.sim.Node.Edge;
-
 public class Astar {
 	ArrayList<Obstacle> obstacles;
 	ArrayList<Node.Edge> nodeEdgePair;
