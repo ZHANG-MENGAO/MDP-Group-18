@@ -64,21 +64,25 @@ public class PathFinder {
 		this.target = this.findNode(new int[] {this.obstacle.getxImageCoordinate(), -(Arena.GRIDNO - this.obstacle.getyImageCoordinate() - 1)});
 		this.result = Astar.AstarSearch(this.start, this.target, originalDir);
 		this.newData = astar.findPath(this.result); // in order
-		this.pathCoordinates.addAll(this.newData);
-		this.setRobotPosition(this.pathCoordinates.get(this.pathCoordinates.size() - 1).getCoordinates(), this.obstacle.getDirection());
-		this.reverseData = new Data(this.robotPosition[0], this.robotPosition[1], this.reverseDir);
-		this.newData.add(this.reverseData);
-		this.pathCoordinates.add(this.reverseData);
-		
-		this.pathString = this.pathToString(originalDir,this.newData);
-		this.STMmovement = this.combineStringSTM();
-		this.prevPosition = this.pathCoordinates.get(this.pathCoordinates.size() - 1).getCoordinates();
-		this.prevOrientation = this.pathCoordinates.get(this.pathCoordinates.size() - 1).getOrientation();
-		
-		return String.format("%s;%s", this.STMmovement , this.pathString); 
+		if (this.newData != null) {
+			this.pathCoordinates.addAll(this.newData);
+			this.setRobotPosition(this.pathCoordinates.get(this.pathCoordinates.size() - 1).getCoordinates(), this.obstacle.getDirection());
+			this.reverseData = new Data(this.robotPosition[0], this.robotPosition[1], this.reverseDir);
+			this.newData.add(this.reverseData);
+			this.pathCoordinates.add(this.reverseData);
+			
+			this.pathString = this.pathToString(originalDir,this.newData);
+			this.STMmovement = this.combineStringSTM();
+			this.prevPosition = this.pathCoordinates.get(this.pathCoordinates.size() - 1).getCoordinates();
+			this.prevOrientation = this.pathCoordinates.get(this.pathCoordinates.size() - 1).getOrientation();
+			
+			return String.format("%s;%s", this.STMmovement , this.pathString); 
+		} else {
+			return "CannotFind";
+		}
 	}
 	
-	private String combineStringSTM() {
+	/*private String combineStringSTM() {
 		String combineString = "";
 		ArrayList<String> stringOfCommands = new ArrayList<String>(Arrays.asList(this.STMmovement.split(",")));
 		String[] stringArray = new String[stringOfCommands.size()];
@@ -97,7 +101,7 @@ public class PathFinder {
 		
 		while (i < stringArray.length) {
 			
-			if(i <= stringArray.length - 2) { // not second last
+			if(i < stringArray.length - 2) { // not second last
 				nextString = stringArray[i + 1];
 				nextNextString = stringArray[i + 2];
 				
@@ -112,7 +116,7 @@ public class PathFinder {
 						newString += "a088,";
 					}
 					else if (nextString.contains("r")) {
-						newString += "d088,";
+						newString += "d090,";
 					}
 					i += 3;
 				} 
@@ -145,10 +149,15 @@ public class PathFinder {
 			
 			// if second last and last
 			if (i >= stringArray.length - 2) {
-				if (!combineString.isEmpty()) 
-					newString += String.format("%s,",combineString);
 				if (i ==  stringArray.length - 2) {
-					newString += String.format("%s",stringArray[i]);
+					if (!combineString.isEmpty() && stringArray[i].contains("f")) {
+						combineString = combineString.substring(0, 1) + String.format("%03d",(Integer.parseInt(combineString.substring(1, 4)) + Integer.parseInt(stringArray[i].substring(1, 4))));
+						newString += String.format("%s,",combineString);
+						combineString = "";
+					}
+					else {
+						newString += String.format("%s,",stringArray[i]);
+					}
 					i++;
 				}
 				newString += String.format("%s",stringArray[i]);
@@ -157,9 +166,9 @@ public class PathFinder {
 		}
 		
 		return newString;
-	}
+	}*/
 	
-	/*private String combineStringSTM() {
+	private String combineStringSTM() {
 		String newString = "STMI,";
 		String combineString = "";
 		ArrayList<String> stringOfCommands = new ArrayList<String>(Arrays.asList(this.STMmovement.split(",")));
@@ -212,9 +221,9 @@ public class PathFinder {
 		}
 		
 		return newString;
-	}*/
+	}
 	
-	private String pathToString(char originalDir, ArrayList <Data> dataPoints) {
+	/*private String pathToString(char originalDir, ArrayList <Data> dataPoints) {
 		Direction currentDir = this.robot.getDirection();
 		int[] xCoordinate = new int[dataPoints.size()]; 
 		int[] yCoordinate = new int[dataPoints.size()]; 
@@ -223,6 +232,7 @@ public class PathFinder {
 		int i = 0;
 		
 		char nextMovement;
+		char nextNextMovement;
 		int[] nextNextCoord = new int[2];
 		String prevString = "";
 		String android = "ANDROID|";
@@ -254,9 +264,10 @@ public class PathFinder {
 		
 		while (i < xCoordinate.length) {
 			
-			if(i <= xCoordinate.length - 2) {
+			if(i < xCoordinate.length - 2) {
 				currentMovement = directionArray[i];
 				nextMovement = directionArray[i + 1];
+				nextNextMovement = directionArray[i + 2];
 				
 				if (currentMovement != nextMovement) {
 					
@@ -267,6 +278,11 @@ public class PathFinder {
 					if(Math.abs(nextNextCoord[0] - xCoordinate[i]) == 1 && Math.abs(nextNextCoord[1] - yCoordinate[i]) == 1) {
 						if (i != 0 && prevString.compareTo(String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i])) != 0)
 							android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i]);
+						
+						if (currentMovement == nextNextMovement) {
+							android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 2], - yCoordinate[i + 2], directionArray[i +1]);
+						}
+						
 						android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 2], - yCoordinate[i + 2], directionArray[i + 2]);
 						prevString = String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 2], - yCoordinate[i + 2], directionArray[i + 2]);
 						i += 2;
@@ -274,7 +290,7 @@ public class PathFinder {
 						android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 1], - yCoordinate[i + 1], directionArray[i]);
 						android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 1], - yCoordinate[i + 1], directionArray[i + 1]);
 						prevString = String.format("ROBOT,%d,%d,%c:", xCoordinate[i + 1], - yCoordinate[i + 1], directionArray[i + 1]);
-						i += 1;
+						i ++;
 					}
 				} else {
 					i++;
@@ -286,15 +302,15 @@ public class PathFinder {
 					android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i]);
 				}
 				i++;
-				android += String.format("ROBOT,%d,%d,%c:", xCoordinate[i], - yCoordinate[i], directionArray[i]);
+				android += String.format("ROBOT,%d,%d,%c", xCoordinate[i], - yCoordinate[i], directionArray[i]);
 				break;
 			}	
 		}
 
 		return android;
-	}
+	}*/
 	
-	/*private String pathToString(char originalDir, ArrayList <Data> dataPoints) {
+	private String pathToString(char originalDir, ArrayList <Data> dataPoints) {
 		Direction currentDir = this.robot.getDirection();
 		char currentMovement ='\0';
 		char nextMovement; 
@@ -338,7 +354,7 @@ public class PathFinder {
 		
 		return andriod;
 		
-		}*/
+		}
 		
 	private Direction movement(Direction currentDir, int[] point) {
 		
@@ -354,11 +370,11 @@ public class PathFinder {
 			} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
 				this.robot.turnRight(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "r000,f010,";
+				this.STMmovement += "r090,f010,";
 			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
 				this.robot.turnLeft(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "l000,f010,";
+				this.STMmovement += "l090,f010,";
 			}
 			break;
 			
@@ -372,11 +388,11 @@ public class PathFinder {
 			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
 				this.robot.turnRight(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "r000,f010,";
+				this.STMmovement += "r090,f010,";
 			} else if (point[0] > this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
 				this.robot.turnLeft(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "l000,f010,";
+				this.STMmovement += "l090,f010,";
 			}
 			break;
 			
@@ -384,11 +400,11 @@ public class PathFinder {
 			if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
 				this.robot.turnLeft(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "l000,f010,";
+				this.STMmovement += "l090,f010,";
 			} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
 				this.robot.turnRight(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "r000,f010,";
+				this.STMmovement += "r090,f010,";
 			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
 				this.robot.reverse(currentDir);
 				this.STMmovement += "b010,";
@@ -402,11 +418,11 @@ public class PathFinder {
 			if (point[0] == this.robot.getxCoordinate() && point[1] < this.robot.getyCoordinate()) {
 				this.robot.turnRight(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "r000,f010,";
+				this.STMmovement += "r090,f010,";
 			} else if (point[0] == this.robot.getxCoordinate() && point[1] > this.robot.getyCoordinate()) {
 				this.robot.turnLeft(currentDir);
 				this.robot.forward(this.robot.getDirection());
-				this.STMmovement += "l000,f010,";
+				this.STMmovement += "l090,f010,";
 			} else if (point[0] < this.robot.getxCoordinate() && point[1] == this.robot.getyCoordinate()) {
 				this.robot.forward(currentDir);
 				this.STMmovement += "f010,";
