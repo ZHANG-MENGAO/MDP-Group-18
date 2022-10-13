@@ -7,7 +7,7 @@ import ast
 import socket
 
 
-path="./Demo/"
+path=r"C:/Users/guanl/yolov5/image_rec/model/runs/detect"
 dirs = os.listdir(path)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 while True:
@@ -53,19 +53,28 @@ def organise_images(image_storage):
     row1=[]
     row2=[]
     counter=1
+    flag = 0
     for image in image_storage:
-        if counter==1:
+        if len(image_storage) <=3: 
             row1.append(image)
-            counter=2
-        elif counter==2:
-            row2.append(image)
-            counter=1
+        else:
+            if counter==1:
+                row1.append(image)
+                counter=2
+            elif counter==2:
+                row2.append(image)
+                counter=1
     print('here')
     print(len(image_storage))
     if len(image_storage)==8:
         rows=[row1[:2],row1[2:],row2[:2],row2[2:]]
-    elif len(image_storage)==6:
+        flag = 1
+    elif len(image_storage)< 8 or len(image_storage)>3:
         rows=[row1,row2]
+        flag = 1
+    else:
+        rows = [row1]
+        flag = 0
     horizontal=[]
     for row in rows:
         horiz=np.hstack(row)

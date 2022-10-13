@@ -371,7 +371,7 @@ def convert_instruct(best_full_movements):
             if (instruction[i][j] == 'forward'):
                 instruction[i][j] = [1, f]
             elif (instruction[i][j] == 'backward'):
-                instruction[i][j] = [1, b]
+                instruction[i][j] = [1  Q1`333A, b]
             elif (instruction[i][j] == 'turn right 1'):  ## turn right (face right)
                 instruction[i][j] = [tr1]
             elif (instruction[i][j] == 'turn left 1'):  ## turn left (face left)
@@ -556,7 +556,7 @@ def format_location_output(robot_pos, robot_direc):
         direction = "E"
     else:
         direction = "W"
-    return 'ANDROID|ROBOT,<{x}>,<{y}>,<{dir}>'.format(x=x_axis, y=y_axis, dir=direction)
+    return 'ANDROID|ROBOT,{x},{y},{dir}'.format(x=x_axis, y=y_axis, dir=direction)
 
 
 # get all positions of a straight line instruction
@@ -655,26 +655,31 @@ while True:
     except:
         continue
 # trial GROUP 18
-#instruct_trial_stm = 'STMI,d088,d088,d088,d088,d088,d088,d088,d088|ANDROID|ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N'
-instruct_trial_stm = 'STMI,r000,f010,l000,f010|ANDROID|ROBOT,1,10,E:ROBOT,10,10,E:ROBOT,10,10,N:ROBOT,10,12,N'
-instruct_trial_stm1 = 'STMI,q090|ANDROID|ROBOT,1,10,E'
-instruct_trial_stm2 = 'STMI,e090|ANDROID|ROBOT,2,10,E'
-
-instruct_trial_coor1 = 'ANDROID|ROBOT,12,13,N:ROBOT,11,14,W'
-instruct_trial_coor = 'ANDROID|ROBOT,8,14,W:ROBOT,7,13,S'
-#instruct_trial_obsID = 'IMAGE|6'
-
-s.send(instruct_trial_stm1.encode("UTF-8"))
-
-num = 1
-while True:
-    recvMsg = s.recv(1024).decode("UTF-8")
-    print('msg: ', recvMsg)
-    if recvMsg == 'g':
-        s.send(instruct_trial_stm2.encode("UTF-8"))
-    num += 1
-    if num == 2:
-        break
+# #instruct_trial_stm = 'STMI,d088,d088,d088,d088,d088,d088,d088,d088|ANDROID|ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N:ROBOT,0,18,N'
+# instruct_trial_stm = 'STMI,r000,f010,l000,f010|ANDROID|ROBOT,1,10,E:ROBOT,10,10,E:ROBOT,10,10,N:ROBOT,10,12,N'
+# instruct_trial_stm1 = 'STMI,f040|ANDROID|ROBOT,0,4,N'
+# instruct_trial_stm2 = 'STMI,b020,obs,1|ANDROID|ROBOT,0,2,N'
+# instruct_trial_stm3 = 'STMI,s002|ANDROID|ROBOT,2,10,E'
+#
+# instruct_trial_coor1 = 'ANDROID|ROBOT,12,13,N:ROBOT,11,14,W'
+# instruct_trial_coor = 'ANDROID|ROBOT,8,14,W:ROBOT,7,13,S'
+# #instruct_trial_obsID = 'IMAGE|6'
+#
+# s.send(instruct_trial_stm1.encode("UTF-8"))
+#
+# num = 1
+# while True:
+#     recvMsg = s.recv(1024).decode("UTF-8")
+#     print('msg:', recvMsg)
+#     if recvMsg == 'g':
+#
+#         if num == 2:
+#             s.send(instruct_trial_stm2.encode("UTF-8"))
+#         if num == 3:
+#             s.send(instruct_trial_stm3.encode("UTF-8"))
+#     num += 1
+#     if num == 3:
+#         break
 
 
 # while True:
