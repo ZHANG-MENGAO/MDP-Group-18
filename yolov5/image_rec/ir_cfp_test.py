@@ -9,6 +9,8 @@ import time
 from PIL import Image
 import sys
 import glob
+import ast
+import socket
 
 # adding Folder_2 to the system path
 sys.path.insert(0, 'C:/Users/guanl/yolov5/image_rec/model')
@@ -81,6 +83,26 @@ netMain = None
 metaMain = None
 altNames = None
 
+
+def organise_images(image_storage):
+    row1 = []
+    # row2=[]
+    counter = 1
+    flag = 0
+    for image in image_storage:
+        row1.append(image)
+    print(len(image_storage))
+
+    rows = [row1]
+    flag = 0
+    horizontal = []
+    for row in rows:
+        horiz = np.hstack(row)
+        horizontal.append(horiz)
+    vertical_attachment = np.vstack(horizontal)
+
+    return vertical_attachment
+
 import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -148,67 +170,52 @@ def YOLO():
     print("Starting the YOLO loop...")
 
     # Create an image we reuse for each detect
-    # image_num = 1
-    while True:  # Load the input frame and write output frame.
+    image_num = 1
 
+    while image_num < 3:  # Load the input frame and write output frame.
+        recvMsg = s.recv(1024).decode("UTF-8")
+        # print('recvMsg: ', recvMsg)
+
+        # recvMsg = 'g'
+        if str(recvMsg) == 'g':
+            print("Starting the YOLO loop...")
             # s.send("p".encode("UTF-8"))
             # time.sleep(2)
             # image_list = []
             # for filename in glob.glob('imageFolder/*.gif'):  # assuming gif
             #     im = Image.open(filename)
             # url = 'http://192.168.18.1:8000/stream.mjpg'
-        cap = cv2.VideoCapture(url)
+            cap = cv2.VideoCapture(url)
 
-        ret, frame_read = cap.read()
+            ret, frame_read = cap.read()
 
-        cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image.jpg', frame_read)
+            cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num), frame_read)
+            cv2.imwrite('C:/Users/guanl/yolov5/image_rec/imageFolder/test_image{0}.jpg'.format(image_num), frame_read)
 
-        cv2.imshow("image", frame_read)
-        cv2.waitKey()
 
             #time.sleep(2)
             #run()
-        print('identifying')
-        label = main(parse_opt())
-        print('the label is: ', label)
-            # if label != 'Left' and label != 'U':
-            #     label = 'Bullseye'
-            # print('this is the returned label ', label)if label != 'Left' and label != 'U':
-            #     label = 'Bullseye'
-            # print('this is the returned label ', label)
-            # label = 'Bullseye'
-            # if label == 'Left':
-            #     #if detections[0][2][0] < detections[1][2][0]:
-            #     s.send("l".encode("UTF-8"))
-            #     #s.send("r".encode("UTF-8"))
-            #
-            #     print('l is sent')
-            #     continue
-            # elif label == 'Right':
-            #     s.send("r".encode("UTF-8"))
-            #     #s.send("l".encode("UTF-8"))
-            #     continue
-            # else:
-            #      s.send("c".encode("UTF-8"))
-            #      continue
+            print('identifying')
+            label = main(parse_opt())
+            print('the label is: ', label)
+            try:
+                os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num))
+            except:
+                pass
 
+            image_num += 1
 
+            if label == 'Left':
+                s.send("l".encode("UTF-8"))
+                continue
+            elif label == 'Right':
+                s.send("r".encode("UTF-8"))
 
-        if label != 'Y':
-            #if detections[0][2][0] < detections[1][2][0]:
-            s.send("l".encode("UTF-8"))
-            #s.send("r".encode("UTF-8"))
+                continue
+            else:
+                continue
+             #s.send("c".encode("UTF-8"))
 
-            print('l is sent')
-            # continue
-        else:
-             s.send("c".encode("UTF-8"))
-
-
-        try:
-            os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image.jpg')
-        except:
-            pass
 
         # except KeyboardInterrupt:
         #     print('End of image recognition.')
@@ -218,3 +225,19 @@ def YOLO():
 
 if __name__ == "__main__":
     YOLO()  # Calls the main function YOLO()
+
+    path = r"C:/Users/guanl/yolov5/image_rec/model/runs/detect"
+
+    lst = []
+    for i in range(2):
+        lst.append('test_image{0}.jpg'.format(i + 1))
+
+    image_storage = []
+
+    for idx, img in enumerate(lst):
+        image = cv2.imread(path + '/exp{}'.format(idx + 2) + '/' + img)
+        image = cv2.resize(image, (416, 416))
+        image_storage.append(image)
+
+    collage = organise_images(image_storage)
+    cv2.imwrite("./Demo/detection_collage.jpg", collage)
