@@ -1,0 +1,111 @@
+from ctypes import *  # Import libraries
+# from image_rec.yolov5.detect import run
+#from yolov5.detect import run
+# from detect.py import run
+import os
+import cv2
+#import darknet
+import socket
+import ast
+import numpy as np
+from PIL import Image
+import sys
+
+# adding Folder_2 to the system path
+sys.path.insert(0, 'C:/Users/guanl/yolov5/image_rec/model')
+# sys.path.insert(0, '/yolov5/image_rec')
+
+from detect import main, parse_opt
+# run()
+
+def send_android_string(detections):
+    # android_string1='ANDROID|TARGET ,'
+    android_string = 'ANDROID,'
+
+    target_id = get_image_id(detections)
+    # print(target_id)
+    if target_id != 'bullseye':
+        # android_string1+="<"+obstacle_number+">"+','+"<"+target_id+">"
+        android_string += str(target_id) + ','
+        print(android_string)
+        s.send(android_string.encode("UTF-8"))
+    else:
+        # print('s')
+        s.send("bullseye".encode("UTF-8"))
+
+def get_image_id(detection):
+    id_dict = {'A': 20, 'B': 21, 'C': 22, 'D': 23,
+               'E': 24, 'F': 25, 'G': 26, 'H': 27,
+               'S': 28, 'T': 29, 'U': 30,
+               'V': 31, 'W': 32, 'X': 33, 'Y': 34,
+               'Z': 35, '1': 11, '2': 12, '3': 13, '4': 14,
+               '5': 15, '6': 16, '7': 17, '8': 18,
+               '9': 19, 'Up': 36, 'Down': 37, 'Left': 39,
+               'Right': 38, 'Stop': 40, "Bullseye": "bullseye"}
+    image_id = str(id_dict[detection])
+    return image_id
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+while True:
+    try:
+        print('trying')
+        s.connect(("192.168.18.1", 2222))
+        print('connected!')
+        break
+    except:
+        continue
+
+# record = {}
+    # Get livevideo from RPi Camera
+    # cap = cv2.VideoCapture("http://192.168.18.1/html/cam_pic_new.php")
+
+
+# url = "http://192.168.18.1:8000"
+
+
+print("waiting for android go")
+image_num = 1
+while True:
+    recvMsg = s.recv(1024).decode("UTF-8")
+#print('recvMsg: ', recvMsg)
+
+# recvMsg = 'g'
+    if str(recvMsg) == 'g':
+        print("Starting the YOLO loop...")
+        keep_going = True
+        while keep_going:
+            # try:
+            url = 'http://192.168.18.1:8000/stream.mjpg'
+
+            cap = cv2.VideoCapture(url)
+            ret, frame_read = cap.read()
+            # print('ret: ', ret)
+            # print('frame_read: ', frame_read)
+            # image = Image.fromarray(frame_read, 'RGB')
+
+            cv2.imwrite('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num), frame_read)
+            cv2.imwrite('C:/Users/guanl/yolov5/image_rec/imageFolder/test_image{0}.jpg'.format(image_num), frame_read)
+
+            # cv2.imshow("image", frame_read)
+            # cv2.waitKey()
+
+        # run()
+            print('identifying')
+            label = main(parse_opt())
+            print('this is the returned label ', label)
+
+            try:
+                os.remove('C:/Users/guanl/yolov5/image_rec/model/images/test_image{0}.jpg'.format(image_num))
+            except:
+                pass
+            if label:
+                send_android_string(label)
+                print('label is: ', label)
+
+            else:
+                print('None detected')
+            break
+            #if label == 'Left':
+            # s.send("l".encode("UTF-8"))
+
+
